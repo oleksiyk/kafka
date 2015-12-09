@@ -1,0 +1,47 @@
+{
+    "bitwise": true, // prohibits the use of bitwise operators
+    "camelcase": false, // allows you to force all variable names to use either camelCase style or UPPER_CASE with underscores
+    "curly": true, // requires you to always put curly braces around blocks in loops and conditionals
+    "eqeqeq": false, // prohibits the use of == and != in favor of === and !==
+    "forin": true, // requires all for in loops to filter object's items
+    "immed": true, // prohibits the use of immediate function invocations without wrapping them in parentheses
+    "indent": false, // enforces specific tab width for your code
+    "latedef": true, // prohibits the use of a variable before it was defined
+    "newcap": true, // requires you to capitalize names of constructor functions
+    "noarg": true, // prohibits the use of arguments.caller and arguments.callee
+    "noempty": true, // warns when you have an empty block in your code
+    "nonew": true, // prohibits the use of constructor functions for side-effects
+    "plusplus": false, // prohibits the use of unary increment and decrement operators
+    "quotmark": false, // enforces the consistency of quotation marks used throughout your code
+    "undef": true, // prohibits the use of explicitly undeclared variables
+    "unused": true, // warns when you define and never use your variables
+    "strict": true, // requires all functions to run in ECMAScript 5's strict mode
+    "trailing": true, // makes it an error to leave a trailing whitespace in your code
+    "maxparams": 5, // set the max number of formal parameters allowed per function
+    "maxdepth": 5, // control how nested do you want your blocks to be
+    "maxstatements": 50, // set the max number of statements allowed per function
+    "maxlen": 150, // set the maximum length of a line
+
+    "asi": false, // suppresses warnings about missing semicolons
+    "eqnull": false, // suppresses warnings about == null
+    "esnext": false, // tells JSHint that your code uses ECMAScript 6 specific syntax
+    "globalstrict": true, // suppresses warnings about the use of global strict mode
+    "lastsemic": true, // suppresses warnings about missing semicolons, but only when the semicolon is omitted for the last statement in a one-line block
+    "laxbreak": true, // suppresses most of the warnings about possibly unsafe line breakings in your code,
+    "laxcomma": true, // suppresses warnings about comma-first coding style
+    "multistr": true, // suppresses warnings about multi-line strings,
+    "proto": true, // suppresses warnings about the __proto__ property,
+    "sub": false, // suppresses warnings about using [] notation when it can be expressed in dot notation
+    "supernew": false, // suppresses warnings about "weird" constructions like new function () { ... } and new Object
+    "loopfunc": false, // suppresses warnings about functions inside of loops
+
+    "browser": true, //  defines globals exposed by modern browsers
+    "devel": false, // defines globals that are usually used for logging poor-man's debugging: console, alert, etc
+    "jquery": true,
+    "node": true,
+    "nonstandard": false, // defines non-standard but widely adopted globals such as escape and unescape.
+
+    "globals": {
+
+    }
+}

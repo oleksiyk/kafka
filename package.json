@@ -1,0 +1,37 @@
+{
+    "name": "kafkajs",
+    "description": "Apache Kafka client for Node.JS",
+    "homepage": "http://github.com/oleksiyk/kafka",
+    "author": {
+        "name": "Oleksiy Krivoshey",
+        "email": "oleksiyk@gmail.com"
+    },
+    "version": "0.0.1",
+    "main": "./lib/index.js",
+    "keywords": ["kafka"],
+    "dependencies": {
+        "bluebird": "~=3.x.x",
+        "lodash": "~=3.x.x",
+        "binary-protocol": "~=0.0.0",
+        "buffer-crc32": "~=0.2.5"
+    },
+    "devDependencies": {
+        "mocha": "~=2.3.4",
+        "chai": "~=3.4.1",
+        "sinon-chai": "~=2.8.0",
+        "chai-as-promised": "~=5.1.0"
+    },
+    "bugs": {
+        "url": "https://github.com/oleksiyk/kafka/issues"
+    },
+    "scripts": {
+        "test": "make test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/oleksiyk/kafka.git"
+    },
+    "readme": "Apache Kafka client for Node.JS",
+    "readmeFilename": "README.md",
+    "license": "MIT"
+}
