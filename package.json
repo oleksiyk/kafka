@@ -12,7 +12,7 @@
     "dependencies": {
         "bluebird": "~=3.x.x",
         "lodash": "~=3.x.x",
-        "binary-protocol": "~=0.0.0",
+        "bin-protocol": "git://github.com/oleksiyk/binary-protocol.git",
         "buffer-crc32": "~=0.2.5"
     },
     "devDependencies": {
@@ -35,3 +35,4 @@
     "readmeFilename": "README.md",
     "license": "MIT"
 }
+
