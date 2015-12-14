@@ -1,16 +1,16 @@
-all: riakfs
+all: kafka
 
 node_modules: package.json
 	@npm install
 
 
-riakfs: node_modules lib/*
+kafka: node_modules lib/*
 
 
 #
 # Tests
 #
-test: riakfs
+test: kafka
 	@mocha
 
 
