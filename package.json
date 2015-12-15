@@ -13,7 +13,8 @@
         "bluebird": "~=3.x.x",
         "lodash": "~=3.x.x",
         "bin-protocol": "git://github.com/oleksiyk/binary-protocol.git",
-        "buffer-crc32": "~=0.2.5"
+        "buffer-crc32": "~=0.2.5",
+        "simple-logger": "git://github.com/oleksiyk/simple-logger.git"
     },
     "devDependencies": {
         "mocha": "~=2.3.4",
