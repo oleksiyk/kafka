@@ -8,7 +8,7 @@ var Promise = require('bluebird');
 var Kafka = require('../lib/index');
 
 var producer = new Kafka.Producer({requiredAcks: 1});
-var consumer = new Kafka.SimpleConsumer();
+var consumer = new Kafka.SimpleConsumer({idleTimeout: 100});
 
 var dataListenerSpy = sinon.spy(function() {});
 
@@ -62,21 +62,42 @@ describe('SimpleConsumer', function () {
 
     it('should receive messages from specified offset', function () {
         dataListenerSpy.reset();
-        return consumer.offset('kafka-test-topic', 0).then(function (offset) {
-            return consumer.subscribe('kafka-test-topic', 0, {offset: offset-1}).then(function () {
-                return producer.send({
-                    topic: 'kafka-test-topic',
-                    partition: 0,
-                    message: {value: 'p01'}
+        return producer.send([{
+            topic: 'kafka-test-topic',
+            partition: 0,
+            message: {value: 'p000'}
+        },{
+            topic: 'kafka-test-topic',
+            partition: 0,
+            message: {value: 'p001'}
+        }])
+        .then(function () {
+            return consumer.offset('kafka-test-topic', 0).then(function (offset) {
+                return consumer.subscribe('kafka-test-topic', 0, {offset: offset-2})
+                .delay(100) // consumer sleep timeout
+                .then(function () {
+                    /* jshint expr: true */
+                    dataListenerSpy.should.have.been.called;
+                    dataListenerSpy.lastCall.args[0].should.be.an('array').and.have.length(2);
+                    dataListenerSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p000');
+                    dataListenerSpy.lastCall.args[0][1].message.value.toString('utf8').should.be.eql('p001');
                 });
-            })
-            .delay(1000) // consumer sleep timeout
+            });
+        });
+    });
+
+    it('should receive messages in maxBytes batches', function () {
+        dataListenerSpy.reset();
+        return consumer.offset('kafka-test-topic', 0).then(function (offset) {
+            return consumer.subscribe('kafka-test-topic', 0, {offset: offset-2, maxBytes: 30})
+            .delay(100) // consumer sleep timeout
             .then(function () {
                 /* jshint expr: true */
-                dataListenerSpy.should.have.been.called;
-                dataListenerSpy.lastCall.args[0].should.be.an('array').and.have.length(2);
-                dataListenerSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p00');
-                dataListenerSpy.lastCall.args[0][1].message.value.toString('utf8').should.be.eql('p01');
+                dataListenerSpy.should.have.been.calledTwice;
+                dataListenerSpy.getCall(0).args[0].should.be.an('array').and.have.length(1);
+                dataListenerSpy.getCall(1).args[0].should.be.an('array').and.have.length(1);
+                dataListenerSpy.getCall(0).args[0][0].message.value.toString('utf8').should.be.eql('p000');
+                dataListenerSpy.getCall(1).args[0][0].message.value.toString('utf8').should.be.eql('p001');
             });
         });
     });
