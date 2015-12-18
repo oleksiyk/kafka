@@ -3,3 +3,10 @@ language: node_js
 node_js:
   - "0.10"
 
+services:
+  - kafka
+
+before_install:
+  - "kafka-topics.sh --zookeeper 127.0.0.1:2181 --create --topic kafka-test-topic --partitions 3 --replication-factor 1"
+
+
