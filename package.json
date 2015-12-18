@@ -12,9 +12,9 @@
     "dependencies": {
         "bluebird": "~=3.x.x",
         "lodash": "~=3.x.x",
-        "bin-protocol": "https://github.com/oleksiyk/binary-protocol.git",
+        "bin-protocol": "git://github.com/oleksiyk/binary-protocol",
         "buffer-crc32": "~=0.2.5",
-        "simple-logger": "https://github.com/oleksiyk/simple-logger.git"
+        "simple-logger": "git://github.com/oleksiyk/simple-logger"
     },
     "devDependencies": {
         "mocha": "~=2.3.4",
