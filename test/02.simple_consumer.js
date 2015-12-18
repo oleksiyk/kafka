@@ -39,7 +39,7 @@ describe('SimpleConsumer', function () {
                 message: {value: 'p00'}
             });
         })
-        .delay(20)
+        .delay(100)
         .then(function () {
             /* jshint expr: true */
             dataListenerSpy.should.have.been.called;
@@ -90,7 +90,7 @@ describe('SimpleConsumer', function () {
         dataListenerSpy.reset();
         return consumer.offset('kafka-test-topic', 0).then(function (offset) {
             return consumer.subscribe('kafka-test-topic', 0, {offset: offset-2, maxBytes: 30})
-            .delay(100) // consumer sleep timeout
+            .delay(200)
             .then(function () {
                 /* jshint expr: true */
                 dataListenerSpy.should.have.been.calledTwice;
