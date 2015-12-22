@@ -28,7 +28,9 @@ describe('SimpleConsumer', function () {
             .respondTo('init')
             .respondTo('subscribe')
             .respondTo('offset')
-            .respondTo('unsubscribe');
+            .respondTo('unsubscribe')
+            .respondTo('commitOffset')
+            .respondTo('fetchOffset');
     });
 
     it('should receive new messages', function () {
@@ -99,6 +101,62 @@ describe('SimpleConsumer', function () {
                 dataListenerSpy.getCall(0).args[0][0].message.value.toString('utf8').should.be.eql('p000');
                 dataListenerSpy.getCall(1).args[0][0].message.value.toString('utf8').should.be.eql('p001');
             });
+        });
+    });
+
+    it('should be able to commit offsets', function () {
+        return Promise.all([
+            consumer.subscribe('kafka-test-topic', 0),
+            consumer.subscribe('kafka-test-topic', 1)
+        ])
+        .then(function () {
+            return consumer.commitOffset([
+            {
+                topic: 'kafka-test-topic',
+                partition: 0,
+                offset: 1
+            },
+            {
+                topic: 'kafka-test-topic',
+                partition: 1,
+                offset: 2
+            }
+            ]).then(function (result) {
+                result.should.be.an('array').that.has.length(1);
+                result[0].should.have.property('topicName', 'kafka-test-topic');
+                result[0].should.have.property('partitions').that.is.an('array');
+                result[0].partitions.should.have.length(2);
+                result[0].partitions[0].should.be.an('object');
+                result[0].partitions[0].should.have.property('partition', 0);
+                result[0].partitions[0].should.have.property('error', null);
+                result[0].partitions[1].should.have.property('partition', 1);
+                result[0].partitions[1].should.have.property('error', null);
+            });
+        });
+    });
+
+    it('should be able to fetch commited offsets', function () {
+        return consumer.fetchOffset([
+        {
+            topic: 'kafka-test-topic',
+            partition: 0
+        },
+        {
+            topic: 'kafka-test-topic',
+            partition: 1
+        }
+        ]).then(function (result) {
+            result.should.be.an('array').that.has.length(1);
+            result[0].should.have.property('topicName', 'kafka-test-topic');
+            result[0].should.have.property('partitions').that.is.an('array');
+            result[0].partitions.should.have.length(2);
+            result[0].partitions[0].should.be.an('object');
+            result[0].partitions[0].should.have.property('partition', 0);
+            result[0].partitions[0].should.have.property('error', null);
+            result[0].partitions[0].should.have.property('offset', 1);
+            result[0].partitions[1].should.have.property('partition', 1);
+            result[0].partitions[1].should.have.property('error', null);
+            result[0].partitions[1].should.have.property('offset', 2);
         });
     });
 
