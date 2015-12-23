@@ -14,7 +14,8 @@
         "lodash": "~=3.x.x",
         "bin-protocol": "git://github.com/oleksiyk/binary-protocol",
         "buffer-crc32": "~=0.2.5",
-        "nice-simple-logger": "git://github.com/oleksiyk/simple-logger"
+        "nice-simple-logger": "git://github.com/oleksiyk/simple-logger",
+        "hashring": "~=3.2.0"
     },
     "devDependencies": {
         "mocha": "~=2.3.4",
