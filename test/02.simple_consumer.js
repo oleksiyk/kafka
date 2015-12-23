@@ -63,16 +63,19 @@ describe('SimpleConsumer', function () {
     });
 
     it('should receive messages from specified offset', function () {
-        dataListenerSpy.reset();
-        return producer.send([{
-            topic: 'kafka-test-topic',
-            partition: 0,
-            message: {value: 'p000'}
-        },{
-            topic: 'kafka-test-topic',
-            partition: 0,
-            message: {value: 'p001'}
-        }])
+        return consumer.unsubscribe('kafka-test-topic', 0).then(function () {
+            dataListenerSpy.reset();
+            return producer.send([{
+                topic: 'kafka-test-topic',
+                partition: 0,
+                message: {value: 'p000'}
+            },{
+                topic: 'kafka-test-topic',
+                partition: 0,
+                message: {value: 'p001'}
+            }]);
+        })
+        .delay(100)
         .then(function () {
             return consumer.offset('kafka-test-topic', 0).then(function (offset) {
                 return consumer.subscribe('kafka-test-topic', 0, {offset: offset-2})
@@ -89,17 +92,19 @@ describe('SimpleConsumer', function () {
     });
 
     it('should receive messages in maxBytes batches', function () {
-        dataListenerSpy.reset();
-        return consumer.offset('kafka-test-topic', 0).then(function (offset) {
-            return consumer.subscribe('kafka-test-topic', 0, {offset: offset-2, maxBytes: 30})
-            .delay(200)
-            .then(function () {
-                /* jshint expr: true */
-                dataListenerSpy.should.have.been.calledTwice;
-                dataListenerSpy.getCall(0).args[0].should.be.an('array').and.have.length(1);
-                dataListenerSpy.getCall(1).args[0].should.be.an('array').and.have.length(1);
-                dataListenerSpy.getCall(0).args[0][0].message.value.toString('utf8').should.be.eql('p000');
-                dataListenerSpy.getCall(1).args[0][0].message.value.toString('utf8').should.be.eql('p001');
+        return consumer.unsubscribe('kafka-test-topic', 0).then(function () {
+            dataListenerSpy.reset();
+            return consumer.offset('kafka-test-topic', 0).then(function (offset) {
+                return consumer.subscribe('kafka-test-topic', 0, {offset: offset-2, maxBytes: 30})
+                .delay(200)
+                .then(function () {
+                    /* jshint expr: true */
+                    dataListenerSpy.should.have.been.calledTwice;
+                    dataListenerSpy.getCall(0).args[0].should.be.an('array').and.have.length(1);
+                    dataListenerSpy.getCall(1).args[0].should.be.an('array').and.have.length(1);
+                    dataListenerSpy.getCall(0).args[0][0].message.value.toString('utf8').should.be.eql('p000');
+                    dataListenerSpy.getCall(1).args[0][0].message.value.toString('utf8').should.be.eql('p001');
+                });
             });
         });
     });
