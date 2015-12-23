@@ -119,12 +119,14 @@ describe('SimpleConsumer', function () {
             {
                 topic: 'kafka-test-topic',
                 partition: 0,
-                offset: 1
+                offset: 1,
+                metadata: 'm1'
             },
             {
                 topic: 'kafka-test-topic',
                 partition: 1,
-                offset: 2
+                offset: 2,
+                metadata: 'm2'
             }
             ]).then(function (result) {
                 result.should.be.an('array').that.has.length(1);
