@@ -45,6 +45,8 @@ return producer.init().then(function(){
 
 ## Simple Consumer
 
+Manually specify topic, partition and offset when subscribing. Suitable for simple use cases.
+
 Example:
 
 ```javascript
@@ -119,4 +121,23 @@ consumer.fetchOffset([
 ]
 */
 });
+```
+
+### Simple Consumer options
+* groupId - group ID for comitting and fetching offsets. Defaults to 'no-kafka-group-v0'
+* timeout - timeout for fetch requests, defaults to 100ms
+* idleTimeout - timeout between fetch calls, defaults to 1000ms
+* minBytes - minimum number of bytes to wait from Kafka before returning the fetch call, defaults to 1 byte
+* maxBytes - maximum size of messages in a fetch response
+* clientId - ID of this client, defaults to 'no-kafka-client'
+* connectionString - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
+
+## Group Consumer (new unified consumer API)
+
+Specify an assignment strategy (or use no-kafka built-in consistent assignment strategy) and subscribe by specifying only topics. Elected group leader will automatically assign partitions between all group members. 
+
+Example:
+
+```javascript
+
 ```
