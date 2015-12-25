@@ -1,6 +1,6 @@
 {
-    "name": "kafkajs",
-    "description": "Apache Kafka client for Node.JS",
+    "name": "no-kafka",
+    "description": "Apache Kafka 0.9 client for Node.JS",
     "homepage": "http://github.com/oleksiyk/kafka",
     "author": {
         "name": "Oleksiy Krivoshey",
@@ -33,7 +33,7 @@
         "type": "git",
         "url": "git://github.com/oleksiyk/kafka.git"
     },
-    "readme": "Apache Kafka client for Node.JS",
+    "readme": "Apache Kafka 0.9 client for Node.JS",
     "readmeFilename": "README.md",
     "license": "MIT"
 }
