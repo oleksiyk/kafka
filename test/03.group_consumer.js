@@ -18,6 +18,7 @@ consumer.on('data', dataListenerSpy);
 
 describe('GroupConsumer', function () {
     before(function () {
+        this.timeout(5000); // let Kafka create offset topic
         return Promise.all([
             producer.init(),
             consumer.init({
