@@ -139,5 +139,35 @@ Specify an assignment strategy (or use no-kafka built-in consistent assignment s
 Example:
 
 ```javascript
+var consumer = new Kafka.GroupConsumer();
+var strategies = [{
+    strategy: 'TestStrategy',
+    subscriptions: ['kafka-test-topic'],
+    metadata: {
+        id: process.argv[2] || 'consumer_1',
+        weight: 50
+    }
+}];
 
+consumer.on('data', function (messageSet, topic, partition) {
+    messageSet.forEach(function (m) {
+        console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
+    });
+});
+
+return consumer.init(strategies).then(function(){
+  // all done, now wait for messages in event listener
+});
+```
+
+no-kafka provides `GroupConsumer.ConsistentAssignment` strategy based on a hashring and so providing consistent assignment across consumers in a group based on `metadata.id` and `metadata.weight` options.
+
+You can write your own assignment strategy function and provide it as `fn` options of the strategy item:
+```javascript
+var strategies = [{
+    strategy: 'MyStrategy',
+    fn: function(subscriptions){} // subscriptions: [{topic:String, members:[], partitions:[]}]
+    subscriptions: ['kafka-test-topic'],
+    metadata: new Buffer() // metadata as Buffer or as plain Object required for your assignment function
+}];
 ```
