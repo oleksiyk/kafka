@@ -6,6 +6,8 @@ no-kafka is [Apache Kafka](https://kafka.apache.org) 0.9 client for Node.js with
 
 All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 
+## Using
+
 * download and install Kafka
 * create your test topic: 
 ```shell
