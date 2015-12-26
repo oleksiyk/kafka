@@ -39,10 +39,10 @@ return producer.init().then(function(){
 ```
 
 ### Producer options:
-* requiredAcks - require acknoledgments for produce request. If it is 0 the server will not send any response.  If it is 1 (default), the server will wait the data is written to the local log before sending a response. If it is -1 the server will block until the message is committed by all in sync replicas before sending a response. For any number > 1 the server will block waiting for this number of acknowledgements to occur (but the server will never wait for more acknowledgements than there are in-sync replicas).
-* timeout - timeout in ms for produce request
-* clientId - ID of this client, defaults to 'no-kafka-client'
-* connectionString - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
+* `requiredAcks` - require acknoledgments for produce request. If it is 0 the server will not send any response.  If it is 1 (default), the server will wait the data is written to the local log before sending a response. If it is -1 the server will block until the message is committed by all in sync replicas before sending a response. For any number > 1 the server will block waiting for this number of acknowledgements to occur (but the server will never wait for more acknowledgements than there are in-sync replicas).
+* `timeout` - timeout in ms for produce request
+* `clientId` - ID of this client, defaults to 'no-kafka-client'
+* `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
 
 ## Simple Consumer
 
@@ -124,14 +124,14 @@ consumer.fetchOffset([
 });
 ```
 
-### Simple Consumer options
-* groupId - group ID for comitting and fetching offsets. Defaults to 'no-kafka-group-v0'
-* timeout - timeout for fetch requests, defaults to 100ms
-* idleTimeout - timeout between fetch calls, defaults to 1000ms
-* minBytes - minimum number of bytes to wait from Kafka before returning the fetch call, defaults to 1 byte
-* maxBytes - maximum size of messages in a fetch response
-* clientId - ID of this client, defaults to 'no-kafka-client'
-* connectionString - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
+### SimpleConsumer options
+* `groupId` - group ID for comitting and fetching offsets. Defaults to 'no-kafka-group-v0'
+* `timeout` - timeout for fetch requests, defaults to 100ms
+* `idleTimeout` - timeout between fetch calls, defaults to 1000ms
+* `minBytes` - minimum number of bytes to wait from Kafka before returning the fetch call, defaults to 1 byte
+* `maxBytes` - maximum size of messages in a fetch response
+* `clientId` - ID of this client, defaults to 'no-kafka-client'
+* `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
 
 ## Group Consumer (new unified consumer API)
 
@@ -190,3 +190,18 @@ var strategies = {
 ```
 
 You can also write your own assignment strategy function and provide it as `fn` options of the strategy item.
+
+### GroupConsumer options
+
+* `groupId` - group ID for comitting and fetching offsets. Defaults to 'no-kafka-group-v0.9'
+* `timeout` - timeout for fetch requests, defaults to 100ms
+* `idleTimeout` - timeout between fetch calls, defaults to 1000ms
+* `minBytes` - minimum number of bytes to wait from Kafka before returning the fetch call, defaults to 1 byte
+* `maxBytes` - maximum size of messages in a fetch response
+* `clientId` - ID of this client, defaults to 'no-kafka-client'
+* `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
+* `sessionTimeout` - session timeout in ms, min 6000, max 30000, defaults to 15000
+* `heartbeatTimeout` - delay between heartbeat requests in ms, defaults to 1000
+* `retentionTime` - offset retention time in ms, defaults to 1 day (24 * 3600 * 1000)
+ 
+
