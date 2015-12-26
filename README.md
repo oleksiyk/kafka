@@ -44,7 +44,7 @@ return producer.init().then(function(){
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
 
-## Simple Consumer
+## SimpleConsumer
 
 Manually specify topic, partition and offset when subscribing. Suitable for simple use cases.
 
@@ -133,7 +133,7 @@ consumer.fetchOffset([
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
 
-## Group Consumer (new unified consumer API)
+## GroupConsumer (new unified consumer API)
 
 Specify an assignment strategy (or use no-kafka built-in consistent assignment strategy) and subscribe by specifying only topics. Elected group leader will automatically assign partitions between all group members.
 
