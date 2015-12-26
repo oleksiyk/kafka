@@ -9,7 +9,7 @@ All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 ## Using
 
 * download and install Kafka
-* create your test topic: 
+* create your test topic:
 ```shell
 kafka-topics.sh --zookeeper 127.0.0.1:2181 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
 ```
@@ -117,7 +117,7 @@ consumer.fetchOffset([
          offset: 2,
          metadata: null,
          error: null },
-      ] 
+      ]
     },
 ]
 */
@@ -135,7 +135,7 @@ consumer.fetchOffset([
 
 ## Group Consumer (new unified consumer API)
 
-Specify an assignment strategy (or use no-kafka built-in consistent assignment strategy) and subscribe by specifying only topics. Elected group leader will automatically assign partitions between all group members. 
+Specify an assignment strategy (or use no-kafka built-in consistent assignment strategy) and subscribe by specifying only topics. Elected group leader will automatically assign partitions between all group members.
 
 Example:
 
@@ -143,11 +143,7 @@ Example:
 var consumer = new Kafka.GroupConsumer();
 var strategies = [{
     strategy: 'TestStrategy',
-    subscriptions: ['kafka-test-topic'],
-    metadata: {
-        id: process.argv[2] || 'consumer_1',
-        weight: 50
-    }
+    subscriptions: ['kafka-test-topic']
 }];
 
 consumer.on('data', function (messageSet, topic, partition) {
@@ -169,7 +165,7 @@ no-kafka provides two built-in strategies:
 * `GroupConsumer.ConsistentAssignment` which is based on a consisten hash ring and so provides consistent assignment across consumers in a group based on supplied `metadata.id` and `metadata.weight` options.
 * `GroupConsumer.RoundRobinAssignment` simple range assignment.
 
-Using `GroupConsumer.ConsistentAssignment` (default in no-kafka):
+Using `GroupConsumer.ConsistentAssignment`:
 ```javascript
 var strategies = {
     strategy: 'TestStrategy',
@@ -177,18 +173,18 @@ var strategies = {
     metadata: {
         id: process.argv[2] || 'consumer_1',
         weight: 50
-    }
+    },
+    fn: Kafka.GroupConsumer.ConsistentAssignment
 };
 // consumer.init(strategy)....
 ```
-Note that each consumer in a group should have its own and consistent metadata.id. 
+Note that each consumer in a group should have its own and consistent metadata.id.
 
-Using `GroupConsumer.RoundRobinAssignment`:
+Using `GroupConsumer.RoundRobinAssignment` (default in no-kafka):
 ```javascript
 var strategies = {
     strategy: 'TestStrategy',
     subscriptions: ['kafka-test-topic'],
-    fn: Kafka.GroupConsumer.RoundRobinAssignment
 };
 // consumer.init(strategy)....
 ```
