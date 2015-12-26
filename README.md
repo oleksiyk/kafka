@@ -2,7 +2,7 @@
 
 # no-kafka
 
-no-kafka is [Apache Kafka](https://kafka.apache.org) 0.9 client for Node.js with [new unified consumer API](#group-consumer-new-unified-consumer-api) support. No Zookeeper connection required. Doesn't support compression yet.
+no-kafka is [Apache Kafka](https://kafka.apache.org) 0.9 client for Node.js with [new unified consumer API](#groupconsumer-new-unified-consumer-api) support. No Zookeeper connection required. Doesn't support compression yet.
 
 All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 
