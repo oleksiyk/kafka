@@ -153,6 +153,8 @@ var strategies = [{
 consumer.on('data', function (messageSet, topic, partition) {
     messageSet.forEach(function (m) {
         console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
+        // process each message and commit its offset
+        consumer.commitOffset({topic: topic, partition: partition, offset: m.offset, metadata: 'optional'});
     });
 });
 
@@ -161,14 +163,34 @@ return consumer.init(strategies).then(function(){
 });
 ```
 
-no-kafka provides `GroupConsumer.ConsistentAssignment` strategy based on a hashring and so providing consistent assignment across consumers in a group based on `metadata.id` and `metadata.weight` options.
+### Assignment strategies
 
-You can write your own assignment strategy function and provide it as `fn` options of the strategy item:
+no-kafka provides two built-in strategies:
+* `GroupConsumer.ConsistentAssignment` which is based on a consisten hash ring and so provides consistent assignment across consumers in a group based on supplied `metadata.id` and `metadata.weight` options.
+* `GroupConsumer.RoundRobinAssignment` simple range assignment.
+
+Using `GroupConsumer.ConsistentAssignment` (default in no-kafka):
 ```javascript
-var strategies = [{
-    strategy: 'MyStrategy',
-    fn: function(subscriptions){} // subscriptions: [{topic:String, members:[], partitions:[]}]
+var strategies = {
+    strategy: 'TestStrategy',
     subscriptions: ['kafka-test-topic'],
-    metadata: new Buffer() // metadata as Buffer or as plain Object required for your assignment function
-}];
+    metadata: {
+        id: process.argv[2] || 'consumer_1',
+        weight: 50
+    }
+};
+// consumer.init(strategy)....
 ```
+Note that each consumer in a group should have its own and consistent metadata.id. 
+
+Using `GroupConsumer.RoundRobinAssignment`:
+```javascript
+var strategies = {
+    strategy: 'TestStrategy',
+    subscriptions: ['kafka-test-topic'],
+    fn: Kafka.GroupConsumer.RoundRobinAssignment
+};
+// consumer.init(strategy)....
+```
+
+You can also write your own assignment strategy function and provide it as `fn` options of the strategy item.
