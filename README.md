@@ -33,8 +33,7 @@ return producer.init().then(function(){
 })
 .then(function (result) {
   /*
-  { ok: [ { topic: 'kafka-test-topic', partition: 0, offset: 353 } ],
-  errors: [] }
+  [ { topic: 'kafka-test-topic', partition: 0, offset: 353 } ]
   */
 });
 ```
