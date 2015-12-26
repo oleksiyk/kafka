@@ -9,10 +9,15 @@ var Kafka = require('../lib/index');
 
 var producer = new Kafka.Producer({requiredAcks: 1});
 var consumer = new Kafka.GroupConsumer({
-    idleTimeout: 100
+    idleTimeout: 100,
+    heartbeatTimeout: 100
 });
 
-var dataListenerSpy = sinon.spy(function() {});
+var dataListenerSpy = sinon.spy(function(messageSet, topic, partition) {
+    messageSet.forEach(function (m) {
+        consumer.commitOffset({topic: topic, partition: partition, offset: m.offset});
+    });
+});
 
 consumer.on('data', dataListenerSpy);
 
@@ -24,10 +29,7 @@ describe('GroupConsumer', function () {
             consumer.init({
                 strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
-                metadata: {
-                    id: 'test-group-consumer',
-                    weight: 50
-                }
+                fn: Kafka.GroupConsumer.RoundRobinAssignment
             }).delay(500)
         ]);
     });
@@ -61,12 +63,6 @@ describe('GroupConsumer', function () {
             dataListenerSpy.lastCall.args[0][0].should.have.property('message').that.is.an('object');
             dataListenerSpy.lastCall.args[0][0].message.should.have.property('value');
             dataListenerSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p00');
-        });
-    });
-
-    it('offset() should return last offset', function () {
-        return consumer.offset('kafka-test-topic', 0).then(function (offset) {
-            offset.should.be.a('number').and.be.gt(0);
         });
     });
 
@@ -121,6 +117,94 @@ describe('GroupConsumer', function () {
             result[0].partitions[1].should.have.property('error', null);
             result[0].partitions[1].should.have.property('offset', 2);
             result[0].partitions[1].should.have.property('metadata', 'm2');
+        });
+    });
+
+    it('offset() should return last offset', function () {
+        return Promise.all([
+            consumer.offset('kafka-test-topic', 0),
+            consumer.offset('kafka-test-topic', 1),
+            consumer.offset('kafka-test-topic', 2),
+        ]).spread(function (offset0, offset1, offset2) {
+            offset0.should.be.a('number').and.be.gt(0);
+            offset1.should.be.a('number').and.be.gt(0);
+            offset2.should.be.a('number').and.be.gt(0);
+
+            // commit them back for next tests
+            return Promise.all([
+                consumer.commitOffset({topic: 'kafka-test-topic', partition: 0, offset: offset0-1}),
+                consumer.commitOffset({topic: 'kafka-test-topic', partition: 1, offset: offset1-1}),
+                consumer.commitOffset({topic: 'kafka-test-topic', partition: 2, offset: offset2-1})
+            ]);
+        });
+    });
+
+    it('should split partitions in a group', function () {
+        var consumer2 = new Kafka.GroupConsumer({
+            idleTimeout: 100,
+            heartbeatTimeout: 100
+        }), consumer3 = new Kafka.GroupConsumer({
+            idleTimeout: 100,
+            heartbeatTimeout: 100
+        });
+
+        var dataListenerSpy2 = sinon.spy(function(messageSet, topic, partition) {
+            messageSet.forEach(function (m) {
+                consumer2.commitOffset({topic: topic, partition: partition, offset: m.offset});
+            });
+        });
+
+        var dataListenerSpy3 = sinon.spy(function(messageSet, topic, partition) {
+            messageSet.forEach(function (m) {
+                consumer3.commitOffset({topic: topic, partition: partition, offset: m.offset});
+            });
+        });
+
+        consumer2.on('data', dataListenerSpy2);
+        consumer3.on('data', dataListenerSpy3);
+
+        return Promise.all([
+            consumer2.init({
+                strategy: 'TestStrategy',
+                subscriptions: ['kafka-test-topic'],
+                fn: Kafka.GroupConsumer.RoundRobinAssignment
+            }),
+            consumer3.init({
+                strategy: 'TestStrategy',
+                subscriptions: ['kafka-test-topic'],
+                fn: Kafka.GroupConsumer.RoundRobinAssignment
+            }),
+        ])
+        .delay(500) // give some time to rebalance group
+        .then(function () {
+            dataListenerSpy.reset();
+            return producer.send([
+                {
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: {value: 'p00'}
+                },
+                {
+                    topic: 'kafka-test-topic',
+                    partition: 1,
+                    message: {value: 'p01'}
+                },
+                {
+                    topic: 'kafka-test-topic',
+                    partition: 2,
+                    message: {value: 'p02'}
+                }
+            ])
+            .delay(200)
+            .then(function () {
+                /* jshint expr: true */
+                dataListenerSpy.should.have.been.calledOnce;
+                dataListenerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
+                dataListenerSpy2.should.have.been.calledOnce;
+                dataListenerSpy2.lastCall.args[0].should.be.an('array').and.have.length(1);
+                dataListenerSpy3.should.have.been.calledOnce;
+                dataListenerSpy3.lastCall.args[0].should.be.an('array').and.have.length(1);
+            });
         });
     });
 
