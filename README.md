@@ -189,7 +189,7 @@ var strategies = {
 // consumer.init(strategy)....
 ```
 
-You can also write your own assignment strategy function and provide it as `fn` options of the strategy item.
+You can also write your own assignment strategy function and provide it as `fn` option of the strategy item.
 
 ### GroupConsumer options
 
