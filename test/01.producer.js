@@ -28,15 +28,12 @@ describe('Producer', function () {
                 value: 'Hello!'
             }
         }).then(function (result) {
-            result.should.be.an('object');
-            result.should.have.property('ok');
-            result.should.have.property('errors');
-            result.ok.should.be.an('array').and.have.length(1);
-            result.errors.should.be.an('array').and.have.length(0);
-            result.ok[0].should.be.an('object');
-            result.ok[0].should.have.property('topic', 'kafka-test-topic');
-            result.ok[0].should.have.property('partition', 0);
-            result.ok[0].should.have.property('offset').that.is.a('number');
+            result.should.be.an('array').and.have.length(1);
+            result[0].should.be.an('object');
+            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.have.property('partition', 0);
+            result[0].should.have.property('offset').that.is.a('number');
+            result[0].should.not.have.property('error');
         });
     });
 
@@ -51,19 +48,41 @@ describe('Producer', function () {
             message: {value: 'Hello!'}
         }];
         return producer.send(msgs).then(function (result) {
-            result.should.be.an('object');
-            result.should.have.property('ok');
-            result.should.have.property('errors');
-            result.ok.should.be.an('array').and.have.length(2);
-            result.errors.should.be.an('array').and.have.length(0);
-            result.ok[0].should.be.an('object');
-            result.ok[1].should.be.an('object');
-            result.ok[0].should.have.property('topic', 'kafka-test-topic');
-            result.ok[0].should.have.property('partition');
-            result.ok[0].should.have.property('offset').that.is.a('number');
-            result.ok[1].should.have.property('topic', 'kafka-test-topic');
-            result.ok[1].should.have.property('partition');
-            result.ok[1].should.have.property('offset').that.is.a('number');
+            result.should.be.an('array').and.have.length(2);
+            result[0].should.be.an('object');
+            result[1].should.be.an('object');
+            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.not.have.property('error');
+            result[0].should.have.property('partition').that.is.a('number');
+            result[0].should.have.property('offset').that.is.a('number');
+            result[1].should.have.property('topic', 'kafka-test-topic');
+            result[1].should.have.property('partition').that.is.a('number');
+            result[1].should.have.property('offset').that.is.a('number');
+            result[1].should.not.have.property('error');
+        });
+    });
+
+    it('should return an error for unknown partition/topic and retry 3 times', function () {
+        this.timeout(4000);
+        var start = Date.now();
+        var msgs = [{
+            topic: 'kafka-test-unknown-topic',
+            partition: 0,
+            message: {value: 'Hello!'}
+        },{
+            topic: 'kafka-test-topic',
+            partition: 20,
+            message: {value: 'Hello!'}
+        }];
+        return producer.send(msgs).then(function (result) {
+            result.should.be.an('array').and.have.length(2);
+            result[0].should.be.an('object');
+            result[1].should.be.an('object');
+            result[0].should.have.property('error');
+            result[1].should.have.property('error');
+            result[0].error.should.have.property('code', 'UnknownTopicOrPartition');
+            result[1].error.should.have.property('code', 'UnknownTopicOrPartition');
+            (Date.now() - start).should.be.closeTo(3 * 1000, 200);
         });
     });
 
