@@ -107,19 +107,16 @@ consumer.fetchOffset([
   }
 ]).then(function (result) {
 /*
-[ { topicName: 'kafka-test-topic',
-    partitions:
-     [ { partition: 0,
-         offset: 1,
-         metadata: null,
-         error: null },
-       { partition: 1,
-         offset: 2,
-         metadata: null,
-         error: null },
-      ]
-    },
-]
+[ { topic: 'kafka-test-topic',
+    partition: 1,
+    offset: 2,
+    metadata: null,
+    error: null },
+  { topic: 'kafka-test-topic',
+    partition: 0,
+    offset: 1,
+    metadata: null,
+    error: null } ]
 */
 });
 ```
