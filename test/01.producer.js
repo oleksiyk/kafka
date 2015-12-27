@@ -33,7 +33,7 @@ describe('Producer', function () {
             result[0].should.have.property('topic', 'kafka-test-topic');
             result[0].should.have.property('partition', 0);
             result[0].should.have.property('offset').that.is.a('number');
-            result[0].should.not.have.property('error');
+            result[0].should.have.property('error', null);
         });
     });
 
@@ -52,13 +52,13 @@ describe('Producer', function () {
             result[0].should.be.an('object');
             result[1].should.be.an('object');
             result[0].should.have.property('topic', 'kafka-test-topic');
-            result[0].should.not.have.property('error');
+            result[0].should.have.property('error', null);
             result[0].should.have.property('partition').that.is.a('number');
             result[0].should.have.property('offset').that.is.a('number');
             result[1].should.have.property('topic', 'kafka-test-topic');
             result[1].should.have.property('partition').that.is.a('number');
             result[1].should.have.property('offset').that.is.a('number');
-            result[1].should.not.have.property('error');
+            result[1].should.have.property('error', null);
         });
     });
 
