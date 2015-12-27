@@ -135,7 +135,7 @@ consumer.fetchOffset([
 
 ## GroupConsumer (new unified consumer API)
 
-Specify an assignment strategy (or use no-kafka built-in consistent assignment strategy) and subscribe by specifying only topics. Elected group leader will automatically assign partitions between all group members.
+Specify an assignment strategy (or use no-kafka built-in consistent or round robin assignment strategy) and subscribe by specifying only topics. Elected group leader will automatically assign partitions between all group members.
 
 Example:
 
@@ -203,5 +203,5 @@ You can also write your own assignment strategy function and provide it as `fn` 
 * `sessionTimeout` - session timeout in ms, min 6000, max 30000, defaults to 15000
 * `heartbeatTimeout` - delay between heartbeat requests in ms, defaults to 1000
 * `retentionTime` - offset retention time in ms, defaults to 1 day (24 * 3600 * 1000)
- 
+
 
