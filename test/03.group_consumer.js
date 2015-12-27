@@ -5,7 +5,8 @@
 // kafka-topics.sh --zookeeper 127.0.0.1:2181/kafka0.8 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
 
 var Promise = require('bluebird');
-var Kafka = require('../lib/index');
+var Kafka   = require('../lib/index');
+var _       = require('lodash');
 
 var producer = new Kafka.Producer({requiredAcks: 1});
 var consumer = new Kafka.GroupConsumer({
@@ -23,14 +24,14 @@ consumer.on('data', dataListenerSpy);
 
 describe('GroupConsumer', function () {
     before(function () {
-        this.timeout(5000); // let Kafka create offset topic
+        this.timeout(6000); // let Kafka create offset topic
         return Promise.all([
             producer.init(),
             consumer.init({
                 strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
                 fn: Kafka.GroupConsumer.RoundRobinAssignment
-            }).delay(500)
+            }).delay(1000)
         ]);
     });
 
@@ -51,7 +52,7 @@ describe('GroupConsumer', function () {
             partition: 0,
             message: {value: 'p00'}
         })
-        .delay(100)
+        .delay(200)
         .then(function () {
             /* jshint expr: true */
             dataListenerSpy.should.have.been.called;
@@ -81,15 +82,15 @@ describe('GroupConsumer', function () {
                 metadata: 'm2'
             }
         ]).then(function (result) {
-            result.should.be.an('array').that.has.length(1);
-            result[0].should.have.property('topicName', 'kafka-test-topic');
-            result[0].should.have.property('partitions').that.is.an('array');
-            result[0].partitions.should.have.length(2);
-            result[0].partitions[0].should.be.an('object');
-            result[0].partitions[0].should.have.property('partition', 0);
-            result[0].partitions[0].should.have.property('error', null);
-            result[0].partitions[1].should.have.property('partition', 1);
-            result[0].partitions[1].should.have.property('error', null);
+            result.should.be.an('array').that.has.length(2);
+            result[0].should.be.an('object');
+            result[1].should.be.an('object');
+            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[1].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.have.property('partition').that.is.a('number');
+            result[1].should.have.property('partition').that.is.a('number');
+            result[0].should.have.property('error', null);
+            result[1].should.have.property('error', null);
         });
     });
 
@@ -104,19 +105,23 @@ describe('GroupConsumer', function () {
             partition: 1
         }
         ]).then(function (result) {
-            result.should.be.an('array').that.has.length(1);
-            result[0].should.have.property('topicName', 'kafka-test-topic');
-            result[0].should.have.property('partitions').that.is.an('array');
-            result[0].partitions.should.have.length(2);
-            result[0].partitions[0].should.be.an('object');
-            result[0].partitions[0].should.have.property('partition', 0);
-            result[0].partitions[0].should.have.property('error', null);
-            result[0].partitions[0].should.have.property('offset', 1);
-            result[0].partitions[0].should.have.property('metadata', 'm1');
-            result[0].partitions[1].should.have.property('partition', 1);
-            result[0].partitions[1].should.have.property('error', null);
-            result[0].partitions[1].should.have.property('offset', 2);
-            result[0].partitions[1].should.have.property('metadata', 'm2');
+            result.should.be.an('array').that.has.length(2);
+            result[0].should.be.an('object');
+            result[1].should.be.an('object');
+            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[1].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.have.property('partition').that.is.a('number');
+            result[1].should.have.property('partition').that.is.a('number');
+            result[0].should.have.property('offset').that.is.a('number');
+            result[1].should.have.property('offset').that.is.a('number');
+            result[0].should.have.property('metadata').that.is.a('string');
+            result[1].should.have.property('metadata').that.is.a('string');
+            result[0].should.have.property('error', null);
+            result[1].should.have.property('error', null);
+            _.find(result, {topic: 'kafka-test-topic', partition: 0}).offset.should.be.eql(1);
+            _.find(result, {topic: 'kafka-test-topic', partition: 1}).offset.should.be.eql(2);
+            _.find(result, {topic: 'kafka-test-topic', partition: 0}).metadata.should.be.eql('m1');
+            _.find(result, {topic: 'kafka-test-topic', partition: 1}).metadata.should.be.eql('m2');
         });
     });
 
