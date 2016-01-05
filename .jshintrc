@@ -15,7 +15,7 @@
     "quotmark": false, // enforces the consistency of quotation marks used throughout your code
     "undef": true, // prohibits the use of explicitly undeclared variables
     "unused": true, // warns when you define and never use your variables
-    "strict": true, // requires all functions to run in ECMAScript 5's strict mode
+    "strict": "global", // requires all functions to run in ECMAScript 5's strict mode
     "trailing": true, // makes it an error to leave a trailing whitespace in your code
     "maxparams": 5, // set the max number of formal parameters allowed per function
     "maxdepth": 5, // control how nested do you want your blocks to be
@@ -25,7 +25,6 @@
     "asi": false, // suppresses warnings about missing semicolons
     "eqnull": false, // suppresses warnings about == null
     "esnext": false, // tells JSHint that your code uses ECMAScript 6 specific syntax
-    "globalstrict": true, // suppresses warnings about the use of global strict mode
     "lastsemic": true, // suppresses warnings about missing semicolons, but only when the semicolon is omitted for the last statement in a one-line block
     "laxbreak": true, // suppresses most of the warnings about possibly unsafe line breakings in your code,
     "laxcomma": true, // suppresses warnings about comma-first coding style
