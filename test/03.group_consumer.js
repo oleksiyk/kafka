@@ -21,6 +21,13 @@ var consumers = [
     new Kafka.GroupConsumer({
         idleTimeout: 100,
         heartbeatTimeout: 100
+    }),
+    new Kafka.GroupConsumer({
+        idleTimeout: 100,
+        heartbeatTimeout: 100,
+        startFrom: {
+            time: Kafka.EARLIEST_OFFSET
+        }
     })
 ];
 
@@ -28,6 +35,7 @@ var dataListenerSpies = [
     sinon.spy(function (messageSet, topic, partition) {messageSet.forEach(function (m) {consumers[0].commitOffset({topic: topic, partition: partition, offset: m.offset}); });}),
     sinon.spy(function (messageSet, topic, partition) {messageSet.forEach(function (m) {consumers[1].commitOffset({topic: topic, partition: partition, offset: m.offset}); });}),
     sinon.spy(function (messageSet, topic, partition) {messageSet.forEach(function (m) {consumers[2].commitOffset({topic: topic, partition: partition, offset: m.offset}); });}),
+    sinon.spy(function (messageSet, topic, partition) {messageSet.forEach(function (m) {consumers[3].commitOffset({topic: topic, partition: partition, offset: m.offset}); });}),
 ];
 
 consumers.forEach(function (c, i) {
@@ -200,6 +208,67 @@ describe('GroupConsumer', function () {
                 dataListenerSpies[2].should.have.been.calledOnce;
                 dataListenerSpies[2].lastCall.args[0].should.be.an('array').and.have.length(1);
             });
+        })
+        .then(function () {
+            // remove this consumer from the group because we will create new in next test and we need 1 consumer per partition
+            return consumers[2].end();
+        })
+        .delay(500); // rebalance group
+    });
+
+    it('should start from specified time/offset', function () {
+        dataListenerSpies.forEach(function (spy) {spy.reset()});
+        return consumers[3].init({
+            strategy: 'TestStrategy',
+            subscriptions: ['kafka-test-topic'],
+            fn: Kafka.GroupConsumer.RoundRobinAssignment
+        })
+        .delay(700) // give some time to rebalance group
+        .then(function () {
+            /* jshint expr: true */
+            dataListenerSpies[0].should.have.been.notCalled;
+            dataListenerSpies[1].should.have.been.notCalled;
+            dataListenerSpies[3].should.have.been.called;
+            // should receive all previous messages in partition
+            dataListenerSpies[3].lastCall.args[0].should.be.an('array').and.have.length.above(0);
+        });
+    });
+
+    it('should not use specified offset after rebalance but use committed', function () {
+        dataListenerSpies.forEach(function (spy) {spy.reset()});
+        return consumers[1].end()
+        .delay(700) // rebalance
+        .then(function () {
+            /* jshint expr: true */
+            dataListenerSpies[0].should.have.been.notCalled;
+            dataListenerSpies[3].should.have.been.notCalled;
+        })
+        .then(function () {
+            return producer.send([
+                {
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: {value: 'p00'}
+                },
+                {
+                    topic: 'kafka-test-topic',
+                    partition: 1,
+                    message: {value: 'p01'}
+                },
+                {
+                    topic: 'kafka-test-topic',
+                    partition: 2,
+                    message: {value: 'p02'}
+                }
+            ])
+            .delay(200)
+            .then(function () {
+                /* jshint expr: true */
+                dataListenerSpies[0].should.have.been.called;
+                dataListenerSpies[0].lastCall.args[0].should.be.an('array').and.have.length(1);
+                dataListenerSpies[3].should.have.been.called;
+                dataListenerSpies[3].lastCall.args[0].should.be.an('array').and.have.length(1);
+            });
         });
     });
 
@@ -221,7 +290,7 @@ describe('GroupConsumer', function () {
             group.should.have.property('protocolType', 'consumer');
             group.should.have.property('protocol', 'TestStrategy');
             group.should.have.property('members').that.is.an('array');
-            group.members.should.have.length(3);
+            group.members.should.have.length(2);
             group.members[0].should.be.an('object');
             group.members[0].should.have.property('memberId').that.is.a('string');
             group.members[0].should.have.property('clientId').that.is.a('string');
