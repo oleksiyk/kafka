@@ -9,6 +9,7 @@ var Kafka   = require('../lib/index');
 var _       = require('lodash');
 
 var producer = new Kafka.Producer({requiredAcks: 1});
+
 var consumers = [
     new Kafka.GroupConsumer({
         idleTimeout: 100,
@@ -21,12 +22,26 @@ var consumers = [
     new Kafka.GroupConsumer({
         idleTimeout: 100,
         heartbeatTimeout: 100
+    }),
+    new Kafka.GroupConsumer({
+        idleTimeout: 100,
+        heartbeatTimeout: 100,
+        offsetFn: function (r) {
+            return consumers[3].offset(r.topic, r.partition, Kafka.EARLIEST_OFFSET);
+        }
     })
 ];
+
+var strategy = {
+    strategy: 'TestStrategy',
+    subscriptions: ['kafka-test-topic'],
+    fn: Kafka.GroupConsumer.RoundRobinAssignment
+};
 
 var dataListenerSpies = [
     sinon.spy(function (messageSet, topic, partition) {messageSet.forEach(function (m) {consumers[0].commitOffset({topic: topic, partition: partition, offset: m.offset}); });}),
     sinon.spy(function (messageSet, topic, partition) {messageSet.forEach(function (m) {consumers[1].commitOffset({topic: topic, partition: partition, offset: m.offset}); });}),
+    sinon.spy(function (messageSet, topic, partition) {messageSet.forEach(function (m) {consumers[2].commitOffset({topic: topic, partition: partition, offset: m.offset}); });}),
     sinon.spy(function (messageSet, topic, partition) {messageSet.forEach(function (m) {consumers[2].commitOffset({topic: topic, partition: partition, offset: m.offset}); });}),
 ];
 
@@ -39,11 +54,7 @@ describe('GroupConsumer', function () {
         this.timeout(6000); // let Kafka create offset topic
         return Promise.all([
             producer.init(),
-            consumers[0].init({
-                strategy: 'TestStrategy',
-                subscriptions: ['kafka-test-topic'],
-                fn: Kafka.GroupConsumer.RoundRobinAssignment
-            }).delay(1000)
+            consumers[0].init(strategy).delay(1000)
         ]);
     });
 
@@ -159,16 +170,8 @@ describe('GroupConsumer', function () {
     it('should split partitions in a group', function () {
         this.timeout(6000);
         return Promise.all([
-            consumers[1].init({
-                strategy: 'TestStrategy',
-                subscriptions: ['kafka-test-topic'],
-                fn: Kafka.GroupConsumer.RoundRobinAssignment
-            }),
-            consumers[2].init({
-                strategy: 'TestStrategy',
-                subscriptions: ['kafka-test-topic'],
-                fn: Kafka.GroupConsumer.RoundRobinAssignment
-            }),
+            consumers[1].init(strategy),
+            consumers[2].init(strategy),
         ])
         .delay(500) // give some time to rebalance group
         .then(function () {
@@ -200,6 +203,21 @@ describe('GroupConsumer', function () {
                 dataListenerSpies[2].should.have.been.calledOnce;
                 dataListenerSpies[2].lastCall.args[0].should.be.an('array').and.have.length(1);
             });
+        });
+    });
+
+    it('should be able to customize offset with offsetFn options', function () {
+        return Promise.all([ // replace one of the group members
+            consumers[2].end(),
+            consumers[3].init(strategy)
+        ])
+        .delay(700)
+        .then(function () {
+            /* jshint expr: true */
+            dataListenerSpies[0].should.have.been.notCalled;
+            dataListenerSpies[1].should.have.been.notCalled;
+            dataListenerSpies[2].should.have.been.notCalled;
+            dataListenerSpies[3].should.have.been.called;
         });
     });
 
