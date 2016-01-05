@@ -200,5 +200,6 @@ You can also write your own assignment strategy function and provide it as `fn` 
 * `sessionTimeout` - session timeout in ms, min 6000, max 30000, defaults to 15000
 * `heartbeatTimeout` - delay between heartbeat requests in ms, defaults to 1000
 * `retentionTime` - offset retention time in ms, defaults to 1 day (24 * 3600 * 1000)
+* `startingOffset` - starting position (time) when there is no commited offset, defaults to Kafka.LATEST_OFFSET
 
 
