@@ -129,6 +129,7 @@ consumer.fetchOffset([
 * `maxBytes` - maximum size of messages in a fetch response
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
+* `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
 
 ## GroupConsumer (new unified consumer API)
 
@@ -201,5 +202,7 @@ You can also write your own assignment strategy function and provide it as `fn` 
 * `heartbeatTimeout` - delay between heartbeat requests in ms, defaults to 1000
 * `retentionTime` - offset retention time in ms, defaults to 1 day (24 * 3600 * 1000)
 * `startingOffset` - starting position (time) when there is no commited offset, defaults to Kafka.LATEST_OFFSET
+* `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
+
 
 
