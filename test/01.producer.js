@@ -17,7 +17,8 @@ describe('Producer', function () {
     it('required methods', function () {
         return producer.should
             .respondTo('init')
-            .respondTo('send');
+            .respondTo('send')
+            .respondTo('end');
     });
 
     it('should send a single message', function () {
