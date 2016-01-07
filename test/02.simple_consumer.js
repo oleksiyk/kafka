@@ -31,7 +31,8 @@ describe('SimpleConsumer', function () {
             .respondTo('offset')
             .respondTo('unsubscribe')
             .respondTo('commitOffset')
-            .respondTo('fetchOffset');
+            .respondTo('fetchOffset')
+            .respondTo('end');
     });
 
     it('should receive new messages', function () {

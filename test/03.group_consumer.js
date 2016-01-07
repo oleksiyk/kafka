@@ -24,10 +24,16 @@ var consumers = [
     })
 ];
 
+function listenerFactory (consumer){
+    return sinon.spy(function (messageSet, topic, partition) {
+        messageSet.forEach(function (m) {consumer.commitOffset({topic: topic, partition: partition, offset: m.offset}); });}
+    );
+}
+
 var dataListenerSpies = [
-    sinon.spy(function (messageSet, topic, partition) {messageSet.forEach(function (m) {consumers[0].commitOffset({topic: topic, partition: partition, offset: m.offset}); });}),
-    sinon.spy(function (messageSet, topic, partition) {messageSet.forEach(function (m) {consumers[1].commitOffset({topic: topic, partition: partition, offset: m.offset}); });}),
-    sinon.spy(function (messageSet, topic, partition) {messageSet.forEach(function (m) {consumers[2].commitOffset({topic: topic, partition: partition, offset: m.offset}); });}),
+    listenerFactory(consumers[0]),
+    listenerFactory(consumers[1]),
+    listenerFactory(consumers[2]),
 ];
 
 consumers.forEach(function (c, i) {
@@ -54,7 +60,8 @@ describe('GroupConsumer', function () {
             .respondTo('offset')
             .respondTo('unsubscribe')
             .respondTo('commitOffset')
-            .respondTo('fetchOffset');
+            .respondTo('fetchOffset')
+            .respondTo('end');
     });
 
     it('should receive new messages', function () {
