@@ -12,6 +12,7 @@ kafka: node_modules lib/*
 #
 test: kafka
 	@mocha
+	@jshint --verbose lib/*.js lib/protocol/*.js test/*.js
 
 
 #
