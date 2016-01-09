@@ -2,7 +2,7 @@
 
 /* global describe, it, before  */
 
-// kafka-topics.sh --zookeeper 127.0.0.1:2181/kafka0.8 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
+// kafka-topics.sh --zookeeper 127.0.0.1:2181/kafka0.9 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
 
 var Kafka = require('../lib/index');
 
