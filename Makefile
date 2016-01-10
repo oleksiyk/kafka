@@ -11,7 +11,7 @@ kafka: node_modules lib/*
 # Tests
 #
 test: kafka
-	@mocha
+	@NSL_LEVEL=0 mocha
 	@jshint --verbose lib/*.js lib/protocol/*.js test/*.js
 
 
