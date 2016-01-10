@@ -49,7 +49,7 @@ describe('GroupConsumer', function () {
                 strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
                 fn: Kafka.GroupConsumer.RoundRobinAssignment
-            }).delay(1000)
+            })
         ]);
     });
 
@@ -239,6 +239,35 @@ describe('GroupConsumer', function () {
             group.members[0].should.have.property('memberAssignment').that.is.a('object');
             group.members[0].memberAssignment.should.have.property('partitionAssignment').that.is.an('array');
 
+        });
+    });
+
+    it('should not log errors on clean shutdown', function () {
+        var consumer = new Kafka.GroupConsumer({
+            groupId: 'no-kafka-shutdown-test-group',
+            timeout: 1000,
+            idleTimeout: 100,
+            heartbeatTimeout: 100
+        });
+
+        var origError = Kafka.error;
+        Kafka.error = sinon.spy(Kafka.error);
+
+        return consumer.init({
+            strategy: 'TestStrategy',
+            subscriptions: ['kafka-test-topic'],
+            fn: Kafka.GroupConsumer.RoundRobinAssignment
+        })
+        .then(function () {
+            return consumer.end();
+        })
+        .delay(1200)
+        .then(function () {
+            /* jshint expr: true */
+            Kafka.error.should.not.have.been.called;
+        })
+        .finally(function () {
+            Kafka.error = origError;
         });
     });
 
