@@ -1,6 +1,6 @@
 'use strict';
 
-/* global describe, it, before  */
+/* global describe, it, before, after  */
 
 // kafka-topics.sh --zookeeper 127.0.0.1:2181/kafka0.9 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
 
@@ -11,6 +11,10 @@ var producer = new Kafka.Producer({ requiredAcks: 1 });
 describe('Producer', function () {
     before(function () {
         return producer.init();
+    });
+
+    after(function () {
+        return producer.end();
     });
 
     it('required methods', function () {

@@ -23,13 +23,17 @@
         "sinon-chai": "~=2.8.0",
         "chai-as-promised": "~=5.1.0",
         "eslint": "^1.10.3",
-        "eslint-config-airbnb": "^3.1.0"
+        "eslint-config-airbnb": "^3.1.0",
+        "gulp": "^3.9.0",
+        "gulp-eslint": "^1.1.1",
+        "gulp-mocha": "^2.2.0",
+        "gulp-istanbul": "^0.10.3"
     },
     "bugs": {
         "url": "https://github.com/oleksiyk/kafka/issues"
     },
     "scripts": {
-        "test": "make test"
+        "test": "gulp"
     },
     "repository": {
         "type": "git",

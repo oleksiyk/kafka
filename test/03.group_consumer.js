@@ -1,6 +1,6 @@
 'use strict';
 
-/* global describe, it, before, sinon  */
+/* global describe, it, before, sinon, after  */
 
 // kafka-topics.sh --zookeeper 127.0.0.1:2181/kafka0.9 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
 
@@ -51,6 +51,15 @@ describe('GroupConsumer', function () {
                 subscriptions: ['kafka-test-topic'],
                 fn: Kafka.GroupConsumer.RoundRobinAssignment
             })
+        ]);
+    });
+
+    after(function () {
+        return Promise.all([
+            Promise.map(consumers, function (c) {
+                return c.end();
+            }),
+            producer.end()
         ]);
     });
 

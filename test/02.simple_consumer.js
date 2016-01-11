@@ -1,6 +1,6 @@
 'use strict';
 
-/* global describe, it, before, sinon  */
+/* global describe, it, before, sinon, after  */
 
 // kafka-topics.sh --zookeeper 127.0.0.1:2181/kafka0.9 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
 
@@ -22,6 +22,13 @@ describe('SimpleConsumer', function () {
         .then(function () {
             consumer.on('data', dataListenerSpy);
         });
+    });
+
+    after(function () {
+        return Promise.all([
+            producer.end(),
+            consumer.end()
+        ]);
     });
 
     it('required methods', function () {
