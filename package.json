@@ -21,7 +21,9 @@
         "mocha": "~=2.3.4",
         "chai": "~=3.4.1",
         "sinon-chai": "~=2.8.0",
-        "chai-as-promised": "~=5.1.0"
+        "chai-as-promised": "~=5.1.0",
+        "eslint": "^1.10.3",
+        "eslint-config-airbnb": "^3.1.0"
     },
     "bugs": {
         "url": "https://github.com/oleksiyk/kafka/issues"

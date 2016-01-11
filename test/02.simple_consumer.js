@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /* global describe, it, before, sinon  */
 
@@ -8,10 +8,10 @@ var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 var _       = require('lodash');
 
-var producer = new Kafka.Producer({requiredAcks: 1});
-var consumer = new Kafka.SimpleConsumer({idleTimeout: 100});
+var producer = new Kafka.Producer({ requiredAcks: 1 });
+var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100 });
 
-var dataListenerSpy = sinon.spy(function() {});
+var dataListenerSpy = sinon.spy(function () {});
 
 describe('SimpleConsumer', function () {
     before(function () {
@@ -40,13 +40,13 @@ describe('SimpleConsumer', function () {
             return producer.send({
                 topic: 'kafka-test-topic',
                 partition: 0,
-                message: {value: 'p00'}
+                message: { value: 'p00' }
             });
         })
         .delay(100)
         .then(function () {
             /* jshint expr: true */
-            dataListenerSpy.should.have.been.called;
+            dataListenerSpy.should.have.been.called; // eslint-disable-line
             dataListenerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
             dataListenerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
             dataListenerSpy.lastCall.args[2].should.be.a('number', 0);
@@ -70,21 +70,21 @@ describe('SimpleConsumer', function () {
             return producer.send([{
                 topic: 'kafka-test-topic',
                 partition: 0,
-                message: {value: 'p000'}
-            },{
+                message: { value: 'p000' }
+            }, {
                 topic: 'kafka-test-topic',
                 partition: 0,
-                message: {value: 'p001'}
+                message: { value: 'p001' }
             }]);
         })
         .delay(100)
         .then(function () {
             return consumer.offset('kafka-test-topic', 0).then(function (offset) {
-                return consumer.subscribe('kafka-test-topic', 0, {offset: offset-2})
+                return consumer.subscribe('kafka-test-topic', 0, { offset: offset - 2 })
                 .delay(100) // consumer sleep timeout
                 .then(function () {
                     /* jshint expr: true */
-                    dataListenerSpy.should.have.been.called;
+                    dataListenerSpy.should.have.been.called; // eslint-disable-line
                     dataListenerSpy.lastCall.args[0].should.be.an('array').and.have.length(2);
                     dataListenerSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p000');
                     dataListenerSpy.lastCall.args[0][1].message.value.toString('utf8').should.be.eql('p001');
@@ -97,11 +97,11 @@ describe('SimpleConsumer', function () {
         return consumer.unsubscribe('kafka-test-topic', 0).then(function () {
             dataListenerSpy.reset();
             return consumer.offset('kafka-test-topic', 0).then(function (offset) {
-                return consumer.subscribe('kafka-test-topic', 0, {offset: offset-2, maxBytes: 30})
+                return consumer.subscribe('kafka-test-topic', 0, { offset: offset - 2, maxBytes: 30 })
                 .delay(200)
                 .then(function () {
                     /* jshint expr: true */
-                    dataListenerSpy.should.have.been.calledTwice;
+                    dataListenerSpy.should.have.been.calledTwice; // eslint-disable-line
                     dataListenerSpy.getCall(0).args[0].should.be.an('array').and.have.length(1);
                     dataListenerSpy.getCall(1).args[0].should.be.an('array').and.have.length(1);
                     dataListenerSpy.getCall(0).args[0][0].message.value.toString('utf8').should.be.eql('p000');
@@ -118,18 +118,18 @@ describe('SimpleConsumer', function () {
         ])
         .then(function () {
             return consumer.commitOffset([
-            {
-                topic: 'kafka-test-topic',
-                partition: 0,
-                offset: 1,
-                metadata: 'm1'
-            },
-            {
-                topic: 'kafka-test-topic',
-                partition: 1,
-                offset: 2,
-                metadata: 'm2'
-            }
+                {
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    offset: 1,
+                    metadata: 'm1'
+                },
+                {
+                    topic: 'kafka-test-topic',
+                    partition: 1,
+                    offset: 2,
+                    metadata: 'm2'
+                }
             ]).then(function (result) {
                 result.should.be.an('array').that.has.length(2);
                 result[0].should.be.an('object');
@@ -146,14 +146,14 @@ describe('SimpleConsumer', function () {
 
     it('should be able to fetch commited offsets', function () {
         return consumer.fetchOffset([
-        {
-            topic: 'kafka-test-topic',
-            partition: 0
-        },
-        {
-            topic: 'kafka-test-topic',
-            partition: 1
-        }
+            {
+                topic: 'kafka-test-topic',
+                partition: 0
+            },
+            {
+                topic: 'kafka-test-topic',
+                partition: 1
+            }
         ]).then(function (result) {
             result.should.be.an('array').that.has.length(2);
             result[0].should.be.an('object');
@@ -166,9 +166,8 @@ describe('SimpleConsumer', function () {
             result[1].should.have.property('offset').that.is.a('number');
             result[0].should.have.property('error', null);
             result[1].should.have.property('error', null);
-            _.find(result, {topic: 'kafka-test-topic', partition: 0}).offset.should.be.eql(1);
-            _.find(result, {topic: 'kafka-test-topic', partition: 1}).offset.should.be.eql(2);
+            _.find(result, { topic: 'kafka-test-topic', partition: 0 }).offset.should.be.eql(1);
+            _.find(result, { topic: 'kafka-test-topic', partition: 1 }).offset.should.be.eql(2);
         });
     });
-
 });

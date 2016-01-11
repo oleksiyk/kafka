@@ -12,7 +12,7 @@ kafka: node_modules lib/*
 #
 test: kafka
 	@NSL_LEVEL=0 mocha
-	@jshint --verbose lib/*.js lib/protocol/*.js test/*.js
+	@./node_modules/eslint/bin/eslint.js lib/**/*.js test/**/*.js
 
 
 #

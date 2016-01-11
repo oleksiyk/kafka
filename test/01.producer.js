@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /* global describe, it, before  */
 
@@ -6,10 +6,9 @@
 
 var Kafka = require('../lib/index');
 
-var producer = new Kafka.Producer({requiredAcks: 1});
+var producer = new Kafka.Producer({ requiredAcks: 1 });
 
 describe('Producer', function () {
-
     before(function () {
         return producer.init();
     });
@@ -42,11 +41,11 @@ describe('Producer', function () {
         var msgs = [{
             topic: 'kafka-test-topic',
             partition: 1,
-            message: {value: 'Hello!'}
-        },{
+            message: { value: 'Hello!' }
+        }, {
             topic: 'kafka-test-topic',
             partition: 2,
-            message: {value: 'Hello!'}
+            message: { value: 'Hello!' }
         }];
         return producer.send(msgs).then(function (result) {
             result.should.be.an('array').and.have.length(2);
@@ -64,16 +63,16 @@ describe('Producer', function () {
     });
 
     it('should return an error for unknown partition/topic and retry 3 times', function () {
+        var start = Date.now(), msgs;
         this.timeout(4000);
-        var start = Date.now();
-        var msgs = [{
+        msgs = [{
             topic: 'kafka-test-unknown-topic',
             partition: 0,
-            message: {value: 'Hello!'}
-        },{
+            message: { value: 'Hello!' }
+        }, {
             topic: 'kafka-test-topic',
             partition: 20,
-            message: {value: 'Hello!'}
+            message: { value: 'Hello!' }
         }];
         return producer.send(msgs).then(function (result) {
             result.should.be.an('array').and.have.length(2);
@@ -86,5 +85,4 @@ describe('Producer', function () {
             (Date.now() - start).should.be.closeTo(3 * 1000, 200);
         });
     });
-
 });

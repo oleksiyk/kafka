@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /* global describe, it, before, sinon  */
 
@@ -8,7 +8,7 @@ var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 var _       = require('lodash');
 
-var producer = new Kafka.Producer({requiredAcks: 1});
+var producer = new Kafka.Producer({ requiredAcks: 1 });
 var consumers = [
     new Kafka.GroupConsumer({
         idleTimeout: 100,
@@ -23,14 +23,15 @@ var consumers = [
         heartbeatTimeout: 100
     })
 ];
+var dataListenerSpies;
 
-function listenerFactory (consumer){
+function listenerFactory(consumer) {
     return sinon.spy(function (messageSet, topic, partition) {
-        messageSet.forEach(function (m) {consumer.commitOffset({topic: topic, partition: partition, offset: m.offset}); });}
-    );
+        messageSet.forEach(function (m) {consumer.commitOffset({ topic: topic, partition: partition, offset: m.offset }); });
+    });
 }
 
-var dataListenerSpies = [
+dataListenerSpies = [
     listenerFactory(consumers[0]),
     listenerFactory(consumers[1]),
     listenerFactory(consumers[2]),
@@ -69,12 +70,12 @@ describe('GroupConsumer', function () {
         return producer.send({
             topic: 'kafka-test-topic',
             partition: 0,
-            message: {value: 'p00'}
+            message: { value: 'p00' }
         })
         .delay(200)
         .then(function () {
             /* jshint expr: true */
-            dataListenerSpies[0].should.have.been.called;
+            dataListenerSpies[0].should.have.been.called; //eslint-disable-line
             dataListenerSpies[0].lastCall.args[0].should.be.an('array').and.have.length(1);
             dataListenerSpies[0].lastCall.args[1].should.be.a('string', 'kafka-test-topic');
             dataListenerSpies[0].lastCall.args[2].should.be.a('number', 0);
@@ -115,14 +116,14 @@ describe('GroupConsumer', function () {
 
     it('should be able to fetch commited offsets', function () {
         return consumers[0].fetchOffset([
-        {
-            topic: 'kafka-test-topic',
-            partition: 0
-        },
-        {
-            topic: 'kafka-test-topic',
-            partition: 1
-        }
+            {
+                topic: 'kafka-test-topic',
+                partition: 0
+            },
+            {
+                topic: 'kafka-test-topic',
+                partition: 1
+            }
         ]).then(function (result) {
             result.should.be.an('array').that.has.length(2);
             result[0].should.be.an('object');
@@ -137,10 +138,10 @@ describe('GroupConsumer', function () {
             result[1].should.have.property('metadata').that.is.a('string');
             result[0].should.have.property('error', null);
             result[1].should.have.property('error', null);
-            _.find(result, {topic: 'kafka-test-topic', partition: 0}).offset.should.be.eql(1);
-            _.find(result, {topic: 'kafka-test-topic', partition: 1}).offset.should.be.eql(2);
-            _.find(result, {topic: 'kafka-test-topic', partition: 0}).metadata.should.be.eql('m1');
-            _.find(result, {topic: 'kafka-test-topic', partition: 1}).metadata.should.be.eql('m2');
+            _.find(result, { topic: 'kafka-test-topic', partition: 0 }).offset.should.be.eql(1);
+            _.find(result, { topic: 'kafka-test-topic', partition: 1 }).offset.should.be.eql(2);
+            _.find(result, { topic: 'kafka-test-topic', partition: 0 }).metadata.should.be.eql('m1');
+            _.find(result, { topic: 'kafka-test-topic', partition: 1 }).metadata.should.be.eql('m2');
         });
     });
 
@@ -156,9 +157,9 @@ describe('GroupConsumer', function () {
 
             // commit them back for next tests
             return Promise.all([
-                consumers[0].commitOffset({topic: 'kafka-test-topic', partition: 0, offset: offset0-1}),
-                consumers[0].commitOffset({topic: 'kafka-test-topic', partition: 1, offset: offset1-1}),
-                consumers[0].commitOffset({topic: 'kafka-test-topic', partition: 2, offset: offset2-1})
+                consumers[0].commitOffset({ topic: 'kafka-test-topic', partition: 0, offset: offset0 - 1 }),
+                consumers[0].commitOffset({ topic: 'kafka-test-topic', partition: 1, offset: offset1 - 1 }),
+                consumers[0].commitOffset({ topic: 'kafka-test-topic', partition: 2, offset: offset2 - 1 })
             ]);
         });
     });
@@ -184,27 +185,27 @@ describe('GroupConsumer', function () {
                 {
                     topic: 'kafka-test-topic',
                     partition: 0,
-                    message: {value: 'p00'}
+                    message: { value: 'p00' }
                 },
                 {
                     topic: 'kafka-test-topic',
                     partition: 1,
-                    message: {value: 'p01'}
+                    message: { value: 'p01' }
                 },
                 {
                     topic: 'kafka-test-topic',
                     partition: 2,
-                    message: {value: 'p02'}
+                    message: { value: 'p02' }
                 }
             ])
             .delay(200)
             .then(function () {
                 /* jshint expr: true */
-                dataListenerSpies[0].should.have.been.calledOnce;
+                dataListenerSpies[0].should.have.been.calledOnce; //eslint-disable-line
                 dataListenerSpies[0].lastCall.args[0].should.be.an('array').and.have.length(1);
-                dataListenerSpies[1].should.have.been.calledOnce;
+                dataListenerSpies[1].should.have.been.calledOnce; //eslint-disable-line
                 dataListenerSpies[1].lastCall.args[0].should.be.an('array').and.have.length(1);
-                dataListenerSpies[2].should.have.been.calledOnce;
+                dataListenerSpies[2].should.have.been.calledOnce; //eslint-disable-line
                 dataListenerSpies[2].lastCall.args[0].should.be.an('array').and.have.length(1);
             });
         });
@@ -238,7 +239,6 @@ describe('GroupConsumer', function () {
             group.members[0].should.have.property('metadata');
             group.members[0].should.have.property('memberAssignment').that.is.a('object');
             group.members[0].memberAssignment.should.have.property('partitionAssignment').that.is.an('array');
-
         });
     });
 
@@ -264,11 +264,10 @@ describe('GroupConsumer', function () {
         .delay(1200)
         .then(function () {
             /* jshint expr: true */
-            Kafka.error.should.not.have.been.called;
+            Kafka.error.should.not.have.been.called; //eslint-disable-line
         })
         .finally(function () {
             Kafka.error = origError;
         });
     });
-
 });
