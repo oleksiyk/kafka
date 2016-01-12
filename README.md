@@ -226,10 +226,10 @@ var consumer2 = new Kafka.GroupConsumer({
 
 You can also tune the logging level which should be bitwise OR for the following:
 
-1 - errors
-2 - warnings
-4 - log (info)
-16 - debug
+- 1 - errors
+- 2 - warnings
+- 4 - log (info)
+- 16 - debug
 
 ```javascript
 var consumer = new Kafka.GroupConsumer({
