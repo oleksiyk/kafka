@@ -205,4 +205,54 @@ You can also write your own assignment strategy function and provide it as `fn` 
 * `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
 
 
+## Logging
 
+You can differentiate messages from several instances of producer/consumer by providing unique `clientId` in options:
+
+```javascript
+var consumer1 = new Kafka.GroupConsumer({
+    clientId: 'group-consumer-1'
+});
+var consumer2 = new Kafka.GroupConsumer({
+    clientId: 'group-consumer-2'
+});
+```
+=>
+
+```
+2016-01-12T07:41:57.884Z INFO group-consumer-1 ....
+2016-01-12T07:41:57.884Z INFO group-consumer-2 ....
+```
+
+You can also tune the logging level which should be bitwise OR for the following:
+
+1 - errors
+2 - warnings
+4 - log (info)
+16 - debug
+
+```javascript
+var consumer = new Kafka.GroupConsumer({
+    clientId: 'group-consumer',
+    nsl: {
+        logLevel: 7 // filter out debug messages (1 | 2 | 4)
+    }
+});
+```
+
+You can overwrite all (error(), log(), warn(), debug()) or just some of the logger functions:
+
+```javascript
+var consumer = new Kafka.GroupConsumer({
+    clientId: 'group-consumer',
+    logger: {
+        log: console.log // overwrite just the .log() method
+    }
+});
+```
+
+First argument passed to custom log functions will always be `clientId`:
+
+ ```
+ group-consumer Joined group no-kafka-group-v0.9 generationId 1 as group-consumer-c88fa417-b6a2-499c-b03f-fa66093831f6
+ ```
