@@ -50,7 +50,7 @@ describe('GroupConsumer', function () {
                 strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
                 fn: Kafka.GroupConsumer.RoundRobinAssignment
-            })
+            }).delay(200) // let it consume previous messages in a topic (if any)
         ]);
     });
 
