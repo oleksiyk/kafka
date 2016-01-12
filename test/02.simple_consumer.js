@@ -8,8 +8,8 @@ var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 var _       = require('lodash');
 
-var producer = new Kafka.Producer({ requiredAcks: 1 });
-var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100 });
+var producer = new Kafka.Producer({ requiredAcks: 1, clientId: 'producer' });
+var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
 
 var dataListenerSpy = sinon.spy(function () {});
 

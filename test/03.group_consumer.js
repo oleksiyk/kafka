@@ -8,19 +8,22 @@ var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 var _       = require('lodash');
 
-var producer = new Kafka.Producer({ requiredAcks: 1 });
+var producer = new Kafka.Producer({ requiredAcks: 1, clientId: 'producer' });
 var consumers = [
     new Kafka.GroupConsumer({
         idleTimeout: 100,
-        heartbeatTimeout: 100
+        heartbeatTimeout: 100,
+        clientId: 'group-consumer1'
     }),
     new Kafka.GroupConsumer({
         idleTimeout: 100,
-        heartbeatTimeout: 100
+        heartbeatTimeout: 100,
+        clientId: 'group-consumer2'
     }),
     new Kafka.GroupConsumer({
         idleTimeout: 100,
-        heartbeatTimeout: 100
+        heartbeatTimeout: 100,
+        clientId: 'group-consumer3'
     })
 ];
 var dataListenerSpies;
@@ -260,7 +263,8 @@ describe('GroupConsumer', function () {
             heartbeatTimeout: 100,
             logger: {
                 error: spy
-            }
+            },
+            clientId: 'group-consumer4'
         });
 
         return consumer.init({

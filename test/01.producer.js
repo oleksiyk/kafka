@@ -6,7 +6,7 @@
 
 var Kafka = require('../lib/index');
 
-var producer = new Kafka.Producer({ requiredAcks: 1 });
+var producer = new Kafka.Producer({ requiredAcks: 1, clientId: 'producer' });
 
 describe('Producer', function () {
     before(function () {
