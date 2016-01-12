@@ -252,15 +252,16 @@ describe('GroupConsumer', function () {
     });
 
     it('should not log errors on clean shutdown', function () {
+        var spy = sinon.spy(function () {});
         var consumer = new Kafka.GroupConsumer({
             groupId: 'no-kafka-shutdown-test-group',
             timeout: 1000,
             idleTimeout: 100,
-            heartbeatTimeout: 100
+            heartbeatTimeout: 100,
+            logger: {
+                error: spy
+            }
         });
-
-        var origError = Kafka.error;
-        Kafka.error = sinon.spy(Kafka.error);
 
         return consumer.init({
             strategy: 'TestStrategy',
@@ -273,10 +274,7 @@ describe('GroupConsumer', function () {
         .delay(1200)
         .then(function () {
             /* jshint expr: true */
-            Kafka.error.should.not.have.been.called; //eslint-disable-line
-        })
-        .finally(function () {
-            Kafka.error = origError;
+            spy.should.not.have.been.called; //eslint-disable-line
         });
     });
 });
