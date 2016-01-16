@@ -52,7 +52,7 @@ describe('GroupConsumer', function () {
             consumers[0].init({
                 strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
-                fn: Kafka.GroupConsumer.RoundRobinAssignment
+                fn: Kafka.RoundRobinAssignment
             }).delay(200) // let it consume previous messages in a topic (if any)
         ]);
     });

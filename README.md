@@ -160,10 +160,10 @@ return consumer.init(strategies).then(function(){
 ### Assignment strategies
 
 no-kafka provides two built-in strategies:
-* `GroupConsumer.ConsistentAssignment` which is based on a consisten hash ring and so provides consistent assignment across consumers in a group based on supplied `metadata.id` and `metadata.weight` options.
-* `GroupConsumer.RoundRobinAssignment` simple assignment strategy (default).
+* `Kafka.ConsistentAssignment` which is based on a consisten hash ring and so provides consistent assignment across consumers in a group based on supplied `metadata.id` and `metadata.weight` options.
+* `Kafka.RoundRobinAssignment` simple assignment strategy (default).
 
-Using `GroupConsumer.ConsistentAssignment`:
+Using `Kafka.ConsistentAssignment`:
 ```javascript
 var strategies = {
     strategy: 'TestStrategy',
@@ -172,13 +172,13 @@ var strategies = {
         id: process.argv[2] || 'consumer_1',
         weight: 50
     },
-    fn: Kafka.GroupConsumer.ConsistentAssignment
+    fn: Kafka.ConsistentAssignment
 };
 // consumer.init(strategy)....
 ```
 Note that each consumer in a group should have its own and consistent metadata.id.
 
-Using `GroupConsumer.RoundRobinAssignment` (default in no-kafka):
+Using `Kafka.RoundRobinAssignment` (default in no-kafka):
 ```javascript
 var strategies = {
     strategy: 'TestStrategy',
