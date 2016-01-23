@@ -13,6 +13,8 @@ var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-co
 
 var dataListenerSpy = sinon.spy(function () {});
 
+var maxBytesTestMessagesSize;
+
 describe('SimpleConsumer', function () {
     before(function () {
         return Promise.all([
@@ -65,6 +67,28 @@ describe('SimpleConsumer', function () {
         });
     });
 
+    it('should correctly encode/decode utf8 string message value', function () {
+        dataListenerSpy.reset();
+        return producer.send({
+            topic: 'kafka-test-topic',
+            partition: 0,
+            message: { value: '人人生而自由，在尊嚴和權利上一律平等。' }
+        })
+        .delay(100)
+        .then(function () {
+            /* jshint expr: true */
+            dataListenerSpy.should.have.been.called; // eslint-disable-line
+            dataListenerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
+            dataListenerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+            dataListenerSpy.lastCall.args[2].should.be.a('number', 0);
+
+            dataListenerSpy.lastCall.args[0][0].should.be.an('object');
+            dataListenerSpy.lastCall.args[0][0].should.have.property('message').that.is.an('object');
+            dataListenerSpy.lastCall.args[0][0].message.should.have.property('value');
+            dataListenerSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('人人生而自由，在尊嚴和權利上一律平等。');
+        });
+    });
+
     it('offset() should return last offset', function () {
         return consumer.offset('kafka-test-topic', 0).then(function (offset) {
             offset.should.be.a('number').and.be.gt(0);
@@ -95,6 +119,8 @@ describe('SimpleConsumer', function () {
                     dataListenerSpy.lastCall.args[0].should.be.an('array').and.have.length(2);
                     dataListenerSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p000');
                     dataListenerSpy.lastCall.args[0][1].message.value.toString('utf8').should.be.eql('p001');
+                    // save for next test
+                    maxBytesTestMessagesSize = dataListenerSpy.lastCall.args[0][0].messageSize + dataListenerSpy.lastCall.args[0][1].messageSize;
                 });
             });
         });
@@ -104,7 +130,9 @@ describe('SimpleConsumer', function () {
         return consumer.unsubscribe('kafka-test-topic', 0).then(function () {
             dataListenerSpy.reset();
             return consumer.offset('kafka-test-topic', 0).then(function (offset) {
-                return consumer.subscribe('kafka-test-topic', 0, { offset: offset - 2, maxBytes: 30 })
+                // ask for maxBytes that is only 1 byte less then required for both last messages
+                var maxBytes = 2 * (8 + 4) + maxBytesTestMessagesSize - 1;
+                return consumer.subscribe('kafka-test-topic', 0, { offset: offset - 2, maxBytes: maxBytes })
                 .delay(200)
                 .then(function () {
                     /* jshint expr: true */
@@ -136,17 +164,27 @@ describe('SimpleConsumer', function () {
                     partition: 1,
                     offset: 2,
                     metadata: 'm2'
+                },
+                {
+                    topic: 'kafka-test-topic',
+                    partition: 2,
+                    offset: 3,
+                    metadata: 'm3'
                 }
             ]).then(function (result) {
-                result.should.be.an('array').that.has.length(2);
+                result.should.be.an('array').that.has.length(3);
                 result[0].should.be.an('object');
                 result[1].should.be.an('object');
+                result[2].should.be.an('object');
                 result[0].should.have.property('topic', 'kafka-test-topic');
                 result[1].should.have.property('topic', 'kafka-test-topic');
+                result[2].should.have.property('topic', 'kafka-test-topic');
                 result[0].should.have.property('partition').that.is.a('number');
                 result[1].should.have.property('partition').that.is.a('number');
+                result[2].should.have.property('partition').that.is.a('number');
                 result[0].should.have.property('error', null);
                 result[1].should.have.property('error', null);
+                result[2].should.have.property('error', null);
             });
         });
     });
@@ -160,21 +198,31 @@ describe('SimpleConsumer', function () {
             {
                 topic: 'kafka-test-topic',
                 partition: 1
+            },
+            {
+                topic: 'kafka-test-topic',
+                partition: 2
             }
         ]).then(function (result) {
-            result.should.be.an('array').that.has.length(2);
+            result.should.be.an('array').that.has.length(3);
             result[0].should.be.an('object');
             result[1].should.be.an('object');
+            result[2].should.be.an('object');
             result[0].should.have.property('topic', 'kafka-test-topic');
             result[1].should.have.property('topic', 'kafka-test-topic');
+            result[2].should.have.property('topic', 'kafka-test-topic');
             result[0].should.have.property('partition').that.is.a('number');
             result[1].should.have.property('partition').that.is.a('number');
+            result[2].should.have.property('partition').that.is.a('number');
             result[0].should.have.property('offset').that.is.a('number');
             result[1].should.have.property('offset').that.is.a('number');
+            result[2].should.have.property('offset').that.is.a('number');
             result[0].should.have.property('error', null);
             result[1].should.have.property('error', null);
+            result[2].should.have.property('error', null);
             _.find(result, { topic: 'kafka-test-topic', partition: 0 }).offset.should.be.eql(1);
             _.find(result, { topic: 'kafka-test-topic', partition: 1 }).offset.should.be.eql(2);
+            _.find(result, { topic: 'kafka-test-topic', partition: 2 }).offset.should.be.eql(3);
         });
     });
 });
