@@ -223,37 +223,6 @@ describe('GroupConsumer', function () {
         });
     });
 
-    it('should list groups', function () {
-        return consumers[0].listGroups().then(function (groups) {
-            groups.should.be.an('array').and.have.length(1);
-            groups[0].should.be.an('object');
-            groups[0].should.have.property('groupId', consumers[0].options.groupId);
-            groups[0].should.have.property('protocolType', 'consumer');
-        });
-    });
-
-    it('should describe group', function () {
-        return consumers[0].describeGroup().then(function (group) {
-            group.should.be.an('object');
-            group.should.have.property('error', null);
-            group.should.have.property('groupId', consumers[0].options.groupId);
-            group.should.have.property('state');
-            group.should.have.property('protocolType', 'consumer');
-            group.should.have.property('protocol', 'TestStrategy');
-            group.should.have.property('members').that.is.an('array');
-            group.members.should.have.length(3);
-            group.members[0].should.be.an('object');
-            group.members[0].should.have.property('memberId').that.is.a('string');
-            group.members[0].should.have.property('clientId').that.is.a('string');
-            group.members[0].should.have.property('clientHost').that.is.a('string');
-            group.members[0].should.have.property('version').that.is.a('number');
-            group.members[0].should.have.property('subscriptions').that.is.an('array');
-            group.members[0].should.have.property('metadata');
-            group.members[0].should.have.property('memberAssignment').that.is.a('object');
-            group.members[0].memberAssignment.should.have.property('partitionAssignment').that.is.an('array');
-        });
-    });
-
     it('should not log errors on clean shutdown', function () {
         var spy = sinon.spy(function () {});
         var consumer = new Kafka.GroupConsumer({
