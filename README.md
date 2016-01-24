@@ -204,6 +204,49 @@ You can also write your own assignment strategy function and provide it as `fn` 
 * `startingOffset` - starting position (time) when there is no commited offset, defaults to Kafka.LATEST_OFFSET
 * `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
 
+## GroupAdmin (consumer groups API)
+
+Offes two methods:
+
+* `listGroups` - list existing consumer groups
+* `describeGroup` - describe existing group by its id
+
+Example:
+
+```javascript
+var admin = new Kafka.GroupAdmin();
+
+return admin.init().then(function(){
+    return admin.listGroups().then(function(groups){
+        // [ { groupId: 'no-kafka-admin-test-group', protocolType: 'consumer' } ]
+        return admin.describeGroup('no-kafka-admin-test-group').then(function(group){
+            /*
+            { error: null,
+              groupId: 'no-kafka-admin-test-group',
+              state: 'Stable',
+              protocolType: 'consumer',
+              protocol: 'TestStrategy',
+              members:
+               [ { memberId: 'group-consumer-82646843-b4b8-4e91-94c9-b4708c8b05e8',
+                   clientId: 'group-consumer',
+                   clientHost: '/192.168.1.4',
+                   version: 0,
+                   subscriptions: [ 'kafka-test-topic'],
+                   metadata: <Buffer 63 6f 6e 73 75 6d 65 72 2d 6d 65 74 61 64 61 74 61>,
+                   memberAssignment:
+                    { _blength: 44,
+                      version: 0,
+                      partitionAssignment:
+                       [ { topic: 'kafka-test-topic',
+                           partitions: [ 0, 1, 2 ] },
+                          ],
+                      metadata: null } },
+                  ] }
+             */
+        })
+    });
+});
+```
 
 ## Logging
 
