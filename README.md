@@ -159,9 +159,23 @@ return consumer.init(strategies).then(function(){
 
 ### Assignment strategies
 
-no-kafka provides two built-in strategies:
-* `Kafka.ConsistentAssignment` which is based on a consisten hash ring and so provides consistent assignment across consumers in a group based on supplied `metadata.id` and `metadata.weight` options.
+no-kafka provides three built-in strategies:
+* `Kafka.WeightedRoundRobinAssignment` weighted round robin assignment (based on [wrr-pool](https://github.com/oleksiyk/wrr-pool)).
+* `Kafka.ConsistentAssignment` which is based on a consistent [hash ring](https://github.com/3rd-Eden/node-hashring) and so provides consistent assignment across consumers in a group based on supplied `metadata.id` and `metadata.weight` options.
 * `Kafka.RoundRobinAssignment` simple assignment strategy (default).
+
+Using `Kafka.WeightedRoundRobinAssignment`:
+```javascript
+var strategies = {
+    strategy: 'TestStrategy',
+    subscriptions: ['kafka-test-topic'],
+    metadata: {
+        weight: 4
+    },
+    fn: Kafka.WeightedRoundRobinAssignment
+};
+// consumer.init(strategy)....
+```
 
 Using `Kafka.ConsistentAssignment`:
 ```javascript

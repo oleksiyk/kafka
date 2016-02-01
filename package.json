@@ -15,7 +15,8 @@
         "bin-protocol": "^2.0.4",
         "buffer-crc32": "~=0.2.5",
         "nice-simple-logger": "~=0.x.x",
-        "hashring": "~=3.2.0"
+        "hashring": "~=3.2.0",
+        "wrr-pool": "^1.0.3"
     },
     "devDependencies": {
         "mocha": "~=2.3.4",
