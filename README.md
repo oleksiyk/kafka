@@ -69,13 +69,13 @@ return consumer.init().then(function () {
 
 Subscribe (or change subscription) to specific offset and limit maximum received MessageSet size:
 ```javascript
-consumer.subscribe('kafka-test-topic', 0, {offset: 20, maxBytes: 30}
+consumer.subscribe('kafka-test-topic', 0, {offset: 20, maxBytes: 30})
 ```
 
 Subscribe to latest or earliest offsets in the topic/parition:
 ```javascript
-consumer.subscribe('kafka-test-topic', 0, {time: Kafka.LATEST_OFFSET}
-consumer.subscribe('kafka-test-topic', 0, {time: Kafka.EARLIEST_OFFSET}
+consumer.subscribe('kafka-test-topic', 0, {time: Kafka.LATEST_OFFSET})
+consumer.subscribe('kafka-test-topic', 0, {time: Kafka.EARLIEST_OFFSET})
 ```
 
 Commit offset(s) (V0, Kafka saves these commits to Zookeeper)
