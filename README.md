@@ -174,7 +174,7 @@ var strategies = {
     },
     fn: Kafka.WeightedRoundRobinAssignment
 };
-// consumer.init(strategy)....
+// consumer.init(strategies)....
 ```
 
 Using `Kafka.ConsistentAssignment`:
@@ -188,7 +188,7 @@ var strategies = {
     },
     fn: Kafka.ConsistentAssignment
 };
-// consumer.init(strategy)....
+// consumer.init(strategies)....
 ```
 Note that each consumer in a group should have its own and consistent metadata.id.
 
@@ -198,7 +198,7 @@ var strategies = {
     strategy: 'TestStrategy',
     subscriptions: ['kafka-test-topic'],
 };
-// consumer.init(strategy)....
+// consumer.init(strategies)....
 ```
 
 You can also write your own assignment strategy function and provide it as `fn` option of the strategy item.
