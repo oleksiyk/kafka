@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/oleksiyk/kafka.png)](https://travis-ci.org/oleksiyk/kafka)
+[![Dependencies](https://david-dm.org/oleksiyk/kafka.svg)](https://david-dm.org/oleksiyk/kafka.svg)
 
 # no-kafka
 
