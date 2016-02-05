@@ -6,7 +6,13 @@
 
 var Kafka = require('../lib/index');
 
-var producer = new Kafka.Producer({ requiredAcks: 1, clientId: 'producer' });
+var producer = new Kafka.Producer({
+    requiredAcks: 1,
+    clientId: 'producer',
+    partitioner: function dummyCustomPartitioner(/*topicName, partitions, message*/) {
+        return 1;
+    }
+});
 
 describe('Producer', function () {
     before(function () {
@@ -87,6 +93,22 @@ describe('Producer', function () {
             result[0].error.should.have.property('code', 'UnknownTopicOrPartition');
             result[1].error.should.have.property('code', 'UnknownTopicOrPartition');
             (Date.now() - start).should.be.closeTo(6000, 200);
+        });
+    });
+
+    it('should determine topic partition using the partitioner function', function () {
+        return producer.send({
+            topic: 'kafka-test-topic',
+            message: {
+                value: 'Hello!'
+            }
+        }).then(function (result) {
+            result.should.be.an('array').and.have.length(1);
+            result[0].should.be.an('object');
+            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.have.property('partition', 1);
+            result[0].should.have.property('offset').that.is.a('number');
+            result[0].should.have.property('error', null);
         });
     });
 });
