@@ -317,3 +317,6 @@ First argument passed to custom log functions will always be `clientId`:
  ```
  group-consumer Joined group no-kafka-group-v0.9 generationId 1 as group-consumer-c88fa417-b6a2-499c-b03f-fa66093831f6
  ```
+
+ ## License: [MIT](https://github.com/oleksiyk/kafka/blob/master/LICENSE)
+
