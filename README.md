@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/oleksiyk/kafka.svg)](https://travis-ci.org/oleksiyk/kafka)
+[![Build Status](https://api.travis-ci.org/oleksiyk/kafka.svg?branch=master)](https://travis-ci.org/oleksiyk/kafka)
 [![Test Coverage](https://codeclimate.com/github/oleksiyk/kafka/badges/coverage.svg)](https://codeclimate.com/github/oleksiyk/kafka/coverage)
 [![Dependencies](https://david-dm.org/oleksiyk/kafka.svg)](https://david-dm.org/oleksiyk/kafka)
 [![DevDependencies](https://david-dm.org/oleksiyk/kafka/dev-status.svg)](https://david-dm.org/oleksiyk/kafka#info=devDependencies)
