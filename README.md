@@ -41,12 +41,24 @@ return producer.init().then(function(){
 });
 ```
 
+Send and retry if failed 2 times with 100ms delay:
+
+```javascript
+return producer.send(messages, {
+  attempts: 2,
+  delay: 100
+});
+```
+
 ### Producer options:
 * `requiredAcks` - require acknoledgments for produce request. If it is 0 the server will not send any response.  If it is 1 (default), the server will wait the data is written to the local log before sending a response. If it is -1 the server will block until the message is committed by all in sync replicas before sending a response. For any number > 1 the server will block waiting for this number of acknowledgements to occur (but the server will never wait for more acknowledgements than there are in-sync replicas).
 * `timeout` - timeout in ms for produce request
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
 * `partitioner` - function used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner function receives 3 arguments: the topic name, an array with partition ids (e.g. ['0', '1']), and the message (useful to partition by key, etc.).
+* `retries` - controls number of attempts at delay between them when produce request fails
+  * `attempts` - number of total attempts to send the message, defaults to 3
+  * `delay` - delay in ms between retries, defaults to 1000
 
 ## SimpleConsumer
 

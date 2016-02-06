@@ -72,9 +72,8 @@ describe('Producer', function () {
         });
     });
 
-    it('should return an error for unknown partition/topic and retry 3 times', function () {
+    it('should return an error for unknown partition/topic and retry 5 times', function () {
         var start = Date.now(), msgs;
-        this.timeout(7000);
         msgs = [{
             topic: 'kafka-test-unknown-topic',
             partition: 0,
@@ -84,7 +83,10 @@ describe('Producer', function () {
             partition: 20,
             message: { value: 'Hello!' }
         }];
-        return producer.send(msgs).then(function (result) {
+        return producer.send(msgs, {
+            attempts: 5,
+            delay: 100
+        }).then(function (result) {
             result.should.be.an('array').and.have.length(2);
             result[0].should.be.an('object');
             result[1].should.be.an('object');
@@ -92,7 +94,7 @@ describe('Producer', function () {
             result[1].should.have.property('error');
             result[0].error.should.have.property('code', 'UnknownTopicOrPartition');
             result[1].error.should.have.property('code', 'UnknownTopicOrPartition');
-            (Date.now() - start).should.be.closeTo(6000, 200);
+            (Date.now() - start).should.be.closeTo(500, 100);
         });
     });
 
