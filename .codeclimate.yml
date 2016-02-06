@@ -1,0 +1,16 @@
+engines:
+  duplication:
+    enabled: true
+    config:
+      languages:
+        - javascript
+  eslint:
+    enabled: true
+    checks:
+      space-before-function-paren: # https://github.com/codeclimate/codeclimate-eslint/pull/68
+        enabled: false
+ratings:
+  paths:
+    - lib/**/*
+exclude_paths:
+  - test/**/*
