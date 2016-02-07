@@ -26,23 +26,19 @@ var consumers = [
         clientId: 'group-consumer3'
     })
 ];
-var dataListenerSpies;
+var dataHandlerSpies;
 
-function listenerFactory(consumer) {
+function dataHandlerFactory(consumer) {
     return sinon.spy(function (messageSet, topic, partition) {
         messageSet.forEach(function (m) {consumer.commitOffset({ topic: topic, partition: partition, offset: m.offset }); });
     });
 }
 
-dataListenerSpies = [
-    listenerFactory(consumers[0]),
-    listenerFactory(consumers[1]),
-    listenerFactory(consumers[2]),
+dataHandlerSpies = [
+    dataHandlerFactory(consumers[0]),
+    dataHandlerFactory(consumers[1]),
+    dataHandlerFactory(consumers[2]),
 ];
-
-consumers.forEach(function (c, i) {
-    c.on('data', dataListenerSpies[i]);
-});
 
 describe('GroupConsumer', function () {
     before(function () {
@@ -52,7 +48,8 @@ describe('GroupConsumer', function () {
             consumers[0].init({
                 strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
-                fn: Kafka.RoundRobinAssignment
+                fn: Kafka.RoundRobinAssignment,
+                handler: dataHandlerSpies[0]
             }).delay(200) // let it consume previous messages in a topic (if any)
         ]);
     });
@@ -78,7 +75,7 @@ describe('GroupConsumer', function () {
     });
 
     it('should receive new messages', function () {
-        dataListenerSpies[0].reset();
+        dataHandlerSpies[0].reset();
         return producer.send({
             topic: 'kafka-test-topic',
             partition: 0,
@@ -87,15 +84,15 @@ describe('GroupConsumer', function () {
         .delay(200)
         .then(function () {
             /* jshint expr: true */
-            dataListenerSpies[0].should.have.been.called; //eslint-disable-line
-            dataListenerSpies[0].lastCall.args[0].should.be.an('array').and.have.length(1);
-            dataListenerSpies[0].lastCall.args[1].should.be.a('string', 'kafka-test-topic');
-            dataListenerSpies[0].lastCall.args[2].should.be.a('number', 0);
+            dataHandlerSpies[0].should.have.been.called; //eslint-disable-line
+            dataHandlerSpies[0].lastCall.args[0].should.be.an('array').and.have.length(1);
+            dataHandlerSpies[0].lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+            dataHandlerSpies[0].lastCall.args[2].should.be.a('number', 0);
 
-            dataListenerSpies[0].lastCall.args[0][0].should.be.an('object');
-            dataListenerSpies[0].lastCall.args[0][0].should.have.property('message').that.is.an('object');
-            dataListenerSpies[0].lastCall.args[0][0].message.should.have.property('value');
-            dataListenerSpies[0].lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p00');
+            dataHandlerSpies[0].lastCall.args[0][0].should.be.an('object');
+            dataHandlerSpies[0].lastCall.args[0][0].should.have.property('message').that.is.an('object');
+            dataHandlerSpies[0].lastCall.args[0][0].message.should.have.property('value');
+            dataHandlerSpies[0].lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p00');
         });
     });
 
@@ -182,17 +179,19 @@ describe('GroupConsumer', function () {
             consumers[1].init({
                 strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
-                fn: Kafka.GroupConsumer.RoundRobinAssignment
+                fn: Kafka.GroupConsumer.RoundRobinAssignment,
+                handler: dataHandlerSpies[1]
             }),
             consumers[2].init({
                 strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
-                fn: Kafka.GroupConsumer.RoundRobinAssignment
+                fn: Kafka.GroupConsumer.RoundRobinAssignment,
+                handler: dataHandlerSpies[2]
             }),
         ])
         .delay(500) // give some time to rebalance group
         .then(function () {
-            dataListenerSpies[0].reset();
+            dataHandlerSpies[0].reset();
             return producer.send([
                 {
                     topic: 'kafka-test-topic',
@@ -213,12 +212,12 @@ describe('GroupConsumer', function () {
             .delay(200)
             .then(function () {
                 /* jshint expr: true */
-                dataListenerSpies[0].should.have.been.calledOnce; //eslint-disable-line
-                dataListenerSpies[0].lastCall.args[0].should.be.an('array').and.have.length(1);
-                dataListenerSpies[1].should.have.been.calledOnce; //eslint-disable-line
-                dataListenerSpies[1].lastCall.args[0].should.be.an('array').and.have.length(1);
-                dataListenerSpies[2].should.have.been.calledOnce; //eslint-disable-line
-                dataListenerSpies[2].lastCall.args[0].should.be.an('array').and.have.length(1);
+                dataHandlerSpies[0].should.have.been.calledOnce; //eslint-disable-line
+                dataHandlerSpies[0].lastCall.args[0].should.be.an('array').and.have.length(1);
+                dataHandlerSpies[1].should.have.been.calledOnce; //eslint-disable-line
+                dataHandlerSpies[1].lastCall.args[0].should.be.an('array').and.have.length(1);
+                dataHandlerSpies[2].should.have.been.calledOnce; //eslint-disable-line
+                dataHandlerSpies[2].lastCall.args[0].should.be.an('array').and.have.length(1);
             });
         });
     });
@@ -239,7 +238,8 @@ describe('GroupConsumer', function () {
         return consumer.init({
             strategy: 'TestStrategy',
             subscriptions: ['kafka-test-topic'],
-            fn: Kafka.GroupConsumer.RoundRobinAssignment
+            fn: Kafka.GroupConsumer.RoundRobinAssignment,
+            handler: function () {}
         })
         .then(function () {
             return consumer.end();
