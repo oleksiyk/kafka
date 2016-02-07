@@ -40,7 +40,8 @@ describe('Weighted Round Robin Assignment', function () {
                 metadata: {
                     weight: ind + 1
                 },
-                fn: Kafka.WeightedRoundRobinAssignment
+                fn: Kafka.WeightedRoundRobinAssignment,
+                handler: function () {}
             });
         }).delay(200);
     });
@@ -88,7 +89,8 @@ describe('Consistent Assignment', function () {
                     id: 'id' + ind,
                     weight: 10
                 },
-                fn: Kafka.ConsistentAssignment
+                fn: Kafka.ConsistentAssignment,
+                handler: function () {}
             });
         }).delay(200);
     });
