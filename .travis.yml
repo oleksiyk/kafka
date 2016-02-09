@@ -4,9 +4,17 @@ node_js:
   - "0.10"
   - "4.3"
 
+env:
+  - CXX=g++-4.8
+
 addons:
   code_climate:
     repo_token: 3ea8622d957330fec45b641e8ed2650f7a83bc905a38d94f3d43738caf8b227a
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
 
 before_install:
   - wget http://www.us.apache.org/dist/kafka/0.9.0.0/kafka_2.11-0.9.0.0.tgz -O kafka.tgz
