@@ -84,8 +84,10 @@ describe('Producer', function () {
             message: { value: 'Hello!' }
         }];
         return producer.send(msgs, {
-            attempts: 5,
-            delay: 100
+            retries: {
+                attempts: 5,
+                delay: 100
+            }
         }).then(function (result) {
             result.should.be.an('array').and.have.length(2);
             result[0].should.be.an('object');

@@ -135,7 +135,7 @@ describe('SimpleConsumer', function () {
                 // ask for maxBytes that is only 1 byte less then required for both last messages
                 var maxBytes = 2 * (8 + 4) + maxBytesTestMessagesSize - 1;
                 return consumer.subscribe('kafka-test-topic', 0, { offset: offset - 2, maxBytes: maxBytes }, dataHandlerSpy)
-                .delay(200)
+                .delay(300)
                 .then(function () {
                     /* jshint expr: true */
                     dataHandlerSpy.should.have.been.calledTwice; // eslint-disable-line
