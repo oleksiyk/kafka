@@ -244,7 +244,6 @@ describe('GroupConsumer', function () {
         .then(function () {
             return consumer.end();
         })
-        .delay(1200)
         .then(function () {
             /* jshint expr: true */
             spy.should.not.have.been.called; //eslint-disable-line
