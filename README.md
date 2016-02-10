@@ -63,7 +63,7 @@ return producer.send(messages, { codec: Kafka.COMPRESSION_SNAPPY });
 * `timeout` - timeout in ms for produce request
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
-* `partitioner` - function used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner function receives 3 arguments: the topic name, an array with partition ids (e.g. ['0', '1']), and the message (useful to partition by key, etc.).
+* `partitioner` - function used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner function receives 3 arguments: the topic name, an array with partition ids (e.g. [0, 1, 2]), and the message (useful to partition by key, etc.).
 * `retries` - controls number of attempts at delay between them when produce request fails
   * `attempts` - number of total attempts to send the message, defaults to 3
   * `delay` - delay in ms between retries, defaults to 1000
