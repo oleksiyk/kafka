@@ -45,9 +45,17 @@ Send and retry if failed 2 times with 100ms delay:
 
 ```javascript
 return producer.send(messages, {
-  attempts: 2,
-  delay: 100
+  retries: {
+    attempts: 2,
+    delay: 100
+  }
 });
+```
+
+Send message with Snappy compression:
+
+```javascript
+return producer.send(messages, { codec: Kafka.COMPRESSION_SNAPPY });
 ```
 
 ### Producer options:
@@ -59,6 +67,7 @@ return producer.send(messages, {
 * `retries` - controls number of attempts at delay between them when produce request fails
   * `attempts` - number of total attempts to send the message, defaults to 3
   * `delay` - delay in ms between retries, defaults to 1000
+* `codec` - compression codec, one of Kafka.COMPRESSION_NONE, Kafka.COMPRESSION_SNAPPY, Kafka.COMPRESSION_GZIP
 
 ## SimpleConsumer
 
@@ -69,29 +78,32 @@ Example:
 ```javascript
 var consumer = new Kafka.SimpleConsumer();
 
-consumer.on('data', function (messageSet, topic, partition) {
+// data handler function can return a Promise
+var dataHandler = function (messageSet, topic, partition) {
     messageSet.forEach(function (m) {
         console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
     });
 });
 
 return consumer.init().then(function () {
-    return Promise.all([
-        consumer.subscribe('kafka-test-topic', 0),
-        consumer.subscribe('kafka-test-topic', 1)
-    ]);
+    return consumer.subscribe('kafka-test-topic', [0, 1], dataHandler);
 });
 ```
 
 Subscribe (or change subscription) to specific offset and limit maximum received MessageSet size:
 ```javascript
-consumer.subscribe('kafka-test-topic', 0, {offset: 20, maxBytes: 30})
+consumer.subscribe('kafka-test-topic', 0, {offset: 20, maxBytes: 30}, dataHandler)
 ```
 
 Subscribe to latest or earliest offsets in the topic/parition:
 ```javascript
-consumer.subscribe('kafka-test-topic', 0, {time: Kafka.LATEST_OFFSET})
-consumer.subscribe('kafka-test-topic', 0, {time: Kafka.EARLIEST_OFFSET})
+consumer.subscribe('kafka-test-topic', 0, {time: Kafka.LATEST_OFFSET}, dataHandler)
+consumer.subscribe('kafka-test-topic', 0, {time: Kafka.EARLIEST_OFFSET}, dataHandler)
+```
+
+Subscribe to all partitions in a topic:
+```javascript
+consumer.subscribe('kafka-test-topic', dataHandler)
 ```
 
 Commit offset(s) (V0, Kafka saves these commits to Zookeeper)
