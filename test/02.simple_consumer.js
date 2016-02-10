@@ -110,11 +110,10 @@ describe('SimpleConsumer', function () {
                 message: { value: 'p001' }
             }]);
         })
-        .delay(100)
         .then(function () {
             return consumer.offset('kafka-test-topic', 0).then(function (offset) {
                 return consumer.subscribe('kafka-test-topic', 0, { offset: offset - 2 }, dataHandlerSpy)
-                .delay(100) // consumer sleep timeout
+                .delay(200) // consumer sleep timeout
                 .then(function () {
                     /* jshint expr: true */
                     dataHandlerSpy.should.have.been.called; // eslint-disable-line
@@ -219,6 +218,35 @@ describe('SimpleConsumer', function () {
             _.find(result, { topic: 'kafka-test-topic', partition: 0 }).offset.should.be.eql(1);
             _.find(result, { topic: 'kafka-test-topic', partition: 1 }).offset.should.be.eql(2);
             _.find(result, { topic: 'kafka-test-topic', partition: 2 }).offset.should.be.eql(3);
+        });
+    });
+
+    it('should unsubscribe from all subscribed partitions for topic when partition parameter is not specified', function () {
+        return consumer.unsubscribe('kafka-test-topic').then(function () {
+            consumer.subscriptions.should.be.eql({});
+        });
+    });
+
+    it('should subscribe all topic partitions when partition parameter is not specified', function () {
+        dataHandlerSpy.reset();
+        return consumer.subscribe('kafka-test-topic', {}, dataHandlerSpy).then(function () {
+            return producer.send([{
+                topic: 'kafka-test-topic',
+                partition: 0,
+                message: { value: 'p000' }
+            }, {
+                topic: 'kafka-test-topic',
+                partition: 1,
+                message: { value: 'p001' }
+            }, {
+                topic: 'kafka-test-topic',
+                partition: 2,
+                message: { value: 'p002' }
+            }]);
+        })
+        .delay(300)
+        .then(function () {
+            dataHandlerSpy.should.have.been.calledThrice; // eslint-disable-line
         });
     });
 });
