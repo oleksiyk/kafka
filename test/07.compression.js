@@ -75,8 +75,8 @@ describe('Compression', function () {
         });
 
         if (typeof require('zlib').gzipSync === 'function') {
-            dataHandlerSpy.reset();
             it('should send/receive with gzip compression', function () {
+                dataHandlerSpy.reset();
                 return producer.send({
                     topic: 'kafka-test-topic',
                     partition: 0,
