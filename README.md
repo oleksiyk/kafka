@@ -166,23 +166,24 @@ Specify an assignment strategy (or use no-kafka built-in consistent or round rob
 Example:
 
 ```javascript
+var Promise = require('bluebird');
 var consumer = new Kafka.GroupConsumer();
-var strategies = [{
-    strategy: 'TestStrategy',
-    subscriptions: ['kafka-test-topic']
-}];
 
-consumer.on('data', function (messageSet, topic, partition) {
-    messageSet.forEach(function (m) {
+var dataHandler = function (messageSet, topic, partition) {
+    return Promise.map(messageSet, function (m){
         console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
-        // process each message and commit its offset
-        consumer.commitOffset({topic: topic, partition: partition, offset: m.offset, metadata: 'optional'});
+        // commit offset
+        return consumer.commitOffset({topic: topic, partition: partition, offset: m.offset, metadata: 'optional'});
     });
 });
 
-return consumer.init(strategies).then(function(){
-  // all done, now wait for messages in event listener
-});
+var strategies = [{
+    strategy: 'TestStrategy',
+    subscriptions: ['kafka-test-topic'],
+    handler: dataHandler
+}];
+
+consumer.init(strategies); // all done, now wait for messages in dataHandler
 ```
 
 ### Assignment strategies
@@ -200,7 +201,8 @@ var strategies = {
     metadata: {
         weight: 4
     },
-    fn: Kafka.WeightedRoundRobinAssignment
+    fn: Kafka.WeightedRoundRobinAssignment,
+    handler: dataHandler
 };
 // consumer.init(strategies)....
 ```
@@ -214,7 +216,8 @@ var strategies = {
         id: process.argv[2] || 'consumer_1',
         weight: 50
     },
-    fn: Kafka.ConsistentAssignment
+    fn: Kafka.ConsistentAssignment,
+    handler: dataHandler
 };
 // consumer.init(strategies)....
 ```
@@ -225,6 +228,7 @@ Using `Kafka.RoundRobinAssignment` (default in no-kafka):
 var strategies = {
     strategy: 'TestStrategy',
     subscriptions: ['kafka-test-topic'],
+    handler: dataHandler
 };
 // consumer.init(strategies)....
 ```
