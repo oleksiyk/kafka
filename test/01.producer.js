@@ -1,17 +1,15 @@
 'use strict';
 
-/* global describe, it, before, after  */
+/* global describe, it, before, after, sinon  */
 
 // kafka-topics.sh --zookeeper 127.0.0.1:2181/kafka0.9 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
 
-var Kafka = require('../lib/index');
+var Promise = require('bluebird');
+var Kafka   = require('../lib/index');
 
 var producer = new Kafka.Producer({
     requiredAcks: 1,
-    clientId: 'producer',
-    partitioner: function dummyCustomPartitioner(/*topicName, partitions, message*/) {
-        return 1;
-    }
+    clientId: 'producer'
 });
 
 describe('Producer', function () {
@@ -100,17 +98,80 @@ describe('Producer', function () {
         });
     });
 
-    it('should determine topic partition using the partitioner function', function () {
-        return producer.send({
-            topic: 'kafka-test-topic',
-            message: {
-                value: 'Hello!'
+    it('partitioner arguments', function () {
+        var partitionerSpy = sinon.spy(function () { return 1; });
+        var _producer = new Kafka.Producer({
+            clientId: 'producer',
+            partitioner: partitionerSpy
+        });
+        return _producer.init().then(function () {
+            return _producer.send({
+                topic: 'kafka-test-topic',
+                message: {
+                    value: 'Hello!'
+                }
+            });
+        })
+        .then(function () {
+            partitionerSpy.should.have.been.called; // eslint-disable-line
+            partitionerSpy.lastCall.args[0].should.be.a('string').that.is.eql('kafka-test-topic');
+            partitionerSpy.lastCall.args[1].should.be.an('array').and.have.length(3);
+            partitionerSpy.lastCall.args[1][0].should.be.an('object');
+            partitionerSpy.lastCall.args[1][0].should.have.property('partitionId').that.is.a('number');
+            partitionerSpy.lastCall.args[1][0].should.have.property('error').that.is.eql(null);
+            partitionerSpy.lastCall.args[1][0].should.have.property('leader').that.is.a('number');
+            partitionerSpy.lastCall.args[1][0].should.have.property('replicas').that.is.an('array');
+            partitionerSpy.lastCall.args[1][0].should.have.property('isr').that.is.an('array');
+        });
+    });
+
+    it('should determine topic partition using sync partitioner function', function () {
+        var _producer = new Kafka.Producer({
+            clientId: 'producer',
+            partitioner: function dummySyncPartitioner(/*topicName, partitions, message*/) {
+                return 1;
             }
-        }).then(function (result) {
+        });
+        return _producer.init().then(function () {
+            return _producer.send({
+                topic: 'kafka-test-topic',
+                message: {
+                    value: 'Hello!'
+                }
+            });
+        })
+        .then(function (result) {
             result.should.be.an('array').and.have.length(1);
             result[0].should.be.an('object');
             result[0].should.have.property('topic', 'kafka-test-topic');
             result[0].should.have.property('partition', 1);
+            result[0].should.have.property('offset').that.is.a('number');
+            result[0].should.have.property('error', null);
+        });
+    });
+
+    it('should determine topic partition using async partitioner function', function () {
+        var _producer = new Kafka.Producer({
+            clientId: 'producer',
+            partitioner: function dummyASyncPartitioner(/*topicName, partitions, message*/) {
+                return Promise.delay(100).then(function () {
+                    return 2;
+                });
+            }
+        });
+        return _producer.init().then(function () {
+            return _producer.send({
+                topic: 'kafka-test-topic',
+                message: {
+                    value: 'Hello!'
+                }
+            });
+        })
+        .then(function (result) {
+            result.should.be.an('array').and.have.length(1);
+            result[0].should.be.an('object');
+            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.have.property('partition', 2);
             result[0].should.have.property('offset').that.is.a('number');
             result[0].should.have.property('error', null);
         });
