@@ -83,30 +83,35 @@ var dataHandler = function (messageSet, topic, partition) {
     messageSet.forEach(function (m) {
         console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
     });
-});
+};
 
 return consumer.init().then(function () {
+    // Subscribe partitons 0 and 1 in a topic:
     return consumer.subscribe('kafka-test-topic', [0, 1], dataHandler);
 });
 ```
 
 Subscribe (or change subscription) to specific offset and limit maximum received MessageSet size:
+
 ```javascript
 consumer.subscribe('kafka-test-topic', 0, {offset: 20, maxBytes: 30}, dataHandler)
 ```
 
 Subscribe to latest or earliest offsets in the topic/parition:
+
 ```javascript
 consumer.subscribe('kafka-test-topic', 0, {time: Kafka.LATEST_OFFSET}, dataHandler)
 consumer.subscribe('kafka-test-topic', 0, {time: Kafka.EARLIEST_OFFSET}, dataHandler)
 ```
 
 Subscribe to all partitions in a topic:
+
 ```javascript
 consumer.subscribe('kafka-test-topic', dataHandler)
 ```
 
 Commit offset(s) (V0, Kafka saves these commits to Zookeeper)
+
 ```javascript
 consumer.commitOffset([
   {
@@ -123,6 +128,7 @@ consumer.commitOffset([
 ```
 
 Fetch commited offset(s)
+
 ```javascript
 consumer.fetchOffset([
   {
@@ -175,7 +181,7 @@ var dataHandler = function (messageSet, topic, partition) {
         // commit offset
         return consumer.commitOffset({topic: topic, partition: partition, offset: m.offset, metadata: 'optional'});
     });
-});
+};
 
 var strategies = [{
     strategy: 'TestStrategy',
@@ -194,6 +200,7 @@ no-kafka provides three built-in strategies:
 * `Kafka.RoundRobinAssignment` simple assignment strategy (default).
 
 Using `Kafka.WeightedRoundRobinAssignment`:
+
 ```javascript
 var strategies = {
     strategy: 'TestStrategy',
@@ -208,6 +215,7 @@ var strategies = {
 ```
 
 Using `Kafka.ConsistentAssignment`:
+
 ```javascript
 var strategies = {
     strategy: 'TestStrategy',
@@ -224,6 +232,7 @@ var strategies = {
 Note that each consumer in a group should have its own and consistent metadata.id.
 
 Using `Kafka.RoundRobinAssignment` (default in no-kafka):
+
 ```javascript
 var strategies = {
     strategy: 'TestStrategy',
