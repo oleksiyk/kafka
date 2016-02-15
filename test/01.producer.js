@@ -176,4 +176,171 @@ describe('Producer', function () {
             result[0].should.have.property('error', null);
         });
     });
+
+    it('should group messages by global batch.size', function () {
+        var _producer = new Kafka.Producer({
+            clientId: 'producer',
+            batch: {
+                size: 10
+            }
+        });
+
+        var spy = sinon.spy(_producer.client, 'produceRequest');
+
+        return _producer.init().then(function () {
+            return Promise.all([
+                _producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: {
+                        value: '12345'
+                    }
+                }),
+                _producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: {
+                        value: '12345'
+                    }
+                })
+            ]);
+        })
+        .then(function () {
+            spy.should.have.been.calledOnce; // eslint-disable-line
+        });
+    });
+
+    it('should not group messages with size > batch.size', function () {
+        var _producer = new Kafka.Producer({
+            clientId: 'producer',
+            batch: {
+                size: 1
+            }
+        });
+
+        var spy = sinon.spy(_producer.client, 'produceRequest');
+
+        return _producer.init().then(function () {
+            return Promise.all([
+                _producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: {
+                        value: '12345'
+                    }
+                }),
+                _producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: {
+                        value: '12345'
+                    }
+                })
+            ]);
+        })
+        .then(function () {
+            spy.should.have.been.calledTwice; // eslint-disable-line
+        });
+    });
+
+    it('should group messages by batch.size in options', function () {
+        var _producer = new Kafka.Producer({
+            clientId: 'producer',
+            batch: {
+                size: 1
+            }
+        });
+
+        var spy = sinon.spy(_producer.client, 'produceRequest');
+
+        return _producer.init().then(function () {
+            return Promise.all([
+                _producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: {
+                        value: '12345'
+                    }
+                }, { batch: { size: 10 } }),
+                _producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: {
+                        value: '12345'
+                    }
+                }, { batch: { size: 10 } })
+            ]);
+        })
+        .then(function () {
+            spy.should.have.been.calledOnce; // eslint-disable-line
+        });
+    });
+
+    it('should not group messages with different options', function () {
+        var _producer = new Kafka.Producer({
+            clientId: 'producer',
+            batch: {
+                size: 1
+            }
+        });
+
+        var spy = sinon.spy(_producer.client, 'produceRequest');
+
+        return _producer.init().then(function () {
+            return Promise.all([
+                _producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: {
+                        value: '12345'
+                    }
+                }, { batch: { size: 100 } }),
+                _producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: {
+                        value: '12345'
+                    }
+                }, { batch: { size: 200 } })
+            ]);
+        })
+        .then(function () {
+            spy.should.have.been.calledTwice; // eslint-disable-line
+        });
+    });
+
+    it('should wait up to maxWait time', function () {
+        var _producer = new Kafka.Producer({
+            clientId: 'producer',
+            batch: {
+                size: 16384,
+                maxWait: 20
+            }
+        });
+
+        var spy = sinon.spy(_producer.client, 'produceRequest');
+
+        return _producer.init().then(function () {
+            return _producer.send({
+                topic: 'kafka-test-topic',
+                partition: 0,
+                message: {
+                    value: '12345'
+                }
+            })
+            .delay(100)
+            .then(function () {
+                return _producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: {
+                        value: '12345'
+                    }
+                });
+            });
+        })
+        .then(function () {
+            spy.should.have.been.calledTwice; // eslint-disable-line
+        });
+    });
 });
