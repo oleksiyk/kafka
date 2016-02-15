@@ -35,7 +35,6 @@ describe('requiredAcks: 0', function () {
         })
         .delay(100)
         .then(function () {
-            /* jshint expr: true */
             dataHanlderSpy.should.have.been.called; // eslint-disable-line
             dataHanlderSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
             dataHanlderSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
@@ -46,5 +45,13 @@ describe('requiredAcks: 0', function () {
             dataHanlderSpy.lastCall.args[0][0].message.should.have.property('value');
             dataHanlderSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p00');
         });
+    });
+});
+
+describe('connectionString', function () {
+    it('should throw when connectionString is wrong', function () {
+        var producer = new Kafka.Producer({ connectionString: 'localhost' });
+
+        return producer.init().should.be.rejected;
     });
 });
