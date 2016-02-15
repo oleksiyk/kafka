@@ -230,7 +230,7 @@ describe('GroupConsumer', function () {
             idleTimeout: 100,
             heartbeatTimeout: 100,
             logger: {
-                error: spy
+                logFunction: spy
             },
             clientId: 'group-consumer4'
         });
@@ -242,6 +242,7 @@ describe('GroupConsumer', function () {
             handler: function () {}
         })
         .then(function () {
+            spy.reset();
             return consumer.end();
         })
         .then(function () {

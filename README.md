@@ -322,38 +322,42 @@ var consumer2 = new Kafka.GroupConsumer({
 2016-01-12T07:41:57.884Z INFO group-consumer-2 ....
 ```
 
-You can also tune the logging level which should be bitwise OR for the following:
-
-- 1 - errors
-- 2 - warnings
-- 4 - log (info)
-- 16 - debug
-
-```javascript
-var consumer = new Kafka.GroupConsumer({
-    clientId: 'group-consumer',
-    nsl: {
-        logLevel: 7 // filter out debug messages (1 | 2 | 4)
-    }
-});
-```
-
-You can overwrite all (error(), log(), warn(), debug()) or just some of the logger functions:
+Change the logging level:
 
 ```javascript
 var consumer = new Kafka.GroupConsumer({
     clientId: 'group-consumer',
     logger: {
-        log: console.log // overwrite just the .log() method
+        logLevel: 1 // 0 - nothing, 1 - just errors, 2 - +warnings, 3 - +info, 4 - +debug, 5 - +trace
     }
 });
 ```
 
-First argument passed to custom log functions will always be `clientId`:
+Send log messages to Logstash server(s) via UDP:
 
- ```
- group-consumer Joined group no-kafka-group-v0.9 generationId 1 as group-consumer-c88fa417-b6a2-499c-b03f-fa66093831f6
- ```
+```javascript
+var consumer = new Kafka.GroupConsumer({
+    clientId: 'group-consumer',
+    logger: {
+        logstash: {
+            enabled: true,
+            connectionString: '10.0.1.1:9999,10.0.1.2:9999',
+            app: 'myApp-kafka-consumer'
+        }
+    }
+});
+```
+
+You can overwrite the function that outputs messages to stdout/stderr:
+
+```javascript
+var consumer = new Kafka.GroupConsumer({
+    clientId: 'group-consumer',
+    logger: {
+        logFunction: console.log
+    }
+});
+```
 
 ## License: [MIT](https://github.com/oleksiyk/kafka/blob/master/LICENSE)
 
