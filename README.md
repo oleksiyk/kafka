@@ -5,7 +5,7 @@
 
 # no-kafka
 
-no-kafka is [Apache Kafka](https://kafka.apache.org) 0.9 client for Node.js with [new unified consumer API](#groupconsumer-new-unified-consumer-api) support. No Zookeeper connection required. Doesn't support compression yet (ready in version [2.0](https://github.com/oleksiyk/kafka/tree/2.0)).
+no-kafka is [Apache Kafka](https://kafka.apache.org) 0.9 client for Node.js with [new unified consumer API](#groupconsumer-new-unified-consumer-api) support. No Zookeeper connection required.
 
 All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 
@@ -45,9 +45,55 @@ Send and retry if failed 2 times with 100ms delay:
 
 ```javascript
 return producer.send(messages, {
-  attempts: 2,
-  delay: 100
+  retries: {
+    attempts: 2,
+    delay: 100
+  }
 });
+```
+
+Accumulate messages into single batch until their total size is >= 1024 bytes or 100ms timeout expires (overwrite Producer constructor options):
+
+```javascript
+producer.send(messages, {
+  batch: {
+    size: 1024,
+    maxWait: 100
+  }
+});
+producer.send(messages, {
+  batch: {
+    size: 1024,
+    maxWait: 100
+  }
+});
+```
+
+Please note, that if you pass different options to the `send()` method then these messages will be grouped into separate batches:
+
+```javascript
+// will be sent in batch 1
+producer.send(messages, {
+  batch: {
+    size: 1024,
+    maxWait: 100
+  },
+  codec: Kafka.COMPRESSION_GZIP
+});
+// will be sent in batch 2
+producer.send(messages, {
+  batch: {
+    size: 1024,
+    maxWait: 100
+  },
+  codec: Kafka.COMPRESSION_SNAPPY
+});
+```
+
+Send message with Snappy compression:
+
+```javascript
+return producer.send(messages, { codec: Kafka.COMPRESSION_SNAPPY });
 ```
 
 ### Producer options:
@@ -55,10 +101,14 @@ return producer.send(messages, {
 * `timeout` - timeout in ms for produce request
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
-* `partitioner` - function used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner function receives 3 arguments: the topic name, an array with partition ids (e.g. ['0', '1']), and the message (useful to partition by key, etc.).
+* `partitioner` - function used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner function receives 3 arguments: the topic name, an array with topic partitions, and the message (useful to partition by key, etc.). `partitioner` can be sync or async (return a Promise).
 * `retries` - controls number of attempts at delay between them when produce request fails
   * `attempts` - number of total attempts to send the message, defaults to 3
   * `delay` - delay in ms between retries, defaults to 1000
+* `codec` - compression codec, one of Kafka.COMPRESSION_NONE, Kafka.COMPRESSION_SNAPPY, Kafka.COMPRESSION_GZIP
+* `batch` - control batching (grouping) of requests
+  * `size` - group messages together into single batch until their total size exceeds this value, defaults to 16384 bytes. Set to 0 to disable batching.
+  * `maxWait` - send grouped messages after this amount of milliseconds expire even if their total size doesn't exceed `batch.size` yet, defaults to 10ms. Set to 0 to disable batching.
 
 ## SimpleConsumer
 
@@ -69,32 +119,40 @@ Example:
 ```javascript
 var consumer = new Kafka.SimpleConsumer();
 
-consumer.on('data', function (messageSet, topic, partition) {
+// data handler function can return a Promise
+var dataHandler = function (messageSet, topic, partition) {
     messageSet.forEach(function (m) {
         console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
     });
-});
+};
 
 return consumer.init().then(function () {
-    return Promise.all([
-        consumer.subscribe('kafka-test-topic', 0),
-        consumer.subscribe('kafka-test-topic', 1)
-    ]);
+    // Subscribe partitons 0 and 1 in a topic:
+    return consumer.subscribe('kafka-test-topic', [0, 1], dataHandler);
 });
 ```
 
 Subscribe (or change subscription) to specific offset and limit maximum received MessageSet size:
+
 ```javascript
-consumer.subscribe('kafka-test-topic', 0, {offset: 20, maxBytes: 30})
+consumer.subscribe('kafka-test-topic', 0, {offset: 20, maxBytes: 30}, dataHandler)
 ```
 
 Subscribe to latest or earliest offsets in the topic/parition:
+
 ```javascript
-consumer.subscribe('kafka-test-topic', 0, {time: Kafka.LATEST_OFFSET})
-consumer.subscribe('kafka-test-topic', 0, {time: Kafka.EARLIEST_OFFSET})
+consumer.subscribe('kafka-test-topic', 0, {time: Kafka.LATEST_OFFSET}, dataHandler)
+consumer.subscribe('kafka-test-topic', 0, {time: Kafka.EARLIEST_OFFSET}, dataHandler)
+```
+
+Subscribe to all partitions in a topic:
+
+```javascript
+consumer.subscribe('kafka-test-topic', dataHandler)
 ```
 
 Commit offset(s) (V0, Kafka saves these commits to Zookeeper)
+
 ```javascript
 consumer.commitOffset([
   {
@@ -111,6 +169,7 @@ consumer.commitOffset([
 ```
 
 Fetch commited offset(s)
+
 ```javascript
 consumer.fetchOffset([
   {
@@ -154,23 +213,24 @@ Specify an assignment strategy (or use no-kafka built-in consistent or round rob
 Example:
 
 ```javascript
+var Promise = require('bluebird');
 var consumer = new Kafka.GroupConsumer();
+
+var dataHandler = function (messageSet, topic, partition) {
+    return Promise.map(messageSet, function (m){
+        console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
+        // commit offset
+        return consumer.commitOffset({topic: topic, partition: partition, offset: m.offset, metadata: 'optional'});
+    });
+};
+
 var strategies = [{
     strategy: 'TestStrategy',
-    subscriptions: ['kafka-test-topic']
+    subscriptions: ['kafka-test-topic'],
+    handler: dataHandler
 }];
 
-consumer.on('data', function (messageSet, topic, partition) {
-    messageSet.forEach(function (m) {
-        console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
-        // process each message and commit its offset
-        consumer.commitOffset({topic: topic, partition: partition, offset: m.offset, metadata: 'optional'});
-    });
-});
-
-return consumer.init(strategies).then(function(){
-  // all done, now wait for messages in event listener
-});
+consumer.init(strategies); // all done, now wait for messages in dataHandler
 ```
 
 ### Assignment strategies
@@ -181,6 +241,7 @@ no-kafka provides three built-in strategies:
 * `Kafka.RoundRobinAssignment` simple assignment strategy (default).
 
 Using `Kafka.WeightedRoundRobinAssignment`:
+
 ```javascript
 var strategies = {
     strategy: 'TestStrategy',
@@ -188,12 +249,14 @@ var strategies = {
     metadata: {
         weight: 4
     },
-    fn: Kafka.WeightedRoundRobinAssignment
+    fn: Kafka.WeightedRoundRobinAssignment,
+    handler: dataHandler
 };
 // consumer.init(strategies)....
 ```
 
 Using `Kafka.ConsistentAssignment`:
+
 ```javascript
 var strategies = {
     strategy: 'TestStrategy',
@@ -202,17 +265,20 @@ var strategies = {
         id: process.argv[2] || 'consumer_1',
         weight: 50
     },
-    fn: Kafka.ConsistentAssignment
+    fn: Kafka.ConsistentAssignment,
+    handler: dataHandler
 };
 // consumer.init(strategies)....
 ```
 Note that each consumer in a group should have its own and consistent metadata.id.
 
 Using `Kafka.RoundRobinAssignment` (default in no-kafka):
+
 ```javascript
 var strategies = {
     strategy: 'TestStrategy',
     subscriptions: ['kafka-test-topic'],
+    handler: dataHandler
 };
 // consumer.init(strategies)....
 ```
@@ -297,38 +363,42 @@ var consumer2 = new Kafka.GroupConsumer({
 2016-01-12T07:41:57.884Z INFO group-consumer-2 ....
 ```
 
-You can also tune the logging level which should be bitwise OR for the following:
-
-- 1 - errors
-- 2 - warnings
-- 4 - log (info)
-- 16 - debug
-
-```javascript
-var consumer = new Kafka.GroupConsumer({
-    clientId: 'group-consumer',
-    nsl: {
-        logLevel: 7 // filter out debug messages (1 | 2 | 4)
-    }
-});
-```
-
-You can overwrite all (error(), log(), warn(), debug()) or just some of the logger functions:
+Change the logging level:
 
 ```javascript
 var consumer = new Kafka.GroupConsumer({
     clientId: 'group-consumer',
     logger: {
-        log: console.log // overwrite just the .log() method
+        logLevel: 1 // 0 - nothing, 1 - just errors, 2 - +warnings, 3 - +info, 4 - +debug, 5 - +trace
     }
 });
 ```
 
-First argument passed to custom log functions will always be `clientId`:
+Send log messages to Logstash server(s) via UDP:
 
- ```
- group-consumer Joined group no-kafka-group-v0.9 generationId 1 as group-consumer-c88fa417-b6a2-499c-b03f-fa66093831f6
- ```
+```javascript
+var consumer = new Kafka.GroupConsumer({
+    clientId: 'group-consumer',
+    logger: {
+        logstash: {
+            enabled: true,
+            connectionString: '10.0.1.1:9999,10.0.1.2:9999',
+            app: 'myApp-kafka-consumer'
+        }
+    }
+});
+```
+
+You can overwrite the function that outputs messages to stdout/stderr:
+
+```javascript
+var consumer = new Kafka.GroupConsumer({
+    clientId: 'group-consumer',
+    logger: {
+        logFunction: console.log
+    }
+});
+```
 
 ## License: [MIT](https://github.com/oleksiyk/kafka/blob/master/LICENSE)
 

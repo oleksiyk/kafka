@@ -21,7 +21,8 @@ describe('GroupAdmin', function () {
             consumer.init({
                 strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
-                metadata: 'consumer-metadata'
+                metadata: 'consumer-metadata',
+                handler: function () {}
             })
         ]);
     });
