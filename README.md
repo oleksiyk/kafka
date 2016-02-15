@@ -1,21 +1,43 @@
-[![Build Status](https://api.travis-ci.org/oleksiyk/kafka.svg?branch=master)](https://travis-ci.org/oleksiyk/kafka)
-[![Test Coverage](https://codeclimate.com/github/oleksiyk/kafka/badges/coverage.svg)](https://codeclimate.com/github/oleksiyk/kafka/coverage)
-[![Dependencies](https://david-dm.org/oleksiyk/kafka.svg)](https://david-dm.org/oleksiyk/kafka)
-[![DevDependencies](https://david-dm.org/oleksiyk/kafka/dev-status.svg)](https://david-dm.org/oleksiyk/kafka#info=devDependencies)
+[![Build Status][badge-travis]][travis]
+[![Test Coverage][badge-coverage]][coverage]
+[![Dependencies][badge-deps]][deps]
+[![DevDependencies][badge-dev-deps]][dev-deps]
+[![license][badge-license]][license]
 
 # no-kafka
 
-no-kafka is [Apache Kafka](https://kafka.apache.org) 0.9 client for Node.js with [new unified consumer API](#groupconsumer-new-unified-consumer-api) support. No Zookeeper connection required.
+__no-kafka__ is [Apache Kafka](https://kafka.apache.org) 0.9 client for Node.js with [new unified consumer API](#groupconsumer-new-unified-consumer-api) support.
 
 All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 
+* [Using](#using)
+* [Producer](#producer)
+  * [Producer options](#producer-options)
+* [Simple Consumer](#simpleconsumer)
+  * [Simple Consumer options](#simpleconsumer-options)
+* [Group Consumer](#groupconsumer-new-unified-consumer-api)
+  * [Assignment strategies](#assignment-strategies)
+  * [Group Consumer options](#groupconsumer-options)
+* [Group Admin](#groupadmin-consumer-groups-api)
+* [Compression](#compression)
+* [Logging](#logging)
+* [License](#license)
+
 ## Using
 
-* download and install Kafka
+* [download and install Kafka](https://kafka.apache.org/documentation.html#quickstart)
 * create your test topic:
+
 ```shell
 kafka-topics.sh --zookeeper 127.0.0.1:2181 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
 ```
+
+* install __no-kafka__
+
+```shell
+npm install no-kafka
+```
+
 
 ## Producer
 
@@ -109,6 +131,7 @@ return producer.send(messages, { codec: Kafka.COMPRESSION_SNAPPY });
 * `batch` - control batching (grouping) of requests
   * `size` - group messages together into single batch until their total size exceeds this value, defaults to 16384 bytes. Set to 0 to disable batching.
   * `maxWait` - send grouped messages after this amount of milliseconds expire even if their total size doesn't exceed `batch.size` yet, defaults to 10ms. Set to 0 to disable batching.
+* `asyncCompression` - boolean, use asynchronouse compression instead of synchronous, defaults to `false`
 
 ## SimpleConsumer
 
@@ -205,10 +228,11 @@ consumer.fetchOffset([
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
 * `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
+* `asyncCompression` - boolean, use asynchronouse decompression instead of synchronous, defaults to `false`
 
 ## GroupConsumer (new unified consumer API)
 
-Specify an assignment strategy (or use no-kafka built-in consistent or round robin assignment strategy) and subscribe by specifying only topics. Elected group leader will automatically assign partitions between all group members.
+Specify an assignment strategy (or use __no-kafka__ built-in consistent or round robin assignment strategy) and subscribe by specifying only topics. Elected group leader will automatically assign partitions between all group members.
 
 Example:
 
@@ -235,7 +259,7 @@ consumer.init(strategies); // all done, now wait for messages in dataHandler
 
 ### Assignment strategies
 
-no-kafka provides three built-in strategies:
+__no-kafka__ provides three built-in strategies:
 * `Kafka.WeightedRoundRobinAssignment` weighted round robin assignment (based on [wrr-pool](https://github.com/oleksiyk/wrr-pool)).
 * `Kafka.ConsistentAssignment` which is based on a consistent [hash ring](https://github.com/3rd-Eden/node-hashring) and so provides consistent assignment across consumers in a group based on supplied `metadata.id` and `metadata.weight` options.
 * `Kafka.RoundRobinAssignment` simple assignment strategy (default).
@@ -272,7 +296,7 @@ var strategies = {
 ```
 Note that each consumer in a group should have its own and consistent metadata.id.
 
-Using `Kafka.RoundRobinAssignment` (default in no-kafka):
+Using `Kafka.RoundRobinAssignment` (default in __no-kafka__):
 
 ```javascript
 var strategies = {
@@ -294,11 +318,12 @@ You can also write your own assignment strategy function and provide it as `fn` 
 * `maxBytes` - maximum size of messages in a fetch response
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
-* `sessionTimeout` - session timeout in ms, min 6000, max 30000, defaults to 15000
-* `heartbeatTimeout` - delay between heartbeat requests in ms, defaults to 1000
+* `sessionTimeout` - session timeout in ms, min 6000, max 30000, defaults to `15000`
+* `heartbeatTimeout` - delay between heartbeat requests in ms, defaults to `1000`
 * `retentionTime` - offset retention time in ms, defaults to 1 day (24 * 3600 * 1000)
-* `startingOffset` - starting position (time) when there is no commited offset, defaults to Kafka.LATEST_OFFSET
+* `startingOffset` - starting position (time) when there is no commited offset, defaults to `Kafka.LATEST_OFFSET`
 * `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
+* `asyncCompression` - boolean, use asynchronouse decompression instead of synchronous, defaults to `false`
 
 ## GroupAdmin (consumer groups API)
 
@@ -341,6 +366,54 @@ return admin.init().then(function(){
              */
         })
     });
+});
+```
+
+## Compression
+
+__no-kafka__ supports both SNAPPY and Gzip compression.
+
+Enable compression in Producer:
+
+```javascript
+var Kafka = require('no-kafka');
+
+var producer = new Kafka.Producer({
+    clientId: 'producer',
+    codec: Kafka.COMPRESSION_SNAPPY // Kafka.COMPRESSION_NONE, Kafka.COMPRESSION_SNAPPY, Kafka.COMPRESSION_GZIP
+});
+```
+
+Alternatively just send some messages with specified compression codec (overwrites codec set in contructor):
+
+```javascript
+return producer.send({
+    topic: 'kafka-test-topic',
+    partition: 0,
+    message: { value: 'p00' }
+}, { codec: Kafka.COMPRESSION_SNAPPY })
+```
+
+By default __no-kafka__ will use synchronous compression and decompression (synchronous Gzip is not availble in node < 0.11).
+Enable async compression/decompression with `asyncCompression` options:
+
+Producer:
+
+```javascript
+var producer = new Kafka.Producer({
+    clientId: 'producer',
+    asyncCompression: true,
+    codec: Kafka.COMPRESSION_SNAPPY
+});
+```
+
+Consumer:
+
+```javascript
+var consumer = new Kafka.SimpleConsumer({
+    idleTimeout: 100,
+    clientId: 'simple-consumer',
+    asyncCompression: true
 });
 ```
 
@@ -401,4 +474,16 @@ var consumer = new Kafka.GroupConsumer({
 ```
 
 ## License: [MIT](https://github.com/oleksiyk/kafka/blob/master/LICENSE)
+
+[badge-license]: https://img.shields.io/badge/License-MIT-green.svg
+[license]: https://github.com/oleksiyk/kafka/blob/master/LICENSE
+[badge-travis]: https://api.travis-ci.org/oleksiyk/kafka.svg?branch=master
+[travis]: https://travis-ci.org/oleksiyk/kafka
+[badge-coverage]: https://codeclimate.com/github/oleksiyk/kafka/badges/coverage.svg
+[coverage]: https://codeclimate.com/github/oleksiyk/kafka/coverage
+[badge-deps]: https://david-dm.org/oleksiyk/kafka.svg
+[deps]: https://david-dm.org/oleksiyk/kafka
+[badge-dev-deps]: https://david-dm.org/oleksiyk/kafka/dev-status.svg
+[dev-deps]: https://david-dm.org/oleksiyk/kafka#info=devDependencies
+
 
