@@ -177,6 +177,23 @@ describe('Producer', function () {
         });
     });
 
+    it('should throw error for unknown topic', function () {
+        var _producer = new Kafka.Producer({
+            clientId: 'producer',
+            partitioner: function dummyPartitioner(/*topicName, partitions, message*/) {
+                return 2;
+            }
+        });
+        return _producer.init().then(function () {
+            return _producer.send({
+                topic: 'no-such-topic-here',
+                message: {
+                    value: 'Hello!'
+                }
+            });
+        }).should.be.rejected.and.eventually.have.property('code', 'UnknownTopicOrPartition');
+    });
+
     it('should group messages by global batch.size', function () {
         var _producer = new Kafka.Producer({
             clientId: 'producer',

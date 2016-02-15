@@ -97,6 +97,19 @@ describe('SimpleConsumer', function () {
         });
     });
 
+    it('should reset offset to LATEST on OffsetOutOfRange error', function () {
+        return consumer.offset('kafka-test-topic', 0).then(function (offset) {
+            return consumer.subscribe('kafka-test-topic', 0, { offset: offset + 200 }, dataHandlerSpy)
+            .then(function () {
+                consumer.subscriptions['kafka-test-topic:0'].offset.should.be.eql(offset + 200);
+            })
+            .delay(200)
+            .then(function () {
+                consumer.subscriptions['kafka-test-topic:0'].offset.should.be.eql(offset);
+            });
+        });
+    });
+
     it('should receive messages from specified offset', function () {
         return consumer.unsubscribe('kafka-test-topic', 0).then(function () {
             dataHandlerSpy.reset();
@@ -115,7 +128,6 @@ describe('SimpleConsumer', function () {
                 return consumer.subscribe('kafka-test-topic', 0, { offset: offset - 2 }, dataHandlerSpy)
                 .delay(200) // consumer sleep timeout
                 .then(function () {
-                    /* jshint expr: true */
                     dataHandlerSpy.should.have.been.called; // eslint-disable-line
                     dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(2);
                     dataHandlerSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p000');
@@ -221,32 +233,91 @@ describe('SimpleConsumer', function () {
         });
     });
 
-    it('should unsubscribe from all subscribed partitions for topic when partition parameter is not specified', function () {
+    it('should unsubscribe all partitions in a topic when partition is not specified', function () {
         return consumer.unsubscribe('kafka-test-topic').then(function () {
-            consumer.subscriptions.should.be.eql({});
+            consumer.subscriptions.should.not.have.property('kafka-test-topic:0');
+            consumer.subscriptions.should.not.have.property('kafka-test-topic:1');
+            consumer.subscriptions.should.not.have.property('kafka-test-topic:2');
         });
     });
 
-    it('should subscribe all topic partitions when partition parameter is not specified', function () {
-        dataHandlerSpy.reset();
-        return consumer.subscribe('kafka-test-topic', {}, dataHandlerSpy).then(function () {
-            return producer.send([{
+    it('should subscribe all partitions in a topic when partition is not specified', function () {
+        return consumer.unsubscribe('kafka-test-topic').then(function () {
+            return consumer.subscribe('kafka-test-topic', dataHandlerSpy).then(function () {
+                consumer.subscriptions.should.have.property('kafka-test-topic:0');
+                consumer.subscriptions.should.have.property('kafka-test-topic:1');
+                consumer.subscriptions.should.have.property('kafka-test-topic:2');
+            });
+        });
+    });
+
+    it('should subscribe partitions specified as array', function () {
+        return consumer.unsubscribe('kafka-test-topic').then(function () {
+            return consumer.subscribe('kafka-test-topic', [0, 1], dataHandlerSpy).then(function () {
+                consumer.subscriptions.should.have.property('kafka-test-topic:0');
+                consumer.subscriptions.should.have.property('kafka-test-topic:1');
+                consumer.subscriptions.should.not.have.property('kafka-test-topic:2');
+            });
+        });
+    });
+
+    it('should subscribe partitions specified as array when options specified', function () {
+        return consumer.unsubscribe('kafka-test-topic').then(function () {
+            return consumer.subscribe('kafka-test-topic', [0, 1], {}, dataHandlerSpy)
+            .then(function () {
+                consumer.subscriptions.should.have.property('kafka-test-topic:0');
+                consumer.subscriptions.should.have.property('kafka-test-topic:1');
+                consumer.subscriptions.should.not.have.property('kafka-test-topic:2');
+            });
+        });
+    });
+
+    it('should subscribe all topic partitions when partition is not specified but options specified', function () {
+        return consumer.unsubscribe('kafka-test-topic').then(function () {
+            return consumer.subscribe('kafka-test-topic', {}, dataHandlerSpy)
+            .then(function () {
+                consumer.subscriptions.should.have.property('kafka-test-topic:0');
+                consumer.subscriptions.should.have.property('kafka-test-topic:1');
+                consumer.subscriptions.should.have.property('kafka-test-topic:2');
+            });
+        });
+    });
+
+    it('should throw when missing dataHandler function', function () {
+        return consumer.subscribe('kafka-test-topic', [0, 1], {}).should.be.rejected;
+    });
+
+    it('should ignore sync errors in data handler', function () {
+        var spy = sinon.spy(function () {
+            throw new Error();
+        });
+        return consumer.subscribe('kafka-test-topic', 0, spy).then(function () {
+            return producer.send({
                 topic: 'kafka-test-topic',
                 partition: 0,
-                message: { value: 'p000' }
-            }, {
-                topic: 'kafka-test-topic',
-                partition: 1,
-                message: { value: 'p001' }
-            }, {
-                topic: 'kafka-test-topic',
-                partition: 2,
-                message: { value: 'p002' }
-            }]);
+                message: { value: 'p00' }
+            });
         })
-        .delay(300)
+        .delay(200)
         .then(function () {
-            dataHandlerSpy.should.have.been.calledThrice; // eslint-disable-line
+            spy.should.have.been.called; // eslint-disable-line
+        });
+    });
+
+    it('should ignore async errors in data handler', function () {
+        var spy = sinon.spy(function () {
+            return Promise.reject(new Error());
+        });
+        return consumer.subscribe('kafka-test-topic', 0, spy).then(function () {
+            return producer.send({
+                topic: 'kafka-test-topic',
+                partition: 0,
+                message: { value: 'p00' }
+            });
+        })
+        .delay(200)
+        .then(function () {
+            spy.should.have.been.called; // eslint-disable-line
         });
     });
 });
