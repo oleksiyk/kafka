@@ -52,6 +52,44 @@ return producer.send(messages, {
 });
 ```
 
+Accumulate messages into single batch until their total size is >= 1024 bytes or 100ms timeout expires (overwrite Producer constructor options):
+
+```javascript
+producer.send(messages, {
+  batch: {
+    size: 1024,
+    maxWait: 100
+  }
+});
+producer.send(messages, {
+  batch: {
+    size: 1024,
+    maxWait: 100
+  }
+});
+```
+
+Please note, that if you pass different options to the `send()` method then these messages will be grouped into separate batches:
+
+```javascript
+// will be sent in batch 1
+producer.send(messages, {
+  batch: {
+    size: 1024,
+    maxWait: 100
+  },
+  codec: Kafka.COMPRESSION_GZIP
+});
+// will be sent in batch 2
+producer.send(messages, {
+  batch: {
+    size: 1024,
+    maxWait: 100
+  },
+  codec: Kafka.COMPRESSION_SNAPPY
+});
+```
+
 Send message with Snappy compression:
 
 ```javascript
@@ -68,6 +106,9 @@ return producer.send(messages, { codec: Kafka.COMPRESSION_SNAPPY });
   * `attempts` - number of total attempts to send the message, defaults to 3
   * `delay` - delay in ms between retries, defaults to 1000
 * `codec` - compression codec, one of Kafka.COMPRESSION_NONE, Kafka.COMPRESSION_SNAPPY, Kafka.COMPRESSION_GZIP
+* `batch` - control batching (grouping) of requests
+  * `size` - group messages together into single batch until their total size exceeds this value, defaults to 16384 bytes. Set to 0 to disable batching.
+  * `maxWait` - send grouped messages after this amount of milliseconds expire even if their total size doesn't exceed `batch.size` yet, defaults to 10ms. Set to 0 to disable batching.
 
 ## SimpleConsumer
 
