@@ -31,15 +31,29 @@ describe('Compression', function () {
         });
 
         it('should send/receive with Snappy compression (<32kb)', function () {
-            return producer.send({
-                topic: 'kafka-test-topic',
-                partition: 0,
-                message: { value: 'p00' }
-            }, { codec: Kafka.COMPRESSION_SNAPPY })
+            return Promise.all([
+                producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: { value: 'p00' }
+                }, { codec: Kafka.COMPRESSION_SNAPPY }),
+                producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: { value: 'p01' }
+                }, { codec: Kafka.COMPRESSION_SNAPPY }),
+                Promise.delay(20).then(function () {
+                    return producer.send({
+                        topic: 'kafka-test-topic',
+                        partition: 0,
+                        message: { value: 'p02' }
+                    }, { codec: Kafka.COMPRESSION_SNAPPY });
+                })
+            ])
             .delay(200)
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
-                dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
+                dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(3);
                 dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
                 dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
@@ -47,6 +61,8 @@ describe('Compression', function () {
                 dataHandlerSpy.lastCall.args[0][0].should.have.property('message').that.is.an('object');
                 dataHandlerSpy.lastCall.args[0][0].message.should.have.property('value');
                 dataHandlerSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p00');
+                dataHandlerSpy.lastCall.args[0][1].message.value.toString('utf8').should.be.eql('p01');
+                dataHandlerSpy.lastCall.args[0][2].message.value.toString('utf8').should.be.eql('p02');
             });
         });
 
@@ -143,15 +159,29 @@ describe('Compression', function () {
         });
 
         it('should send/receive with async Snappy compression (<32kb)', function () {
-            return producer.send({
-                topic: 'kafka-test-topic',
-                partition: 0,
-                message: { value: 'p00' }
-            }, { codec: Kafka.COMPRESSION_SNAPPY })
+            return Promise.all([
+                producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: { value: 'p00' }
+                }, { codec: Kafka.COMPRESSION_SNAPPY }),
+                producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: { value: 'p01' }
+                }, { codec: Kafka.COMPRESSION_SNAPPY }),
+                Promise.delay(20).then(function () {
+                    return producer.send({
+                        topic: 'kafka-test-topic',
+                        partition: 0,
+                        message: { value: 'p02' }
+                    }, { codec: Kafka.COMPRESSION_SNAPPY });
+                })
+            ])
             .delay(200)
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
-                dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
+                dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(3);
                 dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
                 dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
@@ -159,6 +189,8 @@ describe('Compression', function () {
                 dataHandlerSpy.lastCall.args[0][0].should.have.property('message').that.is.an('object');
                 dataHandlerSpy.lastCall.args[0][0].message.should.have.property('value');
                 dataHandlerSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p00');
+                dataHandlerSpy.lastCall.args[0][1].message.value.toString('utf8').should.be.eql('p01');
+                dataHandlerSpy.lastCall.args[0][2].message.value.toString('utf8').should.be.eql('p02');
             });
         });
 
