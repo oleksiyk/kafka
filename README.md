@@ -2,8 +2,8 @@
 [![Test Coverage][badge-coverage]][coverage]
 [![bitHound Code][badge-bithound-code]][bithound-code]
 [![bitHound Overall Score][badge-bithound-overall]][bithound-overall]
-[![Dependencies][badge-deps]][deps]
-[![DevDependencies][badge-dev-deps]][dev-deps]
+[![bitHound Dependencies][badge-bithound-deps]][bithound-deps]
+[![bitHound Dev Dependencies][badge-bithound-dev-deps]][bithound-dev-deps]
 [![license][badge-license]][license]
 
 # no-kafka
@@ -483,11 +483,15 @@ var consumer = new Kafka.GroupConsumer({
 [travis]: https://travis-ci.org/oleksiyk/kafka
 [badge-coverage]: https://codeclimate.com/github/oleksiyk/kafka/badges/coverage.svg
 [coverage]: https://codeclimate.com/github/oleksiyk/kafka/coverage
-[badge-deps]: https://david-dm.org/oleksiyk/kafka.svg
-[deps]: https://david-dm.org/oleksiyk/kafka
-[badge-dev-deps]: https://david-dm.org/oleksiyk/kafka/dev-status.svg
-[dev-deps]: https://david-dm.org/oleksiyk/kafka#info=devDependencies
+[badge-david-deps]: https://david-dm.org/oleksiyk/kafka.svg
+[david-deps]: https://david-dm.org/oleksiyk/kafka
+[badge-david-dev-deps]: https://david-dm.org/oleksiyk/kafka/dev-status.svg
+[david-dev-deps]: https://david-dm.org/oleksiyk/kafka#info=devDependencies
 [badge-bithound-code]: https://www.bithound.io/github/oleksiyk/kafka/badges/code.svg
 [bithound-code]: https://www.bithound.io/github/oleksiyk/kafka
 [badge-bithound-overall]: https://www.bithound.io/github/oleksiyk/kafka/badges/score.svg
 [bithound-overall]: https://www.bithound.io/github/oleksiyk/kafka
+[badge-bithound-deps]: https://www.bithound.io/github/oleksiyk/kafka/badges/dependencies.svg
+[bithound-deps]: https://www.bithound.io/github/oleksiyk/kafka/master/dependencies/npm
+[badge-bithound-dev-deps]: https://www.bithound.io/github/oleksiyk/kafka/badges/devDependencies.svg
+[bithound-dev-deps]: https://www.bithound.io/github/oleksiyk/kafka/master/dependencies/npm
