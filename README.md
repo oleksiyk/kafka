@@ -1,5 +1,7 @@
 [![Build Status][badge-travis]][travis]
 [![Test Coverage][badge-coverage]][coverage]
+[![bitHound Code][badge-bithound-code]][bithound-code]
+[![bitHound Overall Score][badge-bithound-overall]][bithound-overall]
 [![Dependencies][badge-deps]][deps]
 [![DevDependencies][badge-dev-deps]][dev-deps]
 [![license][badge-license]][license]
@@ -485,5 +487,7 @@ var consumer = new Kafka.GroupConsumer({
 [deps]: https://david-dm.org/oleksiyk/kafka
 [badge-dev-deps]: https://david-dm.org/oleksiyk/kafka/dev-status.svg
 [dev-deps]: https://david-dm.org/oleksiyk/kafka#info=devDependencies
-
-
+[badge-bithound-code]: https://www.bithound.io/github/oleksiyk/kafka/badges/code.svg
+[bithound-code]: https://www.bithound.io/github/oleksiyk/kafka
+[badge-bithound-overall]: https://www.bithound.io/github/oleksiyk/kafka/badges/score.svg
+[bithound-overall]: https://www.bithound.io/github/oleksiyk/kafka
