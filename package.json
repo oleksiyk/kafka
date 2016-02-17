@@ -11,7 +11,7 @@
     "keywords": ["kafka"],
     "dependencies": {
         "bluebird": "~=3.x.x",
-        "lodash": "^4.1.0",
+        "lodash": "^4.5.0",
         "bin-protocol": "^2.0.7",
         "buffer-crc32": "~=0.2.5",
         "nice-simple-logger": "^1.0.1",
