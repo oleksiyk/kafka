@@ -30,7 +30,9 @@ var dataHandlerSpies;
 
 function dataHandlerFactory(consumer) {
     return sinon.spy(function (messageSet, topic, partition) {
-        messageSet.forEach(function (m) {consumer.commitOffset({ topic: topic, partition: partition, offset: m.offset }); });
+        return Promise.map(messageSet, function (m) {
+            return consumer.commitOffset({ topic: topic, partition: partition, offset: m.offset });
+        });
     });
 }
 

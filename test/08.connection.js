@@ -18,7 +18,7 @@ describe('Connection', function () {
             consumer.init()
         ])
         .then(function () {
-            consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy);
+            return consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy);
         });
     });
 

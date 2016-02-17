@@ -19,7 +19,7 @@ describe('Compression', function () {
                 consumer.init()
             ])
             .then(function () {
-                consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy);
+                return consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy);
             });
         });
 
@@ -31,6 +31,7 @@ describe('Compression', function () {
         });
 
         it('should send/receive with Snappy compression (<32kb)', function () {
+            var offset;
             return Promise.all([
                 producer.send({
                     topic: 'kafka-test-topic',
@@ -50,6 +51,14 @@ describe('Compression', function () {
                     }, { codec: Kafka.COMPRESSION_SNAPPY });
                 })
             ])
+            .then(function () {
+                return consumer.offset('kafka-test-topic', 0, Kafka.LATEST_OFFSET).then(function (_offset) {
+                    offset = _offset - 3;
+                });
+            })
+            .then(function () {
+                return consumer.subscribe('kafka-test-topic', 0, { offset: offset }, dataHandlerSpy);
+            })
             .delay(200)
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
@@ -147,7 +156,7 @@ describe('Compression', function () {
                 consumer.init()
             ])
             .then(function () {
-                consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy);
+                return consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy);
             });
         });
 
@@ -159,6 +168,7 @@ describe('Compression', function () {
         });
 
         it('should send/receive with async Snappy compression (<32kb)', function () {
+            var offset;
             return Promise.all([
                 producer.send({
                     topic: 'kafka-test-topic',
@@ -178,6 +188,14 @@ describe('Compression', function () {
                     }, { codec: Kafka.COMPRESSION_SNAPPY });
                 })
             ])
+            .then(function () {
+                return consumer.offset('kafka-test-topic', 0, Kafka.LATEST_OFFSET).then(function (_offset) {
+                    offset = _offset - 3;
+                });
+            })
+            .then(function () {
+                return consumer.subscribe('kafka-test-topic', 0, { offset: offset }, dataHandlerSpy);
+            })
             .delay(200)
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
