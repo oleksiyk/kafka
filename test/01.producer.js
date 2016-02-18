@@ -1,6 +1,6 @@
 'use strict';
 
-/* global describe, it, before, after, sinon  */
+/* global describe, it, before, after, sinon, expect  */
 
 // kafka-topics.sh --zookeeper 127.0.0.1:2181/kafka0.9 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
 
@@ -47,6 +47,24 @@ describe('Producer', function () {
             result[0].should.have.property('offset').that.is.a('number');
             result[0].should.have.property('error', null);
         });
+    });
+
+    it('should fail when missing topic field', function () {
+        return producer.send({
+            partition: 0,
+            message: {
+                value: 'Hello!'
+            }
+        }).should.eventually.be.rejectedWith('Missing or wrong topic field');
+    });
+
+    it('should fail when missing partition field and no partitioner function defined', function () {
+        return producer.send({
+            topic: 'kafka-test-topic',
+            message: {
+                value: 'Hello!'
+            }
+        }).should.eventually.be.rejectedWith('Missing or wrong partition field');
     });
 
     it('should send an array of messages', function () {
@@ -127,6 +145,17 @@ describe('Producer', function () {
             partitionerSpy.lastCall.args[1][0].should.have.property('replicas').that.is.an('array');
             partitionerSpy.lastCall.args[1][0].should.have.property('isr').that.is.an('array');
         });
+    });
+
+    it('shoult throw when partitioner is not a function', function () {
+        function _try() {
+            return new Kafka.Producer({
+                clientId: 'producer',
+                partitioner: 'something else'
+            });
+        }
+
+        expect(_try).to.throw('Partitioner must be a function');
     });
 
     it('should determine topic partition using sync partitioner function', function () {

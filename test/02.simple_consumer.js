@@ -159,6 +159,22 @@ describe('SimpleConsumer', function () {
         });
     });
 
+    it('should be able to commit single offset', function () {
+        return consumer.commitOffset({
+            topic: 'kafka-test-topic',
+            partition: 0,
+            offset: 1,
+            metadata: 'm1'
+        })
+        .then(function (result) {
+            result.should.be.an('array').that.has.length(1);
+            result[0].should.be.an('object');
+            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.have.property('partition').that.is.a('number');
+            result[0].should.have.property('error', null);
+        });
+    });
+
     it('should be able to commit offsets', function () {
         return consumer.commitOffset([
             {
