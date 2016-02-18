@@ -20,7 +20,8 @@
         'new-cap': [2, { newIsCap: true, capIsNew: false }],
         'spaced-comment': 0,
         'key-spacing': [2, {'beforeColon': false, 'afterColon': true, mode: 'minimum'}],
-        'no-cond-assign': [2, 'except-parens']
+        'no-cond-assign': [2, 'except-parens'],
+        'quote-props': [2, 'consistent-as-needed']
     },
     'ecmaFeatures': {
         'modules': false,
