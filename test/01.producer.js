@@ -29,7 +29,7 @@ describe('Producer', function () {
     });
 
     it('should create producer with default options', function () {
-        new Kafka.Producer();
+        var _producer = new Kafka.Producer(); // eslint-disable-line
     });
 
     it('should send a single message', function () {
