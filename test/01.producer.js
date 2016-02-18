@@ -28,6 +28,10 @@ describe('Producer', function () {
             .respondTo('end');
     });
 
+    it('should create producer with default options', function () {
+        new Kafka.Producer();
+    });
+
     it('should send a single message', function () {
         return producer.send({
             topic: 'kafka-test-topic',
