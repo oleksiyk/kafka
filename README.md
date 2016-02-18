@@ -1,9 +1,7 @@
 [![Build Status][badge-travis]][travis]
 [![Test Coverage][badge-coverage]][coverage]
-[![bitHound Code][badge-bithound-code]][bithound-code]
-[![bitHound Overall Score][badge-bithound-overall]][bithound-overall]
-[![bitHound Dependencies][badge-bithound-deps]][bithound-deps]
-[![bitHound Dev Dependencies][badge-bithound-dev-deps]][bithound-dev-deps]
+[![david Dependencies][badge-david-deps]][david-deps]
+[![david Dev Dependencies][badge-david-dev-deps]][david-dev-deps]
 [![license][badge-license]][license]
 
 # no-kafka
