@@ -25,11 +25,17 @@
         "newline-per-chained-call": 0,
         "one-var-declaration-per-line": 0
     },
-    "ecmaFeatures": {
-        "modules": false,
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "script",
+        "ecmaFeatures": {
+            "modules": false
+        }
     },
     "env": {
         "es6": true,
-        "node": true
+        "node": true,
+        "browser": false,
+        "mocha": true
     }
 }
