@@ -6,7 +6,7 @@
         "name": "Oleksiy Krivoshey",
         "email": "oleksiyk@gmail.com"
     },
-    "version": "2.0.6",
+    "version": "2.0.7",
     "main": "./lib/index.js",
     "keywords": ["kafka"],
     "dependencies": {
