@@ -7,6 +7,7 @@
 # no-kafka
 
 __no-kafka__ is [Apache Kafka](https://kafka.apache.org) 0.9 client for Node.js with [new unified consumer API](#groupconsumer-new-unified-consumer-api) support.
+__no-kafka__ supports sync and async Gzip and Snappy compression, producer batching and controllable retries, offers few predefined group assignment strategies and producer partitioner option.
 
 All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 
