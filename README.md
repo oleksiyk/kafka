@@ -12,6 +12,7 @@ All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 
 * [Using](#using)
 * [Producer](#producer)
+  * [Keyed Messages](#keyed-messages)
   * [Producer options](#producer-options)
 * [Simple Consumer](#simpleconsumer)
   * [Simple Consumer options](#simpleconsumer-options)
@@ -116,6 +117,21 @@ Send message with Snappy compression:
 
 ```javascript
 return producer.send(messages, { codec: Kafka.COMPRESSION_SNAPPY });
+```
+
+### Keyed Messages
+
+Send a message with the key:
+
+```javascript
+producer.send({
+    topic: 'kafka-test-topic',
+    partition: 0,
+    message: {
+        key: 'some-key'
+        value: 'Hello!'
+    }
+});
 ```
 
 ### Producer options:

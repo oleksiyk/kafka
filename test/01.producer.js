@@ -49,6 +49,24 @@ describe('Producer', function () {
         });
     });
 
+    it('should send a single keyed message', function () {
+        return producer.send({
+            topic: 'kafka-test-topic',
+            partition: 0,
+            message: {
+                key: 'test-key',
+                value: 'Hello!'
+            }
+        }).then(function (result) {
+            result.should.be.an('array').and.have.length(1);
+            result[0].should.be.an('object');
+            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.have.property('partition', 0);
+            result[0].should.have.property('offset').that.is.a('number');
+            result[0].should.have.property('error', null);
+        });
+    });
+
     it('should fail when missing topic field', function () {
         return producer.send({
             partition: 0,

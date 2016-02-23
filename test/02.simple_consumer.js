@@ -67,6 +67,37 @@ describe('SimpleConsumer', function () {
         });
     });
 
+    it('should receive new keyed messages', function () {
+        return consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy).then(function () {
+            return producer.send({
+                topic: 'kafka-test-topic',
+                partition: 0,
+                message: {
+                    key: 'test-key-p00',
+                    value: 'p00'
+                }
+            });
+        })
+        .delay(100)
+        .then(function () {
+            /* jshint expr: true */
+            dataHandlerSpy.should.have.been.called; // eslint-disable-line
+            dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
+            dataHandlerSpy.lastCall.args[1].should.be.a('string');
+            dataHandlerSpy.lastCall.args[1].should.be.eql('kafka-test-topic');
+            dataHandlerSpy.lastCall.args[2].should.be.a('number');
+            dataHandlerSpy.lastCall.args[2].should.be.eql(0);
+            dataHandlerSpy.lastCall.args[3].should.be.a('number');
+
+            dataHandlerSpy.lastCall.args[0][0].should.be.an('object');
+            dataHandlerSpy.lastCall.args[0][0].should.have.property('message').that.is.an('object');
+            dataHandlerSpy.lastCall.args[0][0].message.should.have.property('key');
+            dataHandlerSpy.lastCall.args[0][0].message.key.toString().should.be.eql('test-key-p00');
+            dataHandlerSpy.lastCall.args[0][0].message.should.have.property('value');
+            dataHandlerSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p00');
+        });
+    });
+
     it('should correctly encode/decode utf8 string message value', function () {
         dataHandlerSpy.reset();
         return producer.send({
