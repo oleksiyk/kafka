@@ -259,7 +259,7 @@ var Promise = require('bluebird');
 var consumer = new Kafka.GroupConsumer();
 
 var dataHandler = function (messageSet, topic, partition) {
-    return Promise.map(messageSet, function (m){
+    return Promise.each(messageSet, function (m){
         console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
         // commit offset
         return consumer.commitOffset({topic: topic, partition: partition, offset: m.offset, metadata: 'optional'});
