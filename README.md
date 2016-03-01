@@ -247,6 +247,7 @@ consumer.fetchOffset([
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
 * `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
 * `asyncCompression` - boolean, use asynchronouse decompression instead of synchronous, defaults to `false`
+* `handlerConcurrency` - specify concurrency level for the consumer handler function, defaults to 10
 
 ## GroupConsumer (new unified consumer API)
 
@@ -342,6 +343,7 @@ You can also write your own assignment strategy function and provide it as `fn` 
 * `startingOffset` - starting position (time) when there is no commited offset, defaults to `Kafka.LATEST_OFFSET`
 * `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
 * `asyncCompression` - boolean, use asynchronouse decompression instead of synchronous, defaults to `false`
+* `handlerConcurrency` - specify concurrency level for the consumer handler function, defaults to 10
 
 ## GroupAdmin (consumer groups API)
 
