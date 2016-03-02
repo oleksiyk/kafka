@@ -1,44 +1,45 @@
 {
-    "name": "no-kafka",
-    "description": "Apache Kafka 0.9 client for Node.JS",
-    "homepage": "http://github.com/oleksiyk/kafka",
-    "author": {
-        "name": "Oleksiy Krivoshey",
-        "email": "oleksiyk@gmail.com"
-    },
-    "version": "2.1.0",
-    "main": "./lib/index.js",
-    "keywords": ["kafka"],
-    "dependencies": {
-        "bluebird": "~=3.x.x",
-        "lodash": "^4.5.0",
-        "bin-protocol": "^2.0.7",
-        "buffer-crc32": "~=0.2.5",
-        "nice-simple-logger": "^1.0.1",
-        "hashring": "~=3.2.0",
-        "wrr-pool": "^1.0.3",
-        "snappy": "^4.1.2"
-    },
-    "devDependencies": {
-        "mocha": "^2.4.5",
-        "chai": "^3.5.0",
-        "sinon-chai": "^2.8.0",
-        "chai-as-promised": "^5.2.0",
-        "eslint": "^2.2.0",
-        "eslint-config-magictoolbox": "^0.0.2",
-        "istanbul": "^0.4.2"
-    },
-    "bugs": {
-        "url": "https://github.com/oleksiyk/kafka/issues"
-    },
-    "scripts": {
-        "test": "make"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/oleksiyk/kafka.git"
-    },
-    "readmeFilename": "README.md",
-    "license": "MIT"
+  "name": "no-kafka",
+  "description": "Apache Kafka 0.9 client for Node.JS",
+  "homepage": "http://github.com/oleksiyk/kafka",
+  "author": {
+    "name": "Oleksiy Krivoshey",
+    "email": "oleksiyk@gmail.com"
+  },
+  "version": "2.1.1",
+  "main": "./lib/index.js",
+  "keywords": [
+    "kafka"
+  ],
+  "dependencies": {
+    "bluebird": "~=3.x.x",
+    "lodash": "^4.5.0",
+    "bin-protocol": "^2.0.7",
+    "buffer-crc32": "~=0.2.5",
+    "nice-simple-logger": "^1.0.1",
+    "hashring": "~=3.2.0",
+    "wrr-pool": "^1.0.3",
+    "snappy": "^4.1.2"
+  },
+  "devDependencies": {
+    "mocha": "^2.4.5",
+    "chai": "^3.5.0",
+    "sinon-chai": "^2.8.0",
+    "chai-as-promised": "^5.2.0",
+    "eslint": "^2.2.0",
+    "eslint-config-magictoolbox": "^0.0.2",
+    "istanbul": "^0.4.2"
+  },
+  "bugs": {
+    "url": "https://github.com/oleksiyk/kafka/issues"
+  },
+  "scripts": {
+    "test": "make"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oleksiyk/kafka.git"
+  },
+  "readmeFilename": "README.md",
+  "license": "MIT"
 }
-
