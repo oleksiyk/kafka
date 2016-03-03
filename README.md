@@ -496,7 +496,7 @@ var consumer = new Kafka.GroupConsumer({
 
 ## Topic Creation
 
-There is no Kafka API call to create a topic. Kafka supports auto creating of topics when their metadata is first requested (`auto.create.topic` option) but the topic is created with all default parameters, which is useless. For this reason __no-kafka__ doesn't support this behaviour until there will be a specific Kafka API call to create/manage topics.
+There is no Kafka API call to create a topic. Kafka supports auto creating of topics when their metadata is first requested (`auto.create.topic` option) but the topic is created with all default parameters, which is useless. There is no way to be notified when the topic has been created, so the library will need to ping the server with some interval. There is also no way to be notified of any error for this operation. For this reason, having no guarantees, __no-kafka__ won't provide topic creation method until there will be a specific Kafka API call to create/manage topics.
 
 ## License: [MIT](https://github.com/oleksiyk/kafka/blob/master/LICENSE)
 
