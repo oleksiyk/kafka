@@ -24,6 +24,7 @@ All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 * [Group Admin](#groupadmin-consumer-groups-api)
 * [Compression](#compression)
 * [Logging](#logging)
+* [Topic Creation](#topic-creation)
 * [License](#license)
 
 ## Using
@@ -492,6 +493,10 @@ var consumer = new Kafka.GroupConsumer({
     }
 });
 ```
+
+## Topic Creation
+
+There is no Kafka API call to create a topic. Kafka supports auto creating of topics when their metadata is first requested (`auto.create.topic` option) but the topic is created with all default parameters, which is useless. For this reason __no-kafka__ doesn't support this behaviour until there will be a specific Kafka API call to create/manage topics.
 
 ## License: [MIT](https://github.com/oleksiyk/kafka/blob/master/LICENSE)
 
