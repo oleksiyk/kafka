@@ -240,7 +240,7 @@ consumer.fetchOffset([
 
 ### SimpleConsumer options
 * `groupId` - group ID for comitting and fetching offsets. Defaults to 'no-kafka-group-v0'
-* `timeout` - timeout for fetch requests, defaults to 100ms
+* `maxWaitTime` - maximum amount of time in milliseconds to block waiting if insufficient data is available at the time the fetch request is issued, defaults to 100ms
 * `idleTimeout` - timeout between fetch calls, defaults to 1000ms
 * `minBytes` - minimum number of bytes to wait from Kafka before returning the fetch call, defaults to 1 byte
 * `maxBytes` - maximum size of messages in a fetch response
@@ -332,7 +332,7 @@ You can also write your own assignment strategy function and provide it as `fn` 
 ### GroupConsumer options
 
 * `groupId` - group ID for comitting and fetching offsets. Defaults to 'no-kafka-group-v0.9'
-* `timeout` - timeout for fetch requests, defaults to 100ms
+* `maxWaitTime` - maximum amount of time in milliseconds to block waiting if insufficient data is available at the time the fetch request is issued, defaults to 100ms
 * `idleTimeout` - timeout between fetch calls, defaults to 1000ms
 * `minBytes` - minimum number of bytes to wait from Kafka before returning the fetch call, defaults to 1 byte
 * `maxBytes` - maximum size of messages in a fetch response
