@@ -15,6 +15,7 @@ All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 * [Using](#using)
 * [Producer](#producer)
   * [Keyed Messages](#keyed-messages)
+  * [Batching (grouping) produce requests](#batching_grouping_produce_requests)
   * [Producer options](#producer-options)
 * [Simple Consumer](#simpleconsumer)
   * [Simple Consumer options](#simpleconsumer-options)
@@ -78,6 +79,8 @@ return producer.send(messages, {
 });
 ```
 
+### Batching (grouping) produce requests
+
 Accumulate messages into single batch until their total size is >= 1024 bytes or 100ms timeout expires (overwrite Producer constructor options):
 
 ```javascript
@@ -114,12 +117,6 @@ producer.send(messages, {
   },
   codec: Kafka.COMPRESSION_SNAPPY
 });
-```
-
-Send message with Snappy compression:
-
-```javascript
-return producer.send(messages, { codec: Kafka.COMPRESSION_SNAPPY });
 ```
 
 ### Keyed Messages
