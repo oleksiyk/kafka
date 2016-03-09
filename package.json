@@ -12,14 +12,15 @@
     "kafka"
   ],
   "dependencies": {
-    "bluebird": "^3.3.3",
-    "lodash": "^4.5.0",
     "bin-protocol": "^3.0.0",
+    "bluebird": "^3.3.3",
     "buffer-crc32": "~=0.2.5",
-    "nice-simple-logger": "^1.0.1",
     "hashring": "~=3.2.0",
-    "wrr-pool": "^1.0.3",
-    "snappy": "^4.1.2"
+    "lodash": "^4.5.0",
+    "murmur-hash-js": "^1.0.0",
+    "nice-simple-logger": "^1.0.1",
+    "snappy": "^4.1.2",
+    "wrr-pool": "^1.0.3"
   },
   "devDependencies": {
     "mocha": "^2.4.5",
