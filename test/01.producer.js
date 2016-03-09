@@ -4,8 +4,11 @@
 
 // kafka-topics.sh --zookeeper 127.0.0.1:2181/kafka0.9 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
 
+var util    = require('util');
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
+
+var DefaultPartitioner = Kafka.DefaultPartitioner;
 
 var producer = new Kafka.Producer({
     requiredAcks: 1,
@@ -76,13 +79,15 @@ describe('Producer', function () {
         }).should.eventually.be.rejectedWith('Missing or wrong topic field');
     });
 
-    it('should fail when missing partition field and no partitioner function defined', function () {
+    it('should use default partitioner when missing partition field and no partitioner function defined', function () {
         return producer.send({
             topic: 'kafka-test-topic',
             message: {
                 value: 'Hello!'
             }
-        }).should.eventually.be.rejectedWith('Missing or wrong partition field');
+        }).then(function (result) {
+            result.should.be.an('array').and.have.length(1);
+        });
     });
 
     it('should send an array of messages', function () {
@@ -139,11 +144,10 @@ describe('Producer', function () {
     });
 
     it('partitioner arguments', function () {
-        var partitionerSpy = sinon.spy(function () { return 1; });
         var _producer = new Kafka.Producer({
-            clientId: 'producer',
-            partitioner: partitionerSpy
+            clientId: 'producer'
         });
+        var partitionerSpy = _producer.partitioner.partition = sinon.spy(function () { return 1; });
         return _producer.init().then(function () {
             return _producer.send({
                 topic: 'kafka-test-topic',
@@ -165,7 +169,7 @@ describe('Producer', function () {
         });
     });
 
-    it('shoult throw when partitioner is not a function', function () {
+    it('should throw when partitioner is not a DefaultPartitioner', function () {
         function _try() {
             return new Kafka.Producer({
                 clientId: 'producer',
@@ -173,16 +177,24 @@ describe('Producer', function () {
             });
         }
 
-        expect(_try).to.throw('Partitioner must be a function');
+        expect(_try).to.throw('Partitioner must inherit from DefaultPartitioner');
     });
 
-    it('should determine topic partition using sync partitioner function', function () {
-        var _producer = new Kafka.Producer({
+    it('should determine topic partition using inherited partitioner', function () {
+        var _producer;
+
+        function MyPartitioner() {}
+        util.inherits(MyPartitioner, DefaultPartitioner);
+
+        MyPartitioner.prototype.partition = function dummySyncPartitioner(/*topicName, partitions, message*/) {
+            return 1;
+        };
+
+        _producer = new Kafka.Producer({
             clientId: 'producer',
-            partitioner: function dummySyncPartitioner(/*topicName, partitions, message*/) {
-                return 1;
-            }
+            partitioner: new MyPartitioner()
         });
+
         return _producer.init().then(function () {
             return _producer.send({
                 topic: 'kafka-test-topic',
@@ -203,13 +215,13 @@ describe('Producer', function () {
 
     it('should determine topic partition using async partitioner function', function () {
         var _producer = new Kafka.Producer({
-            clientId: 'producer',
-            partitioner: function dummyASyncPartitioner(/*topicName, partitions, message*/) {
-                return Promise.delay(100).then(function () {
-                    return 2;
-                });
-            }
+            clientId: 'producer'
         });
+        _producer.partitioner.partition = function dummySyncPartitioner(/*topicName, partitions, message*/) {
+            return Promise.delay(100).then(function () {
+                return 2;
+            });
+        };
         return _producer.init().then(function () {
             return _producer.send({
                 topic: 'kafka-test-topic',
@@ -230,10 +242,7 @@ describe('Producer', function () {
 
     it('should throw error for unknown topic', function () {
         var _producer = new Kafka.Producer({
-            clientId: 'producer',
-            partitioner: function dummyPartitioner(/*topicName, partitions, message*/) {
-                return 2;
-            }
+            clientId: 'producer'
         });
         return _producer.init().then(function () {
             return _producer.send({
