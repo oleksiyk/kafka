@@ -19,7 +19,6 @@ describe('GroupAdmin', function () {
         return Promise.all([
             admin.init(),
             consumer.init({
-                strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
                 metadata: 'consumer-metadata',
                 handler: function () {}
@@ -44,7 +43,7 @@ describe('GroupAdmin', function () {
 
     it('should list groups', function () {
         return admin.listGroups().then(function (groups) {
-            groups.should.be.an('array').and.have.length(1);
+            groups.should.be.an('array').and.have.length.gt(0);
             groups[0].should.be.an('object');
             groups[0].should.have.property('groupId', consumer.options.groupId);
             groups[0].should.have.property('protocolType', 'consumer');
@@ -58,7 +57,7 @@ describe('GroupAdmin', function () {
             group.should.have.property('groupId', consumer.options.groupId);
             group.should.have.property('state');
             group.should.have.property('protocolType', 'consumer');
-            group.should.have.property('protocol', 'TestStrategy');
+            group.should.have.property('protocol', 'DefaultAssignmentStrategy');
             group.should.have.property('members').that.is.an('array');
             group.members.should.have.length(1);
             group.members[0].should.be.an('object');

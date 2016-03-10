@@ -176,7 +176,7 @@ return producer.init().then(function(){
 * `timeout` - timeout in ms for produce request
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
-* `partitioner` - Class instance used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner must inherit from [`Kafka.DefaultPartitioner`](lib/default_partitioner.js). The `partition` method receives 3 arguments: the topic name, an array with topic partitions, and the message (useful to partition by key, etc.). `partition` can be sync or async (return a Promise).
+* `partitioner` - Class instance used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner must inherit from [`Kafka.DefaultPartitioner`](lib/assignment/partitioners/default.js). The `partition` method receives 3 arguments: the topic name, an array with topic partitions, and the message (useful to partition by key, etc.). `partition` can be sync or async (return a Promise).
 * `retries` - controls number of attempts at delay between them when produce request fails
   * `attempts` - number of total attempts to send the message, defaults to 3
   * `delay` - delay in ms between retries, defaults to 1000
@@ -303,7 +303,6 @@ var dataHandler = function (messageSet, topic, partition) {
 };
 
 var strategies = [{
-    strategy: 'TestStrategy',
     subscriptions: ['kafka-test-topic'],
     handler: dataHandler
 }];
@@ -314,11 +313,11 @@ consumer.init(strategies); // all done, now wait for messages in dataHandler
 ### Assignment strategies
 
 __no-kafka__ provides three built-in strategies:
-* `Kafka.WeightedRoundRobinAssignment` weighted round robin assignment (based on [wrr-pool](https://github.com/oleksiyk/wrr-pool)).
-* `Kafka.ConsistentAssignment` which is based on a consistent [hash ring](https://github.com/3rd-Eden/node-hashring) and so provides consistent assignment across consumers in a group based on supplied `metadata.id` and `metadata.weight` options.
-* `Kafka.RoundRobinAssignment` simple assignment strategy (default).
+* `Kafka.WeightedRoundRobinAssignmentStrategy` weighted round robin assignment (based on [wrr-pool](https://github.com/oleksiyk/wrr-pool)).
+* `Kafka.ConsistentAssignmentStrategy` which is based on a consistent [hash ring](https://github.com/3rd-Eden/node-hashring) and so provides consistent assignment across consumers in a group based on supplied `metadata.id` and `metadata.weight` options.
+* `Kafka.DefaultAssignmentStrategy` simple round robin assignment strategy (default).
 
-Using `Kafka.WeightedRoundRobinAssignment`:
+Using `Kafka.WeightedRoundRobinAssignmentStrategy`:
 
 ```javascript
 var strategies = {
@@ -327,41 +326,29 @@ var strategies = {
     metadata: {
         weight: 4
     },
-    fn: Kafka.WeightedRoundRobinAssignment,
+    strategy: new Kafka.WeightedRoundRobinAssignmentStrategy(),
     handler: dataHandler
 };
 // consumer.init(strategies)....
 ```
 
-Using `Kafka.ConsistentAssignment`:
+Using `Kafka.ConsistentAssignmentStrategy`:
 
 ```javascript
 var strategies = {
-    strategy: 'TestStrategy',
     subscriptions: ['kafka-test-topic'],
     metadata: {
         id: process.argv[2] || 'consumer_1',
         weight: 50
     },
-    fn: Kafka.ConsistentAssignment,
+    strategy: new Kafka.ConsistentAssignmentStrategy(),
     handler: dataHandler
 };
 // consumer.init(strategies)....
 ```
 Note that each consumer in a group should have its own and consistent metadata.id.
 
-Using `Kafka.RoundRobinAssignment` (default in __no-kafka__):
-
-```javascript
-var strategies = {
-    strategy: 'TestStrategy',
-    subscriptions: ['kafka-test-topic'],
-    handler: dataHandler
-};
-// consumer.init(strategies)....
-```
-
-You can also write your own assignment strategy function and provide it as `fn` option of the strategy item.
+You can also write your own assignment strategy by inheriting from Kafka.DefaultAssignmentStrategy and overwriting `assignment` method.
 
 ### GroupConsumer options
 
@@ -401,7 +388,7 @@ return admin.init().then(function(){
               groupId: 'no-kafka-admin-test-group',
               state: 'Stable',
               protocolType: 'consumer',
-              protocol: 'TestStrategy',
+              protocol: 'DefaultAssignmentStrategy',
               members:
                [ { memberId: 'group-consumer-82646843-b4b8-4e91-94c9-b4708c8b05e8',
                    clientId: 'group-consumer',

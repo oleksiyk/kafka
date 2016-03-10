@@ -2,10 +2,9 @@
 
 /* global describe, it */
 
-var util = require('util');
-var _    = require('lodash');
-
-var DefaultPartitioner = require('../lib/default_partitioner');
+var util  = require('util');
+var _     = require('lodash');
+var Kafka = require('../lib/index');
 
 // Ran against Java DefaultPartitioner with 12 partitions
 // https://gist.github.com/kjvalencik/74ff9c7451878d150819
@@ -21,13 +20,13 @@ var expectedPartitions = {
 
 describe('Default Partitioner', function () {
     it('should be able to seed round robin partitioner', function () {
-        var partitioner = new DefaultPartitioner(0);
+        var partitioner = new Kafka.DefaultPartitioner(0);
 
         partitioner.partition('topic', new Array(10), {}).should.equal(0);
     });
 
     it('should increment after each call to round robin partitioner', function () {
-        var partitioner = new DefaultPartitioner(0);
+        var partitioner = new Kafka.DefaultPartitioner(0);
 
         partitioner.partition('topic', new Array(10), {}).should.equal(0);
         partitioner.partition('topic', new Array(10), {}).should.equal(1);
@@ -35,14 +34,14 @@ describe('Default Partitioner', function () {
     });
 
     it('should choose random seed if one is not provided', function () {
-        var partitioner = new DefaultPartitioner();
+        var partitioner = new Kafka.DefaultPartitioner();
         var seed = partitioner.partition('topic', new Array(10), {});
 
         partitioner.partition('topic', new Array(10), {}).should.equal((seed + 1) % 10);
     });
 
     it('should partition correctly with murmur2', function () {
-        var partitioner = new DefaultPartitioner();
+        var partitioner = new Kafka.DefaultPartitioner();
 
         _.each(expectedPartitions, function (partition, key) {
             partitioner.partition('topic', new Array(numPartitions), {
@@ -55,14 +54,14 @@ describe('Default Partitioner', function () {
         });
     });
 
-    it('should be able to inherit from DefaultPartitioner', function () {
+    it('should be able to inherit from Kafka.DefaultPartitioner', function () {
         var partitioner;
 
         function MyPartitioner() {
-            DefaultPartitioner.apply(this, arguments);
+            Kafka.DefaultPartitioner.apply(this, arguments);
         }
 
-        util.inherits(MyPartitioner, DefaultPartitioner);
+        util.inherits(MyPartitioner, Kafka.DefaultPartitioner);
 
         MyPartitioner.prototype.getKey = function getKey(message) {
             return message.key.split('-')[0];
