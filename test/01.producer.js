@@ -177,7 +177,7 @@ describe('Producer', function () {
             });
         }
 
-        expect(_try).to.throw('Partitioner must inherit from DefaultPartitioner');
+        expect(_try).to.throw('Partitioner must inherit from Kafka.DefaultPartitioner');
     });
 
     it('should determine topic partition using inherited partitioner', function () {
