@@ -137,7 +137,7 @@ producer.send({
 
 ### Custom Partitioner
 
-Override the default partitioner with a custom partitioner that only uses a portion of the key.
+Example: override the default partitioner with a custom partitioner that only uses a portion of the key.
 
 ```javascript
 var util  = require('util');
@@ -176,7 +176,7 @@ return producer.init().then(function(){
 * `timeout` - timeout in ms for produce request
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
-* `partitioner` - Class used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner must inherit from [`DefaultPartitioner`](lib/default_partitioner.js). The `partition` method receives 3 arguments: the topic name, an array with topic partitions, and the message (useful to partition by key, etc.). `partition` can be sync or async (return a Promise).
+* `partitioner` - Class instance used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner must inherit from [`Kafka.DefaultPartitioner`](lib/default_partitioner.js). The `partition` method receives 3 arguments: the topic name, an array with topic partitions, and the message (useful to partition by key, etc.). `partition` can be sync or async (return a Promise).
 * `retries` - controls number of attempts at delay between them when produce request fails
   * `attempts` - number of total attempts to send the message, defaults to 3
   * `delay` - delay in ms between retries, defaults to 1000
