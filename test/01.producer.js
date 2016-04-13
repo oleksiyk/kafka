@@ -111,7 +111,7 @@ describe('Producer', function () {
     });
 
     it('should return an error for unknown partition/topic and retry 5 times', function () {
-        var start = Date.now(), msgs;
+        var msgs;
         msgs = [{
             topic: 'kafka-test-unknown-topic',
             partition: 0,
@@ -134,7 +134,6 @@ describe('Producer', function () {
             result[1].should.have.property('error');
             result[0].error.should.have.property('code', 'UnknownTopicOrPartition');
             result[1].error.should.have.property('code', 'UnknownTopicOrPartition');
-            (Date.now() - start).should.be.closeTo(500, 100);
         });
     });
 
