@@ -442,6 +442,17 @@ __no-kafka__ will connect to the hosts specified in `connectionString` construct
 
 All network errors are handled by the library: producer will retry sending failed messages for configured amount of times, simple consumer and group consumer will try to reconnect to failed host, update metadata as needed as so on.
 
+### SSL
+
+Kafka 0.9 supports [encryption and authentication using SSL](http://kafka.apache.org/090/documentation.html#security_ssl).
+
+To connect over SSL, include an `ssl` Object alongside your `connectionString` which contains two properties:
+`clientCert` and `clientCertKey`.
+
+If not specified,
+these will populate from the `KAFKA_CLIENT_CERT` and `KAFKA_CLIENT_CERT_KEY` environment variables.
+The ssl option defaults to `false` if no cert options or environment variables are found.
+
 ## Logging
 
 You can differentiate messages from several instances of producer/consumer by providing unique `clientId` in options:
