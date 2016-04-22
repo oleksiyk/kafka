@@ -83,7 +83,7 @@ describe('GroupConsumer', function () {
             partition: 0,
             message: { value: 'p00' }
         })
-        .delay(200)
+        .delay(1000)
         .then(function () {
             /* jshint expr: true */
             dataHandlerSpies[0].should.have.been.called; //eslint-disable-line
