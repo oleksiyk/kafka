@@ -54,58 +54,50 @@ describe('Connection', function () {
     });
 
     it('should parse connection string with protocol', function () {
-        var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9092' });
+        var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9092', ssl: { certFile: null, keyFile: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(1);
-            p.client.initialBrokers[0].host.should.be.eql('127.0.0.1');
-            p.client.initialBrokers[0].port.should.be.eql(9092);
+            p.client.initialBrokers[0].server().should.be.eql('127.0.0.1:9092');
         });
     });
 
     it('should parse connection string without protocol', function () {
-        var p = new Kafka.Producer({ connectionString: '127.0.0.1:9092' });
+        var p = new Kafka.Producer({ connectionString: '127.0.0.1:9092', ssl: { certFile: null, keyFile: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(1);
-            p.client.initialBrokers[0].host.should.be.eql('127.0.0.1');
-            p.client.initialBrokers[0].port.should.be.eql(9092);
+            p.client.initialBrokers[0].server().should.be.eql('127.0.0.1:9092');
         });
     });
 
     it('should parse connection string with multiple hosts with and without protocol', function () {
-        var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9092,127.0.0.1:9092' });
+        var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9092,127.0.0.1:9092', ssl: { certFile: null, keyFile: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(2);
-            p.client.initialBrokers[0].host.should.be.eql('127.0.0.1');
-            p.client.initialBrokers[0].port.should.be.eql(9092);
-            p.client.initialBrokers[1].host.should.be.eql('127.0.0.1');
-            p.client.initialBrokers[1].port.should.be.eql(9092);
+            p.client.initialBrokers[0].server().should.be.eql('127.0.0.1:9092');
+            p.client.initialBrokers[1].server().should.be.eql('127.0.0.1:9092');
         });
     });
 
     it('should parse connection string with multiple hosts without protocol', function () {
-        var p = new Kafka.Producer({ connectionString: '127.0.0.1:9092,127.0.0.1:9092' });
+        var p = new Kafka.Producer({ connectionString: '127.0.0.1:9092,127.0.0.1:9092', ssl: { certFile: null, keyFile: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(2);
-            p.client.initialBrokers[0].host.should.be.eql('127.0.0.1');
-            p.client.initialBrokers[0].port.should.be.eql(9092);
-            p.client.initialBrokers[1].host.should.be.eql('127.0.0.1');
-            p.client.initialBrokers[1].port.should.be.eql(9092);
+            p.client.initialBrokers[0].server().should.be.eql('127.0.0.1:9092');
+            p.client.initialBrokers[1].server().should.be.eql('127.0.0.1:9092');
         });
     });
 
     it('should strip whitespaces in connectionString', function () {
-        var p = new Kafka.Producer({ connectionString: ' kafka://127.0.0.1:9092, localhost:9092 ' });
+        var p = new Kafka.Producer({ connectionString: ' kafka://127.0.0.1:9092, localhost:9092 ', ssl: { certFile: null, keyFile: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(2);
-            p.client.initialBrokers[0].host.should.be.eql('127.0.0.1');
-            p.client.initialBrokers[0].port.should.be.eql(9092);
-            p.client.initialBrokers[1].host.should.be.eql('localhost');
-            p.client.initialBrokers[1].port.should.be.eql(9092);
+            p.client.initialBrokers[0].server().should.be.eql('127.0.0.1:9092');
+            p.client.initialBrokers[1].server().should.be.eql('localhost:9092');
         });
     });
 });
