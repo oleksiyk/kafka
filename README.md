@@ -26,6 +26,7 @@ All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 * [Group Admin](#groupadmin-consumer-groups-api)
 * [Compression](#compression)
 * [Connection](#connection)
+  * [SSL](#ssl)
 * [Logging](#logging)
 * [Topic Creation](#topic-creation)
 * [License](#license)
@@ -465,6 +466,27 @@ var consumer = new Kafka.SimpleConsumer({
 __no-kafka__ will connect to the hosts specified in `connectionString` constructor option unless it is omitted. In this case it will use KAFKA_URL environment variable or fallback to default `kafka://127.0.0.1:9092`. For better availability always specify several initial brokers: `10.0.1.1:9092,10.0.1.2:9092,10.0.1.3:9092`. The `kafka://` prefix is optional.
 
 All network errors are handled by the library: producer will retry sending failed messages for configured amount of times, simple consumer and group consumer will try to reconnect to failed host, update metadata as needed as so on.
+
+### SSL
+To connect to Kafka with [SSL endpoint enabled](http://kafka.apache.org/090/documentation.html#security_ssl) specify SSL certificate and key file options:
+
+```javascript
+var producer = new Kafka.Producer({
+  connectionString: 'kafka://127.0.0.1:9093', // should match `listeners` SSL option in Kafka config
+  ssl: {
+    certFile: '/path/to/client.crt',
+    keyFile: '/path/to/client.key'
+  }
+});
+```
+
+Other Node.js SSL options are available such as `rejectUnauthorized`, `secureProtocol`, `ciphers`, etc. See Node.js `tls.createServer` method documentation for more details.
+
+It is also possible to use `KAFKA_CLIENT_CERT` and `KAFKA_CLIENT_CERT_KEY` environment variables to specify SSL certificate and key locations:
+
+```bash
+KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT=./test/ssl/client.crt KAFKA_CLIENT_CERT_KEY=./test/ssl/client.key node producer.js
+```
 
 ## Logging
 
