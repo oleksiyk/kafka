@@ -129,7 +129,7 @@ producer.send({
     topic: 'kafka-test-topic',
     partition: 0,
     message: {
-        key: 'some-key'
+        key: 'some-key',
         value: 'Hello!'
     }
 });
@@ -148,7 +148,26 @@ producer.send({
 * `batch` - control batching (grouping) of requests
   * `size` - group messages together into single batch until their total size exceeds this value, defaults to 16384 bytes. Set to 0 to disable batching.
   * `maxWait` - send grouped messages after this amount of milliseconds expire even if their total size doesn't exceed `batch.size` yet, defaults to 10ms. Set to 0 to disable batching.
-* `asyncCompression` - boolean, use asynchronouse compression instead of synchronous, defaults to `false`
+* `asyncCompression` - boolean, use asynchronous compression instead of synchronous, defaults to `false`
+
+### Producer.send()
+```js
+send(data: Data | Data[], options: SendOptions) => Promise
+
+interface Data {
+    topic: String,
+    partition: Number,
+    value: String,
+    key?: String
+}
+
+interface SendOptions {
+    codec: Number,
+    retries: {attempts = 3: Number, delay = 1000: Number},
+    batch: {size = 16384: Number, maxWait = 10: Number}
+}
+```
+
 
 ## SimpleConsumer
 
