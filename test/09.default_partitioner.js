@@ -63,7 +63,7 @@ describe('Default Partitioner', function () {
 
         util.inherits(MyPartitioner, Kafka.DefaultPartitioner);
 
-        MyPartitioner.prototype.getKey = function getKey(message) {
+        MyPartitioner.prototype.getKey = function (message) {
             return message.key.split('-')[0];
         };
 
