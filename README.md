@@ -438,15 +438,15 @@ return producer.send({
 }, { codec: Kafka.COMPRESSION_SNAPPY })
 ```
 
-By default __no-kafka__ will use synchronous compression and decompression (synchronous Gzip is not availble in node < 0.11).
-Enable async compression/decompression with `asyncCompression` options:
+By default __no-kafka__ will use asynchronous compression and decompression.
+Disable async compression/decompression (and use sync) with `asyncCompression` option (synchronous Gzip is not availble in node < 0.11):
 
 Producer:
 
 ```javascript
 var producer = new Kafka.Producer({
     clientId: 'producer',
-    asyncCompression: true,
+    asyncCompression: false, // use sync compression/decompression
     codec: Kafka.COMPRESSION_SNAPPY
 });
 ```
