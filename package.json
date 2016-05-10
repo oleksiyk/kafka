@@ -6,7 +6,7 @@
     "name": "Oleksiy Krivoshey",
     "email": "oleksiyk@gmail.com"
   },
-  "version": "2.4.1",
+  "version": "2.4.2",
   "main": "./lib/index.js",
   "keywords": [
     "kafka"
