@@ -124,7 +124,7 @@ describe('Producer', function () {
         return producer.send(msgs, {
             retries: {
                 attempts: 5,
-                delay: 100
+                delay: 50
             }
         }).then(function (result) {
             result.should.be.an('array').and.have.length(2);
@@ -138,14 +138,12 @@ describe('Producer', function () {
         });
     });
 
-    it('should use delays array when supplied', function (done) {
+    it('should use progressive delay between attempts', function (done) {
         var NoKafkaConnectionError = require('../lib/errors').NoKafkaConnectionError;
         var originalGetNextDelay = producer._getNextDelay;
         var attemptCounter = 0;
         var expectedNumberOfAttempts = 7;
-        var progressiveDelays = [1, 2, 3, 4];
-        var defaultDelay = 5;
-        var expectedDelays = progressiveDelays.concat(defaultDelay, defaultDelay);
+        var expectedDelays = [3, 6, 9, 12, 15, 18];
 
         producer._getNextDelay = function (task, attempt) {
             var result = originalGetNextDelay(task, attempt);
@@ -155,7 +153,7 @@ describe('Producer', function () {
         producer.client.produceRequest = function () {
             attemptCounter++;
             if (attemptCounter === expectedNumberOfAttempts) {
-                expectedDelays.should.be.empty; // eslint-disable-line
+                expectedDelays.should.have.length(0);
                 done();
             }
             return Promise.resolve([{
@@ -172,8 +170,7 @@ describe('Producer', function () {
         }], {
             retries: {
                 attempts: expectedNumberOfAttempts,
-                delay: defaultDelay,
-                delays: progressiveDelays
+                delay: 3
             }
         });
     });

@@ -69,14 +69,13 @@ return producer.init().then(function(){
 });
 ```
 
-Send and retry if failed 5 times with delays 10, 50, 100, and 100 ms:
+Send and retry if failed 5 times with progressive delays 10, 20, 30, and 40 ms:
 
 ```javascript
 return producer.send(messages, {
   retries: {
     attempts: 5,
-    delay: 100,
-    delays: [10, 50]
+    delay: 10
   }
 });
 ```
@@ -142,10 +141,9 @@ producer.send({
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
 * `partitioner` - function used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner function receives 3 arguments: the topic name, an array with topic partitions, and the message (useful to partition by key, etc.). `partitioner` can be sync or async (return a Promise).
-* `retries` - controls number of attempts at delay between them when produce request fails
+* `retries` - controls number of attempts between send attempts when produce request fails. The delay is progressive, e.g. 1000, 2000, 3000, 4000...
   * `attempts` - number of total attempts to send the message, defaults to 3
-  * `delay` - delay in ms between retries, defaults to 1000
-  * `delays` - an array of delays per attempt, defaults to 'delay' value
+  * `delay` - delay increment in ms, defaults to 1000
 * `codec` - compression codec, one of Kafka.COMPRESSION_NONE, Kafka.COMPRESSION_SNAPPY, Kafka.COMPRESSION_GZIP
 * `batch` - control batching (grouping) of requests
   * `size` - group messages together into single batch until their total size exceeds this value, defaults to 16384 bytes. Set to 0 to disable batching.
