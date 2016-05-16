@@ -149,12 +149,13 @@ describe('Producer', function () {
 
         producer._getNextDelay = function (task, attempt) {
             var result = originalGetNextDelay(task, attempt);
-            result.should.be.equal(expectedDelays[attempt - 1]);
+            result.should.be.equal(expectedDelays.shift());
             return result;
         };
         producer.client.produceRequest = function () {
             attemptCounter++;
             if (attemptCounter === expectedNumberOfAttempts) {
+                expectedDelays.should.be.empty; // eslint-disable-line
                 done();
             }
             return Promise.resolve([{
