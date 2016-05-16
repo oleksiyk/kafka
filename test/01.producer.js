@@ -138,6 +138,45 @@ describe('Producer', function () {
         });
     });
 
+    it('should use delays array when supplied', function (done) {
+        var NoKafkaConnectionError = require('../lib/errors').NoKafkaConnectionError;
+        var originalGetNextDelay = producer._getNextDelay;
+        var attemptCounter = 0;
+        var expectedNumberOfAttempts = 7;
+        var progressiveDelays = [1, 2, 3, 4];
+        var defaultDelay = 5;
+        var expectedDelays = progressiveDelays.concat(defaultDelay, defaultDelay);
+
+        producer._getNextDelay = function (task, attempt) {
+            var result = originalGetNextDelay(task, attempt);
+            result.should.be.equal(expectedDelays[attempt - 1]);
+            return result;
+        };
+        producer.client.produceRequest = function () {
+            attemptCounter++;
+            if (attemptCounter === expectedNumberOfAttempts) {
+                done();
+            }
+            return Promise.resolve([{
+                topic: 'kafka-test-unknown-topic',
+                partition: 0,
+                error: new NoKafkaConnectionError()
+            }]);
+        };
+
+        return producer.send([{
+            topic: 'kafka-test-unknown-topic',
+            partition: 0,
+            message: { value: 'Hello!' }
+        }], {
+            retries: {
+                attempts: expectedNumberOfAttempts,
+                delay: defaultDelay,
+                delays: progressiveDelays
+            }
+        });
+    });
+
     it('partitioner arguments', function () {
         var partitionerSpy = sinon.spy(function () { return 1; });
         var _producer = new Kafka.Producer({

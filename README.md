@@ -69,13 +69,14 @@ return producer.init().then(function(){
 });
 ```
 
-Send and retry if failed 2 times with 100ms delay:
+Send and retry if failed 5 times with delays 10, 50, 100, and 100 ms:
 
 ```javascript
 return producer.send(messages, {
   retries: {
-    attempts: 2,
-    delay: 100
+    attempts: 5,
+    delay: 100,
+    delays: [10, 50]
   }
 });
 ```
@@ -129,14 +130,14 @@ producer.send({
     topic: 'kafka-test-topic',
     partition: 0,
     message: {
-        key: 'some-key'
+        key: 'some-key',
         value: 'Hello!'
     }
 });
 ```
 
 ### Producer options:
-* `requiredAcks` - require acknoledgments for produce request. If it is 0 the server will not send any response.  If it is 1 (default), the server will wait the data is written to the local log before sending a response. If it is -1 the server will block until the message is committed by all in sync replicas before sending a response. For any number > 1 the server will block waiting for this number of acknowledgements to occur (but the server will never wait for more acknowledgements than there are in-sync replicas).
+* `requiredAcks` - require acknowledgments for produce request. If it is 0 the server will not send any response.  If it is 1 (default), the server will wait the data is written to the local log before sending a response. If it is -1 the server will block until the message is committed by all in sync replicas before sending a response. For any number > 1 the server will block waiting for this number of acknowledgements to occur (but the server will never wait for more acknowledgements than there are in-sync replicas).
 * `timeout` - timeout in ms for produce request
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
@@ -144,11 +145,12 @@ producer.send({
 * `retries` - controls number of attempts at delay between them when produce request fails
   * `attempts` - number of total attempts to send the message, defaults to 3
   * `delay` - delay in ms between retries, defaults to 1000
+  * `delays` - an array of delays per attempt, defaults to 'delay' value
 * `codec` - compression codec, one of Kafka.COMPRESSION_NONE, Kafka.COMPRESSION_SNAPPY, Kafka.COMPRESSION_GZIP
 * `batch` - control batching (grouping) of requests
   * `size` - group messages together into single batch until their total size exceeds this value, defaults to 16384 bytes. Set to 0 to disable batching.
   * `maxWait` - send grouped messages after this amount of milliseconds expire even if their total size doesn't exceed `batch.size` yet, defaults to 10ms. Set to 0 to disable batching.
-* `asyncCompression` - boolean, use asynchronouse compression instead of synchronous, defaults to `false`
+* `asyncCompression` - boolean, use asynchronous compression instead of synchronous, defaults to `false`
 
 ## SimpleConsumer
 
@@ -208,7 +210,7 @@ consumer.commitOffset([
 ])
 ```
 
-Fetch commited offset(s)
+Fetch committed offset(s)
 
 ```javascript
 consumer.fetchOffset([
@@ -237,7 +239,7 @@ consumer.fetchOffset([
 ```
 
 ### SimpleConsumer options
-* `groupId` - group ID for comitting and fetching offsets. Defaults to 'no-kafka-group-v0'
+* `groupId` - group ID for committing and fetching offsets. Defaults to 'no-kafka-group-v0'
 * `maxWaitTime` - maximum amount of time in milliseconds to block waiting if insufficient data is available at the time the fetch request is issued, defaults to 100ms
 * `idleTimeout` - timeout between fetch calls, defaults to 1000ms
 * `minBytes` - minimum number of bytes to wait from Kafka before returning the fetch call, defaults to 1 byte
@@ -245,7 +247,7 @@ consumer.fetchOffset([
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
 * `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
-* `asyncCompression` - boolean, use asynchronouse decompression instead of synchronous, defaults to `false`
+* `asyncCompression` - boolean, use asynchronous decompression instead of synchronous, defaults to `false`
 * `handlerConcurrency` - specify concurrency level for the consumer handler function, defaults to 10
 
 ## GroupConsumer (new unified consumer API)
@@ -341,7 +343,7 @@ You can also write your own assignment strategy function and provide it as `fn` 
 * `retentionTime` - offset retention time in ms, defaults to 1 day (24 * 3600 * 1000)
 * `startingOffset` - starting position (time) when there is no commited offset, defaults to `Kafka.LATEST_OFFSET`
 * `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
-* `asyncCompression` - boolean, use asynchronouse decompression instead of synchronous, defaults to `false`
+* `asyncCompression` - boolean, use asynchronous decompression instead of synchronous, defaults to `false`
 * `handlerConcurrency` - specify concurrency level for the consumer handler function, defaults to 10
 
 ## GroupAdmin (consumer groups API)
@@ -413,7 +415,7 @@ return producer.send({
 }, { codec: Kafka.COMPRESSION_SNAPPY })
 ```
 
-By default __no-kafka__ will use synchronous compression and decompression (synchronous Gzip is not availble in node < 0.11).
+By default __no-kafka__ will use synchronous compression and decompression (synchronous Gzip is not available in node < 0.11).
 Enable async compression/decompression with `asyncCompression` options:
 
 Producer:
