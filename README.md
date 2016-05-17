@@ -140,6 +140,9 @@ producer.send({
 * `timeout` - timeout in ms for produce request
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
+* `reconnectionDelay` - controls optionally progressive delay between reconnection attempts in case of network error:
+  * `min` - minimum delay, used as increment value for next attempts, defaults to 1000ms
+  * `max` - maximum delay value, defaults to 1000ms
 * `partitioner` - function used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner function receives 3 arguments: the topic name, an array with topic partitions, and the message (useful to partition by key, etc.). `partitioner` can be sync or async (return a Promise).
 * `retries` - controls number of attempts at delay between them when produce request fails
   * `attempts` - number of total attempts to send the message, defaults to 3
@@ -244,6 +247,9 @@ consumer.fetchOffset([
 * `maxBytes` - maximum size of messages in a fetch response
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
+* `reconnectionDelay` - controls optionally progressive delay between reconnection attempts in case of network error:
+  * `min` - minimum delay, used as increment value for next attempts, defaults to 1000ms
+  * `max` - maximum delay value, defaults to 1000ms
 * `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
 * `asyncCompression` - boolean, use asynchronouse decompression instead of synchronous, defaults to `false`
 * `handlerConcurrency` - specify concurrency level for the consumer handler function, defaults to 10
@@ -336,6 +342,9 @@ You can also write your own assignment strategy function and provide it as `fn` 
 * `maxBytes` - maximum size of messages in a fetch response
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
+* `reconnectionDelay` - controls optionally progressive delay between reconnection attempts in case of network error:
+  * `min` - minimum delay, used as increment value for next attempts, defaults to 1000ms
+  * `max` - maximum delay value, defaults to 1000ms
 * `sessionTimeout` - session timeout in ms, min 6000, max 30000, defaults to `15000`
 * `heartbeatTimeout` - delay between heartbeat requests in ms, defaults to `1000`
 * `retentionTime` - offset retention time in ms, defaults to 1 day (24 * 3600 * 1000)
@@ -441,6 +450,9 @@ var consumer = new Kafka.SimpleConsumer({
 __no-kafka__ will connect to the hosts specified in `connectionString` constructor option unless it is omitted. In this case it will use KAFKA_URL environment variable or fallback to default `kafka://127.0.0.1:9092`. For better availability always specify several initial brokers: `10.0.1.1:9092,10.0.1.2:9092,10.0.1.3:9092`. The `kafka://` prefix is optional.
 
 All network errors are handled by the library: producer will retry sending failed messages for configured amount of times, simple consumer and group consumer will try to reconnect to failed host, update metadata as needed as so on.
+
+### Reconnection delay
+In case of network error which prevents further operations __no-kafka__ will try to reconnect to Kafka brokers in a endless loop with the optionally progressive delay which can be configured with `reconnectionDelay` option.
 
 ## Logging
 
