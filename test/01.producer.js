@@ -112,6 +112,7 @@ describe('Producer', function () {
 
     it('should return an error for unknown partition/topic and retry 5 times', function () {
         var start = Date.now(), msgs;
+        var delay = 50, attempts = 5, expectedTotalDelay = 50 + 100 + 150 + 200;
         msgs = [{
             topic: 'kafka-test-unknown-topic',
             partition: 0,
@@ -123,8 +124,8 @@ describe('Producer', function () {
         }];
         return producer.send(msgs, {
             retries: {
-                attempts: 5,
-                delay: 50
+                attempts: attempts,
+                delay: delay
             }
         }).then(function (result) {
             result.should.be.an('array').and.have.length(2);
@@ -134,44 +135,7 @@ describe('Producer', function () {
             result[1].should.have.property('error');
             result[0].error.should.have.property('code', 'UnknownTopicOrPartition');
             result[1].error.should.have.property('code', 'UnknownTopicOrPartition');
-            (Date.now() - start).should.be.closeTo(500, 100);
-        });
-    });
-
-    it('should use progressive delay between attempts', function (done) {
-        var NoKafkaConnectionError = require('../lib/errors').NoKafkaConnectionError;
-        var originalGetNextDelay = producer._getNextDelay;
-        var attemptCounter = 0;
-        var expectedNumberOfAttempts = 7;
-        var expectedDelays = [3, 6, 9, 12, 15, 18];
-
-        producer._getNextDelay = function (task, attempt) {
-            var result = originalGetNextDelay(task, attempt);
-            result.should.be.equal(expectedDelays.shift());
-            return result;
-        };
-        producer.client.produceRequest = function () {
-            attemptCounter++;
-            if (attemptCounter === expectedNumberOfAttempts) {
-                expectedDelays.should.have.length(0);
-                done();
-            }
-            return Promise.resolve([{
-                topic: 'kafka-test-unknown-topic',
-                partition: 0,
-                error: new NoKafkaConnectionError()
-            }]);
-        };
-
-        return producer.send([{
-            topic: 'kafka-test-unknown-topic',
-            partition: 0,
-            message: { value: 'Hello!' }
-        }], {
-            retries: {
-                attempts: expectedNumberOfAttempts,
-                delay: 3
-            }
+            (Date.now() - start).should.be.closeTo(expectedTotalDelay, 100);
         });
     });
 
