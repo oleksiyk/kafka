@@ -112,6 +112,7 @@ describe('Producer', function () {
 
     it('should return an error for unknown partition/topic and retry 5 times', function () {
         var start = Date.now(), msgs;
+        var delay = 50, attempts = 5, expectedTotalDelay = 50 + 100 + 150 + 200;
         msgs = [{
             topic: 'kafka-test-unknown-topic',
             partition: 0,
@@ -123,8 +124,8 @@ describe('Producer', function () {
         }];
         return producer.send(msgs, {
             retries: {
-                attempts: 5,
-                delay: 100
+                attempts: attempts,
+                delay: delay
             }
         }).then(function (result) {
             result.should.be.an('array').and.have.length(2);
@@ -134,7 +135,7 @@ describe('Producer', function () {
             result[1].should.have.property('error');
             result[0].error.should.have.property('code', 'UnknownTopicOrPartition');
             result[1].error.should.have.property('code', 'UnknownTopicOrPartition');
-            (Date.now() - start).should.be.closeTo(500, 100);
+            (Date.now() - start).should.be.closeTo(expectedTotalDelay, 100);
         });
     });
 
