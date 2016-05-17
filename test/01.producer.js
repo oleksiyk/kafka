@@ -116,7 +116,10 @@ describe('Producer', function () {
     });
 
     it('should return an error for unknown partition/topic and make 5 attempts', function () {
-        var start = Date.now(), msgs;
+        var msgs;
+
+        var spy = sinon.spy(producer.client, 'produceRequest');
+
         msgs = [{
             topic: 'kafka-test-unknown-topic',
             partition: 0,
@@ -135,6 +138,7 @@ describe('Producer', function () {
                 }
             }
         }).then(function (result) {
+            spy.should.have.callCount(5);
             result.should.be.an('array').and.have.length(2);
             result[0].should.be.an('object');
             result[1].should.be.an('object');
@@ -142,7 +146,7 @@ describe('Producer', function () {
             result[1].should.have.property('error');
             result[0].error.should.have.property('code', 'UnknownTopicOrPartition');
             result[1].error.should.have.property('code', 'UnknownTopicOrPartition');
-            (Date.now() - start).should.be.closeTo(900, 100);
+            // (Date.now() - start).should.be.closeTo(900, 100);
         });
     });
 

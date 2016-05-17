@@ -185,7 +185,7 @@ describe('GroupConsumer', function () {
                 handler: dataHandlerSpies[2]
             }),
         ])
-        .delay(500) // give some time to rebalance group
+        .delay(1000) // give some time to rebalance group
         .then(function () {
             dataHandlerSpies[0].reset();
             return producer.send([
@@ -205,7 +205,7 @@ describe('GroupConsumer', function () {
                     message: { value: 'p02' }
                 }
             ])
-            .delay(200)
+            .delay(400)
             .then(function () {
                 /* jshint expr: true */
                 dataHandlerSpies[0].should.have.been.calledOnce; //eslint-disable-line

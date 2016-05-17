@@ -49,7 +49,7 @@ describe('SimpleConsumer', function () {
                 message: { value: 'p00' }
             });
         })
-        .delay(100)
+        .delay(200)
         .then(function () {
             /* jshint expr: true */
             dataHandlerSpy.should.have.been.called; // eslint-disable-line
@@ -78,7 +78,7 @@ describe('SimpleConsumer', function () {
                 }
             });
         })
-        .delay(100)
+        .delay(200)
         .then(function () {
             /* jshint expr: true */
             dataHandlerSpy.should.have.been.called; // eslint-disable-line
@@ -105,7 +105,7 @@ describe('SimpleConsumer', function () {
             partition: 0,
             message: { value: '人人生而自由，在尊嚴和權利上一律平等。' }
         })
-        .delay(100)
+        .delay(200)
         .then(function () {
             /* jshint expr: true */
             dataHandlerSpy.should.have.been.called; // eslint-disable-line

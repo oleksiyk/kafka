@@ -194,6 +194,7 @@ describe('Compression', function () {
                 });
             })
             .then(function () {
+                dataHandlerSpy.reset();
                 return consumer.subscribe('kafka-test-topic', 0, { offset: offset }, dataHandlerSpy);
             })
             .delay(200)
