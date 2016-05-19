@@ -247,7 +247,7 @@ describe('Producer', function () {
         });
     });
 
-    it('should throw error for unknown topic', function () {
+    it('should return error for unknown topic', function () {
         var _producer = new Kafka.Producer({
             clientId: 'producer'
         });
@@ -257,8 +257,18 @@ describe('Producer', function () {
                 message: {
                     value: 'Hello!'
                 }
+            }, {
+                retries: {
+                    attempts: 1
+                }
             });
-        }).should.be.rejected.and.eventually.have.property('code', 'UnknownTopicOrPartition');
+        })
+        .then(function (result) {
+            result.should.be.an('array').and.have.length(1);
+            result[0].should.be.an('object');
+            result[0].should.have.property('error');
+            result[0].error.should.have.property('code', 'UnknownTopicOrPartition');
+        });
     });
 
     it('should group messages by global batch.size', function () {
