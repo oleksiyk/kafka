@@ -49,7 +49,7 @@ describe('SimpleConsumer', function () {
                 message: { value: 'p00' }
             });
         })
-        .delay(200)
+        .delay(500)
         .then(function () {
             /* jshint expr: true */
             dataHandlerSpy.should.have.been.called; // eslint-disable-line
@@ -68,17 +68,16 @@ describe('SimpleConsumer', function () {
     });
 
     it('should receive new keyed messages', function () {
-        return consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy).then(function () {
-            return producer.send({
-                topic: 'kafka-test-topic',
-                partition: 0,
-                message: {
-                    key: 'test-key-p00',
-                    value: 'p00'
-                }
-            });
+        dataHandlerSpy.reset();
+        return producer.send({
+            topic: 'kafka-test-topic',
+            partition: 0,
+            message: {
+                key: 'test-key-p00',
+                value: 'p00'
+            }
         })
-        .delay(200)
+        .delay(500)
         .then(function () {
             /* jshint expr: true */
             dataHandlerSpy.should.have.been.called; // eslint-disable-line
@@ -105,7 +104,7 @@ describe('SimpleConsumer', function () {
             partition: 0,
             message: { value: '人人生而自由，在尊嚴和權利上一律平等。' }
         })
-        .delay(200)
+        .delay(500)
         .then(function () {
             /* jshint expr: true */
             dataHandlerSpy.should.have.been.called; // eslint-disable-line
