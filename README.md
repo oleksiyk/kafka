@@ -244,7 +244,7 @@ consumer.fetchOffset([
 * `maxWaitTime` - maximum amount of time in milliseconds to block waiting if insufficient data is available at the time the fetch request is issued, defaults to 100ms
 * `idleTimeout` - timeout between fetch calls, defaults to 1000ms
 * `minBytes` - minimum number of bytes to wait from Kafka before returning the fetch call, defaults to 1 byte
-* `maxBytes` - maximum size of messages in a fetch response
+* `maxBytes` - maximum size of messages in a fetch response, defaults to 1MB
 * `clientId` - ID of this client, defaults to 'no-kafka-client'
 * `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
 * `reconnectionDelay` - controls optionally progressive delay between reconnection attempts in case of network error:
