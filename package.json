@@ -6,15 +6,15 @@
     "name": "Oleksiy Krivoshey",
     "email": "oleksiyk@gmail.com"
   },
-  "version": "2.5.1",
+  "version": "2.5.5",
   "main": "./lib/index.js",
   "keywords": [
     "kafka"
   ],
   "dependencies": {
-    "bin-protocol": "^3.0.0",
+    "bin-protocol": "^3.0.2",
     "bluebird": "^3.3.3",
-    "buffer-crc32": "~=0.2.5",
+    "buffer-crc32": "^0.2.5",
     "hashring": "~=3.2.0",
     "lodash": "^4.5.0",
     "murmur-hash-js": "^1.0.0",
