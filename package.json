@@ -20,9 +20,6 @@
     "hashring": "^3.2.0",
     "wrr-pool": "^1.0.3"
   },
-  "optionalDependencies": {
-    "snappy": "^5.0.0"
-  },
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^5.2.0",
