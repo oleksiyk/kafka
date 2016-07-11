@@ -399,7 +399,7 @@ return admin.init().then(function(){
 
 ## Compression
 
-__no-kafka__ supports both SNAPPY and Gzip compression.
+__no-kafka__ supports both SNAPPY and Gzip compression. To use SNAPPY you must install the `snappy` NPM module in your project.
 
 Enable compression in Producer:
 
