@@ -13,8 +13,6 @@ var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-co
 
 var dataHandlerSpy = sinon.spy(function () {});
 
-var maxBytesTestMessagesSize;
-
 describe('SimpleConsumer', function () {
     before(function () {
         return Promise.all([
@@ -162,14 +160,13 @@ describe('SimpleConsumer', function () {
                     dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(2);
                     dataHandlerSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p000');
                     dataHandlerSpy.lastCall.args[0][1].message.value.toString('utf8').should.be.eql('p001');
-                    // save for next test
-                    maxBytesTestMessagesSize = dataHandlerSpy.lastCall.args[0][0].messageSize + dataHandlerSpy.lastCall.args[0][1].messageSize;
                 });
             });
         });
     });
 
     it('should receive messages in maxBytes batches', function () {
+        var maxBytesTestMessagesSize = dataHandlerSpy.lastCall.args[0][0].messageSize + dataHandlerSpy.lastCall.args[0][1].messageSize;
         return consumer.unsubscribe('kafka-test-topic', 0).then(function () {
             dataHandlerSpy.reset();
             return consumer.offset('kafka-test-topic', 0).then(function (offset) {
@@ -184,6 +181,41 @@ describe('SimpleConsumer', function () {
                     dataHandlerSpy.getCall(1).args[0].should.be.an('array').and.have.length(1);
                     dataHandlerSpy.getCall(0).args[0][0].message.value.toString('utf8').should.be.eql('p000');
                     dataHandlerSpy.getCall(1).args[0][0].message.value.toString('utf8').should.be.eql('p001');
+                });
+            });
+        });
+    });
+
+    it('should skip single message larger then configured maxBytes', function () {
+        var mSize;
+        dataHandlerSpy.reset();
+        return producer.send([{
+            topic: 'kafka-test-topic',
+            partition: 0,
+            message: { value: 'p0000000000000001' }
+        }, {
+            topic: 'kafka-test-topic',
+            partition: 0,
+            message: { value: 'p001' }
+        }])
+        .delay(300)
+        .then(function () {
+            dataHandlerSpy.should.have.been.calledTwice; // eslint-disable-line
+            mSize = dataHandlerSpy.getCall(0).args[0][0].messageSize;
+        })
+        .then(function () {
+            dataHandlerSpy.reset();
+            return consumer.unsubscribe('kafka-test-topic', 0).then(function () {
+                return consumer.offset('kafka-test-topic', 0).then(function (offset) {
+                    // ask for maxBytes that is smaller then size of the first message but enough to receive second message
+                    var maxBytes = 8 + 4 + mSize - 1;
+                    return consumer.subscribe('kafka-test-topic', 0, { offset: offset - 2, maxBytes: maxBytes }, dataHandlerSpy)
+                    .delay(300)
+                    .then(function () {
+                        dataHandlerSpy.should.have.been.calledOnce; // eslint-disable-line
+                        dataHandlerSpy.getCall(0).args[0].should.be.an('array').and.have.length(1);
+                        dataHandlerSpy.getCall(0).args[0][0].message.value.toString('utf8').should.be.eql('p001');
+                    });
                 });
             });
         });
