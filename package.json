@@ -35,7 +35,11 @@
     "url": "https://github.com/oleksiyk/kafka/issues"
   },
   "scripts": {
-    "test": "make"
+    "coverage": "istanbul check-coverage --statement 85 --branch 70 --function 85",
+    "eslint": "eslint .",
+    "posttest": "npm run coverage",
+    "pretest": "npm run eslint",
+    "test": "istanbul cover --report lcov --report text --report html ./node_modules/mocha/bin/_mocha \"test/**/*.js\""
   },
   "repository": {
     "type": "git",
