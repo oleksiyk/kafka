@@ -4,6 +4,7 @@
 
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
+var Client = require('../lib/client');
 
 describe('requiredAcks: 0', function () {
     var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
@@ -53,5 +54,43 @@ describe('connectionString', function () {
         var producer = new Kafka.Producer({ connectionString: 'localhost' });
 
         return producer.init().should.be.rejected;
+    });
+});
+
+describe('client logging', function () {
+    var logger = {
+        log: sinon.spy(function () {}),
+        debug: sinon.spy(function () {}),
+        error: sinon.spy(function () {}),
+        warn: sinon.spy(function () {}),
+        trace: sinon.spy(function () {})
+    };
+
+    var defaultClient = new Client({
+        logger: {
+            logLevel: 5,
+            logstash: {
+                enabled: false
+            }
+        }
+    });
+
+    var customClient = new Client({
+        logger: logger
+    });
+
+    it('should allow legacy log settings', function () {
+        ['log', 'debug', 'error', 'warn', 'trace'].forEach(function (m) {
+            //TODO: how do we check if this is the default logger?
+            defaultClient[m](m);
+        });
+    });
+
+    it('should allow a logger object', function () {
+        ['log', 'debug', 'error', 'warn', 'trace'].forEach(function (m) {
+            customClient[m](m);
+            logger[m].should.have.been.called; // eslint-disable-line
+            logger[m].lastCall.args[0].should.be.a('string', 'no-kafka-client');
+        });
     });
 });
