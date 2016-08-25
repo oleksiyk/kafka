@@ -456,6 +456,21 @@ In case of network error which prevents further operations __no-kafka__ will try
 
 ## Logging
 
+### Custom logger
+You can send in a log object (like [bunyan](https://www.npmjs.com/package/bunyan)):
+
+```javascript
+var bunyan = require('bunyan');
+var log = bunyan.createLogger({name: "Kafka"});
+
+var consumer = new Kafka.GroupConsumer({
+    clientId: 'group-consumer',
+    logger: log
+});
+```
+
+### Default logger
+
 You can differentiate messages from several instances of producer/consumer by providing unique `clientId` in options:
 
 ```javascript
