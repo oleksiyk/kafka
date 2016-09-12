@@ -63,8 +63,8 @@ describe('brokerRedirection', function () {
             brokerRedirection: function (host, port) {
                 latched = true;
                 return {
-                    host,
-                    port
+                    host: host,
+                    port: port
                 };
             }
         });
