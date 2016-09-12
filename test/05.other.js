@@ -64,9 +64,9 @@ describe('brokerRedirection', function () {
                 latched = true;
                 return {
                     host,
-                    port,
+                    port
                 };
-            },
+            }
         });
 
         return producer.init()
@@ -83,9 +83,9 @@ describe('brokerRedirection', function () {
                 latched = true;
                 return {
                     host: 'localhost',
-                    port: 9092,
+                    port: 9092
                 };
-            },
+            }
         });
 
         // If the init is succesful, then we remapped the bad
@@ -100,8 +100,8 @@ describe('brokerRedirection', function () {
         var producer = new Kafka.Producer({
             connectionString: 'does-not-exist:9092',
             brokerRedirection: {
-                'does-not-exist:9092': 'localhost:9092',
-            },
+                'does-not-exist:9092': 'localhost:9092'
+            }
         });
 
         // If the init is succesful, then we remapped the bad
@@ -113,8 +113,8 @@ describe('brokerRedirection', function () {
         var producer = new Kafka.Producer({
             connectionString: 'does-not-exist:9092',
             brokerRedirection: {
-                'kafka://does-not-exist:9092': 'localhost:9092',
-            },
+                'kafka://does-not-exist:9092': 'localhost:9092'
+            }
         });
 
         // If the init is succesful, then we remapped the bad
@@ -126,8 +126,8 @@ describe('brokerRedirection', function () {
         var producer = new Kafka.Producer({
             connectionString: 'does-not-exist:9092',
             brokerRedirection: {
-                'kafka://does-not-exist:9092': 'kafka://localhost:9092',
-            },
+                'kafka://does-not-exist:9092': 'kafka://localhost:9092'
+            }
         });
 
         // If the init is succesful, then we remapped the bad
