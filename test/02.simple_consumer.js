@@ -131,7 +131,7 @@ describe('SimpleConsumer', function () {
             .then(function () {
                 consumer.subscriptions['kafka-test-topic:0'].offset.should.be.eql(offset + 200);
             })
-            .delay(200)
+            .delay(300)
             .then(function () {
                 consumer.subscriptions['kafka-test-topic:0'].offset.should.be.eql(offset);
             });

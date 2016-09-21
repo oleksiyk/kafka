@@ -59,7 +59,7 @@ describe('Compression', function () {
             .then(function () {
                 return consumer.subscribe('kafka-test-topic', 0, { offset: offset }, dataHandlerSpy);
             })
-            .delay(200)
+            .delay(300)
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
                 dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(3);

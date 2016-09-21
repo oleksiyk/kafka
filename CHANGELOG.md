@@ -9,3 +9,4 @@
 
 ### Added
 - SSL support
+- Broker redirection (map host/port to alternate/internal host/port pair)

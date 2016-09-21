@@ -79,6 +79,7 @@ describe('brokerRedirection', function () {
         var latched = false;
         var producer = new Kafka.Producer({
             connectionString: 'does-not-exist:9092',
+            ssl: false,
             brokerRedirection: function () {
                 latched = true;
                 return {
@@ -99,6 +100,7 @@ describe('brokerRedirection', function () {
     it('Should apply lookup remap (host:port)', function () {
         var producer = new Kafka.Producer({
             connectionString: 'does-not-exist:9092',
+            ssl: false,
             brokerRedirection: {
                 'does-not-exist:9092': 'localhost:9092'
             }
@@ -112,6 +114,7 @@ describe('brokerRedirection', function () {
     it('Should apply lookup remap (kafka://host:port)', function () {
         var producer = new Kafka.Producer({
             connectionString: 'does-not-exist:9092',
+            ssl: false,
             brokerRedirection: {
                 'kafka://does-not-exist:9092': 'localhost:9092'
             }
@@ -125,6 +128,7 @@ describe('brokerRedirection', function () {
     it('Should apply lookup remap prefixed with Kafka', function () {
         var producer = new Kafka.Producer({
             connectionString: 'does-not-exist:9092',
+            ssl: false,
             brokerRedirection: {
                 'kafka://does-not-exist:9092': 'kafka://localhost:9092'
             }
