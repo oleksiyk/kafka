@@ -6,7 +6,7 @@
     "name": "Oleksiy Krivoshey",
     "email": "oleksiyk@gmail.com"
   },
-  "version": "2.5.6",
+  "version": "2.8.1",
   "main": "./lib/index.js",
   "keywords": [
     "kafka"
@@ -19,7 +19,7 @@
     "lodash": "^4.5.0",
     "murmur-hash-js": "^1.0.0",
     "nice-simple-logger": "^1.0.1",
-    "snappy": "^5.0.0",
+    "hashring": "^3.2.0",
     "wrr-pool": "^1.0.3"
   },
   "devDependencies": {
@@ -30,13 +30,18 @@
     "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
     "sinon": "^1.4.0",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^2.8.0",
+    "snappy": "^5.0.0"
   },
   "bugs": {
     "url": "https://github.com/oleksiyk/kafka/issues"
   },
   "scripts": {
-    "test": "make"
+    "coverage": "istanbul check-coverage --statement 85 --branch 70 --function 85",
+    "eslint": "eslint .",
+    "posttest": "npm run coverage",
+    "pretest": "npm run eslint",
+    "test": "istanbul cover --report lcov --report text --report html ./node_modules/mocha/bin/_mocha \"test/**/*.js\""
   },
   "repository": {
     "type": "git",

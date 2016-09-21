@@ -27,6 +27,7 @@ All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 * [Compression](#compression)
 * [Connection](#connection)
   * [SSL](#ssl)
+  * [Remapping Broker Addresses](#remapping-broker-addresses)
 * [Logging](#logging)
 * [Topic Creation](#topic-creation)
 * [License](#license)
@@ -429,7 +430,7 @@ return admin.init().then(function(){
 
 ## Compression
 
-__no-kafka__ supports both SNAPPY and Gzip compression.
+__no-kafka__ supports both SNAPPY and Gzip compression. To use SNAPPY you must install the `snappy` NPM module in your project.
 
 Enable compression in Producer:
 
@@ -477,8 +478,11 @@ var consumer = new Kafka.SimpleConsumer({
 
 ## Connection
 
-__no-kafka__ will connect to the hosts specified in `connectionString` constructor option unless it is omitted. In this case it will use KAFKA_URL environment variable or fallback to default `kafka://127.0.0.1:9092`. For better availability always specify several initial brokers: `10.0.1.1:9092,10.0.1.2:9092,10.0.1.3:9092`. The `kafka://` prefix is optional.
+### Initial Brokers
 
+__no-kafka__ will connect to the hosts specified in `connectionString` constructor option unless it is omitted. In this case it will use KAFKA_URL environment variable or fallback to default `kafka://127.0.0.1:9092`. For better availability always specify several initial brokers: `10.0.1.1:9092,10.0.1.2:9092,10.0.1.3:9092`. The `/` prefix is optional.
+
+### Disconnect / Timeout Handling
 All network errors are handled by the library: producer will retry sending failed messages for configured amount of times, simple consumer and group consumer will try to reconnect to failed host, update metadata as needed as so on.
 
 ### SSL
@@ -501,6 +505,34 @@ It is also possible to use `KAFKA_CLIENT_CERT` and `KAFKA_CLIENT_CERT_KEY` envir
 ```bash
 KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT=./test/ssl/client.crt KAFKA_CLIENT_CERT_KEY=./test/ssl/client.key node producer.js
 ```
+
+### Remapping Broker Addresses
+Sometimes the advertised listener addresses for a Kafka cluster may be incorrect from the client,
+such as when a Kafka farm is behind NAT or other network infrastructure. In this scenario it is
+possible to pass a `brokerRedirection` option to the `Producer`, `SimpleConsumer` or `GroupConsumer`.
+
+The value of the `brokerDirection` can be either:
+
+  - A function returning a tuple of host (string) and port (integer), such as:
+
+        brokerRedirection: function (host, port) {
+            return {
+                host: host + '.somesuffix.com', // Fully qualify
+                port: port + 100,               // Port NAT
+            }
+        }
+
+  - A simple map of connection strings to new connection strings, such as:
+
+        brokerRedirection: {
+            'some-host:9092': 'actual-host:9092',
+            'kafka://another-host:9092': 'another-host:9093',
+            'third-host:9092': 'kafka://third-host:9000'
+        }
+
+A common scenario for this kind of remapping is when a Kafka cluster exists within a Docker application, and the
+internally advertised names needed for container to container communication do not correspond to the actual external
+ports or addresses when connecting externally via other tools.
 
 ### Reconnection delay
 In case of network error which prevents further operations __no-kafka__ will try to reconnect to Kafka brokers in a endless loop with the optionally progressive delay which can be configured with `reconnectionDelay` option.

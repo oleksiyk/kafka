@@ -55,3 +55,83 @@ describe('connectionString', function () {
         return producer.init().should.be.rejected;
     });
 });
+
+describe('brokerRedirection', function () {
+    it('Should execute a function passed for direction', function () {
+        var latched = false;
+        var producer = new Kafka.Producer({
+            brokerRedirection: function (host, port) {
+                latched = true;
+                return {
+                    host: host,
+                    port: port
+                };
+            }
+        });
+
+        return producer.init()
+            .then(function () {
+                latched.should.eql(true);
+            });
+    });
+
+    it('Should apply function remapping', function () {
+        var latched = false;
+        var producer = new Kafka.Producer({
+            connectionString: 'does-not-exist:9092',
+            brokerRedirection: function () {
+                latched = true;
+                return {
+                    host: 'localhost',
+                    port: 9092
+                };
+            }
+        });
+
+        // If the init is succesful, then we remapped the bad
+        // broker name.
+        return producer.init()
+            .then(function () {
+                latched.should.eql(true);
+            });
+    });
+
+    it('Should apply lookup remap (host:port)', function () {
+        var producer = new Kafka.Producer({
+            connectionString: 'does-not-exist:9092',
+            brokerRedirection: {
+                'does-not-exist:9092': 'localhost:9092'
+            }
+        });
+
+        // If the init is succesful, then we remapped the bad
+        // broker name.
+        return producer.init();
+    });
+
+    it('Should apply lookup remap (kafka://host:port)', function () {
+        var producer = new Kafka.Producer({
+            connectionString: 'does-not-exist:9092',
+            brokerRedirection: {
+                'kafka://does-not-exist:9092': 'localhost:9092'
+            }
+        });
+
+        // If the init is succesful, then we remapped the bad
+        // broker name.
+        return producer.init();
+    });
+
+    it('Should apply lookup remap prefixed with Kafka', function () {
+        var producer = new Kafka.Producer({
+            connectionString: 'does-not-exist:9092',
+            brokerRedirection: {
+                'kafka://does-not-exist:9092': 'kafka://localhost:9092'
+            }
+        });
+
+        // If the init is succesful, then we remapped the bad
+        // broker name.
+        return producer.init();
+    });
+});
