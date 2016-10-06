@@ -13,7 +13,7 @@
   ],
   "dependencies": {
     "bluebird": "^3.3.3",
-    "lodash": "^4.5.0",
+    "lodash": "=4.5.0",
     "bin-protocol": "^3.0.2",
     "buffer-crc32": "^0.2.5",
     "nice-simple-logger": "^1.0.1",
