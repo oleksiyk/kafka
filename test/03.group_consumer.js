@@ -149,8 +149,8 @@ describe('GroupConsumer', function () {
             result[1].should.have.property('metadata').that.is.a('string');
             result[0].should.have.property('error', null);
             result[1].should.have.property('error', null);
-            _.find(result, { topic: 'kafka-test-topic', partition: 0 }).offset.should.be.eql(1);
-            _.find(result, { topic: 'kafka-test-topic', partition: 1 }).offset.should.be.eql(2);
+            _.find(result, { topic: 'kafka-test-topic', partition: 0 }).offset.should.be.eql(1 + 1);
+            _.find(result, { topic: 'kafka-test-topic', partition: 1 }).offset.should.be.eql(2 + 1);
             _.find(result, { topic: 'kafka-test-topic', partition: 0 }).metadata.should.be.eql('m1');
             _.find(result, { topic: 'kafka-test-topic', partition: 1 }).metadata.should.be.eql('m2');
         });
