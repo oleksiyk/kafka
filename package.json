@@ -46,5 +46,6 @@
     "url": "https://github.com/oleksiyk/kafka.git"
   },
   "readmeFilename": "README.md",
-  "license": "MIT"
+  "license": "MIT",
+  "typings": "types.d.ts"
 }
