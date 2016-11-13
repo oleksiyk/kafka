@@ -6,7 +6,7 @@
     "name": "Oleksiy Krivoshey",
     "email": "oleksiyk@gmail.com"
   },
-  "version": "2.9.2",
+  "version": "3.0.0",
   "main": "./lib/index.js",
   "keywords": [
     "kafka"
@@ -17,6 +17,7 @@
     "buffer-crc32": "^0.2.5",
     "hashring": "^3.2.0",
     "lodash": "=4.16.4",
+    "murmur-hash-js": "^1.0.0",
     "nice-simple-logger": "^1.0.1",
     "wrr-pool": "^1.0.3"
   },

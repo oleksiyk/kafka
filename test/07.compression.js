@@ -8,8 +8,8 @@ var Kafka   = require('../lib/index');
 
 describe('Compression', function () {
     describe('sync', function () {
-        var producer = new Kafka.Producer({ clientId: 'producer' });
-        var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
+        var producer = new Kafka.Producer({ clientId: 'producer', asyncCompression: false });
+        var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer', asyncCompression: false });
 
         var dataHandlerSpy = sinon.spy(function () {});
 
@@ -59,7 +59,7 @@ describe('Compression', function () {
             .then(function () {
                 return consumer.subscribe('kafka-test-topic', 0, { offset: offset }, dataHandlerSpy);
             })
-            .delay(200)
+            .delay(300)
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
                 dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(3);
@@ -194,6 +194,7 @@ describe('Compression', function () {
                 });
             })
             .then(function () {
+                dataHandlerSpy.reset();
                 return consumer.subscribe('kafka-test-topic', 0, { offset: offset }, dataHandlerSpy);
             })
             .delay(200)

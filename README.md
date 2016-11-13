@@ -12,10 +12,13 @@ Supports sync and async Gzip and Snappy compression, producer batching and contr
 
 All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 
+__Please check a [CHANGELOG](CHANGELOG.md) for backward incompatible changes in version 3.x__
+
 * [Using](#using)
 * [Producer](#producer)
   * [Keyed Messages](#keyed-messages)
   * [Batching (grouping) produce requests](#batching-grouping-produce-requests)
+  * [Custom Partitioner](#custom-partitioner)
   * [Producer options](#producer-options)
 * [Simple Consumer](#simpleconsumer)
   * [Simple Consumer options](#simpleconsumer-options)
@@ -25,6 +28,8 @@ All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 * [Group Admin](#groupadmin-consumer-groups-api)
 * [Compression](#compression)
 * [Connection](#connection)
+  * [SSL](#ssl)
+  * [Remapping Broker Addresses](#remapping-broker-addresses)
 * [Logging](#logging)
 * [Topic Creation](#topic-creation)
 * [License](#license)
@@ -69,13 +74,16 @@ return producer.init().then(function(){
 });
 ```
 
-Send and retry if failed 2 times with 100ms delay:
+Send and retry if failed within 100ms delay:
 
 ```javascript
 return producer.send(messages, {
   retries: {
     attempts: 2,
-    delay: 100
+    delay: {
+      min: 100,
+      max: 300
+    }
   }
 });
 ```
@@ -135,6 +143,42 @@ producer.send({
 });
 ```
 
+### Custom Partitioner
+
+Example: override the default partitioner with a custom partitioner that only uses a portion of the key.
+
+```javascript
+var util  = require('util');
+var Kafka = require('no-kafka');
+
+var Producer           = Kafka.Producer;
+var DefaultPartitioner = Kafka.DefaultPartitioner;
+
+function MyPartitioner() {
+    DefaultPartitioner.apply(this, arguments);
+}
+
+util.inherits(MyPartitioner, DefaultPartitioner);
+
+MyPartitioner.prototype.getKey = function getKey(message) {
+    return message.key.split('-')[0];
+};
+
+var producer = new Producer({
+    partitioner : new MyPartitioner()
+});
+
+return producer.init().then(function(){
+  return producer.send({
+      topic: 'kafka-test-topic',
+      message: {
+          key   : 'namespace-key',
+          value : 'Hello!'
+      }
+  });
+});
+```
+
 ### Producer options:
 * `requiredAcks` - require acknoledgments for produce request. If it is 0 the server will not send any response.  If it is 1 (default), the server will wait the data is written to the local log before sending a response. If it is -1 the server will block until the message is committed by all in sync replicas before sending a response. For any number > 1 the server will block waiting for this number of acknowledgements to occur (but the server will never wait for more acknowledgements than there are in-sync replicas).
 * `timeout` - timeout in ms for produce request
@@ -143,10 +187,12 @@ producer.send({
 * `reconnectionDelay` - controls optionally progressive delay between reconnection attempts in case of network error:
   * `min` - minimum delay, used as increment value for next attempts, defaults to 1000ms
   * `max` - maximum delay value, defaults to 1000ms
-* `partitioner` - function used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner function receives 3 arguments: the topic name, an array with topic partitions, and the message (useful to partition by key, etc.). `partitioner` can be sync or async (return a Promise).
+* `partitioner` - Class instance used to determine topic partition for message. If message already specifies a partition, the partitioner won't be used. The partitioner must inherit from [`Kafka.DefaultPartitioner`](lib/assignment/partitioners/default.js). The `partition` method receives 3 arguments: the topic name, an array with topic partitions, and the message (useful to partition by key, etc.). `partition` can be sync or async (return a Promise).
 * `retries` - controls number of attempts at delay between them when produce request fails
   * `attempts` - number of total attempts to send the message, defaults to 3
-  * `delay` - delay in ms between retries, defaults to 1000
+  * `delay` - controls delay between retries, the delay is progressive and incrememented with each attempt with `min` value steps up to but not exceeding `max` value
+    * `min` - minimum delay, used as increment value for next attempts, defaults to 1000ms
+    * `max` - maximum delay value, defaults to 3000ms
 * `codec` - compression codec, one of Kafka.COMPRESSION_NONE, Kafka.COMPRESSION_SNAPPY, Kafka.COMPRESSION_GZIP
 * `batch` - control batching (grouping) of requests
   * `size` - group messages together into single batch until their total size exceeds this value, defaults to 16384 bytes. Set to 0 to disable batching.
@@ -273,7 +319,6 @@ var dataHandler = function (messageSet, topic, partition) {
 };
 
 var strategies = [{
-    strategy: 'TestStrategy',
     subscriptions: ['kafka-test-topic'],
     handler: dataHandler
 }];
@@ -284,11 +329,11 @@ consumer.init(strategies); // all done, now wait for messages in dataHandler
 ### Assignment strategies
 
 __no-kafka__ provides three built-in strategies:
-* `Kafka.WeightedRoundRobinAssignment` weighted round robin assignment (based on [wrr-pool](https://github.com/oleksiyk/wrr-pool)).
-* `Kafka.ConsistentAssignment` which is based on a consistent [hash ring](https://github.com/3rd-Eden/node-hashring) and so provides consistent assignment across consumers in a group based on supplied `metadata.id` and `metadata.weight` options.
-* `Kafka.RoundRobinAssignment` simple assignment strategy (default).
+* `Kafka.WeightedRoundRobinAssignmentStrategy` weighted round robin assignment (based on [wrr-pool](https://github.com/oleksiyk/wrr-pool)).
+* `Kafka.ConsistentAssignmentStrategy` which is based on a consistent [hash ring](https://github.com/3rd-Eden/node-hashring) and so provides consistent assignment across consumers in a group based on supplied `metadata.id` and `metadata.weight` options.
+* `Kafka.DefaultAssignmentStrategy` simple round robin assignment strategy (default).
 
-Using `Kafka.WeightedRoundRobinAssignment`:
+Using `Kafka.WeightedRoundRobinAssignmentStrategy`:
 
 ```javascript
 var strategies = {
@@ -297,41 +342,29 @@ var strategies = {
     metadata: {
         weight: 4
     },
-    fn: Kafka.WeightedRoundRobinAssignment,
+    strategy: new Kafka.WeightedRoundRobinAssignmentStrategy(),
     handler: dataHandler
 };
 // consumer.init(strategies)....
 ```
 
-Using `Kafka.ConsistentAssignment`:
+Using `Kafka.ConsistentAssignmentStrategy`:
 
 ```javascript
 var strategies = {
-    strategy: 'TestStrategy',
     subscriptions: ['kafka-test-topic'],
     metadata: {
         id: process.argv[2] || 'consumer_1',
         weight: 50
     },
-    fn: Kafka.ConsistentAssignment,
+    strategy: new Kafka.ConsistentAssignmentStrategy(),
     handler: dataHandler
 };
 // consumer.init(strategies)....
 ```
 Note that each consumer in a group should have its own and consistent metadata.id.
 
-Using `Kafka.RoundRobinAssignment` (default in __no-kafka__):
-
-```javascript
-var strategies = {
-    strategy: 'TestStrategy',
-    subscriptions: ['kafka-test-topic'],
-    handler: dataHandler
-};
-// consumer.init(strategies)....
-```
-
-You can also write your own assignment strategy function and provide it as `fn` option of the strategy item.
+You can also write your own assignment strategy by inheriting from Kafka.DefaultAssignmentStrategy and overwriting `assignment` method.
 
 ### GroupConsumer options
 
@@ -374,7 +407,7 @@ return admin.init().then(function(){
               groupId: 'no-kafka-admin-test-group',
               state: 'Stable',
               protocolType: 'consumer',
-              protocol: 'TestStrategy',
+              protocol: 'DefaultAssignmentStrategy',
               members:
                [ { memberId: 'group-consumer-82646843-b4b8-4e91-94c9-b4708c8b05e8',
                    clientId: 'group-consumer',
@@ -422,15 +455,15 @@ return producer.send({
 }, { codec: Kafka.COMPRESSION_SNAPPY })
 ```
 
-By default __no-kafka__ will use synchronous compression and decompression (synchronous Gzip is not availble in node < 0.11).
-Enable async compression/decompression with `asyncCompression` options:
+By default __no-kafka__ will use asynchronous compression and decompression.
+Disable async compression/decompression (and use sync) with `asyncCompression` option (synchronous Gzip is not availble in node < 0.11):
 
 Producer:
 
 ```javascript
 var producer = new Kafka.Producer({
     clientId: 'producer',
-    asyncCompression: true,
+    asyncCompression: false, // use sync compression/decompression
     codec: Kafka.COMPRESSION_SNAPPY
 });
 ```
@@ -454,6 +487,27 @@ __no-kafka__ will connect to the hosts specified in `connectionString` construct
 ### Disconnect / Timeout Handling
 All network errors are handled by the library: producer will retry sending failed messages for configured amount of times, simple consumer and group consumer will try to reconnect to failed host, update metadata as needed as so on.
 
+### SSL
+To connect to Kafka with [SSL endpoint enabled](http://kafka.apache.org/090/documentation.html#security_ssl) specify SSL certificate and key file options:
+
+```javascript
+var producer = new Kafka.Producer({
+  connectionString: 'kafka://127.0.0.1:9093', // should match `listeners` SSL option in Kafka config
+  ssl: {
+    certFile: '/path/to/client.crt',
+    keyFile: '/path/to/client.key'
+  }
+});
+```
+
+Other Node.js SSL options are available such as `rejectUnauthorized`, `secureProtocol`, `ciphers`, etc. See Node.js `tls.createServer` method documentation for more details.
+
+It is also possible to use `KAFKA_CLIENT_CERT` and `KAFKA_CLIENT_CERT_KEY` environment variables to specify SSL certificate and key locations:
+
+```bash
+KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT=./test/ssl/client.crt KAFKA_CLIENT_CERT_KEY=./test/ssl/client.key node producer.js
+```
+
 ### Remapping Broker Addresses
 Sometimes the advertised listener addresses for a Kafka cluster may be incorrect from the client,
 such as when a Kafka farm is behind NAT or other network infrastructure. In this scenario it is
@@ -462,7 +516,7 @@ possible to pass a `brokerRedirection` option to the `Producer`, `SimpleConsumer
 The value of the `brokerDirection` can be either:
 
   - A function returning a tuple of host (string) and port (integer), such as:
-     
+
         brokerRedirection: function (host, port) {
             return {
                 host: host + '.somesuffix.com', // Fully qualify
@@ -478,7 +532,7 @@ The value of the `brokerDirection` can be either:
             'third-host:9092': 'kafka://third-host:9000'
         }
 
-A common scenario for this kind of remapping is when a Kafka cluster exists within a Docker application, and the 
+A common scenario for this kind of remapping is when a Kafka cluster exists within a Docker application, and the
 internally advertised names needed for container to container communication do not correspond to the actual external
 ports or addresses when connecting externally via other tools.
 

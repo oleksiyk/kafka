@@ -48,9 +48,7 @@ describe('GroupConsumer', function () {
         return Promise.all([
             producer.init(),
             consumers[0].init({
-                strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
-                fn: Kafka.RoundRobinAssignment,
                 handler: dataHandlerSpies[0]
             }).delay(200) // let it consume previous messages in a topic (if any)
         ]);
@@ -179,19 +177,15 @@ describe('GroupConsumer', function () {
         this.timeout(6000);
         return Promise.all([
             consumers[1].init({
-                strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
-                fn: Kafka.GroupConsumer.RoundRobinAssignment,
                 handler: dataHandlerSpies[1]
             }),
             consumers[2].init({
-                strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
-                fn: Kafka.GroupConsumer.RoundRobinAssignment,
                 handler: dataHandlerSpies[2]
             }),
         ])
-        .delay(500) // give some time to rebalance group
+        .delay(1000) // give some time to rebalance group
         .then(function () {
             dataHandlerSpies[0].reset();
             return producer.send([
@@ -211,7 +205,7 @@ describe('GroupConsumer', function () {
                     message: { value: 'p02' }
                 }
             ])
-            .delay(200)
+            .delay(400)
             .then(function () {
                 /* jshint expr: true */
                 dataHandlerSpies[0].should.have.been.calledOnce; //eslint-disable-line
@@ -238,9 +232,7 @@ describe('GroupConsumer', function () {
         });
 
         return consumer.init({
-            strategy: 'TestStrategy',
             subscriptions: ['kafka-test-topic'],
-            fn: Kafka.GroupConsumer.RoundRobinAssignment,
             handler: function () {}
         })
         .then(function () {

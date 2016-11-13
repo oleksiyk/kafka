@@ -4,8 +4,11 @@
 
 // kafka-topics.sh --zookeeper 127.0.0.1:2181/kafka0.9 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
 
+var util    = require('util');
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
+
+var DefaultPartitioner = Kafka.DefaultPartitioner;
 
 var producer = new Kafka.Producer({
     requiredAcks: 1,
@@ -76,13 +79,15 @@ describe('Producer', function () {
         }).should.eventually.be.rejectedWith('Missing or wrong topic field');
     });
 
-    it('should fail when missing partition field and no partitioner function defined', function () {
+    it('should use default partitioner when missing partition field and no partitioner function defined', function () {
         return producer.send({
             topic: 'kafka-test-topic',
             message: {
                 value: 'Hello!'
             }
-        }).should.eventually.be.rejectedWith('Missing or wrong partition field');
+        }).then(function (result) {
+            result.should.be.an('array').and.have.length(1);
+        });
     });
 
     it('should send an array of messages', function () {
@@ -110,8 +115,11 @@ describe('Producer', function () {
         });
     });
 
-    it('should return an error for unknown partition/topic and retry 5 times', function () {
-        var start = Date.now(), msgs;
+    it('should return an error for unknown partition/topic and make 5 attempts', function () {
+        var msgs;
+
+        var spy = sinon.spy(producer.client, 'produceRequest');
+
         msgs = [{
             topic: 'kafka-test-unknown-topic',
             partition: 0,
@@ -124,9 +132,13 @@ describe('Producer', function () {
         return producer.send(msgs, {
             retries: {
                 attempts: 5,
-                delay: 100
+                delay: {
+                    min: 100,
+                    max: 300
+                }
             }
         }).then(function (result) {
+            spy.should.have.callCount(5);
             result.should.be.an('array').and.have.length(2);
             result[0].should.be.an('object');
             result[1].should.be.an('object');
@@ -134,16 +146,15 @@ describe('Producer', function () {
             result[1].should.have.property('error');
             result[0].error.should.have.property('code', 'UnknownTopicOrPartition');
             result[1].error.should.have.property('code', 'UnknownTopicOrPartition');
-            (Date.now() - start).should.be.closeTo(500, 100);
+            // (Date.now() - start).should.be.closeTo(900, 100);
         });
     });
 
     it('partitioner arguments', function () {
-        var partitionerSpy = sinon.spy(function () { return 1; });
         var _producer = new Kafka.Producer({
-            clientId: 'producer',
-            partitioner: partitionerSpy
+            clientId: 'producer'
         });
+        var partitionerSpy = _producer.partitioner.partition = sinon.spy(function () { return 1; });
         return _producer.init().then(function () {
             return _producer.send({
                 topic: 'kafka-test-topic',
@@ -165,7 +176,7 @@ describe('Producer', function () {
         });
     });
 
-    it('shoult throw when partitioner is not a function', function () {
+    it('should throw when partitioner is not a DefaultPartitioner', function () {
         function _try() {
             return new Kafka.Producer({
                 clientId: 'producer',
@@ -173,16 +184,24 @@ describe('Producer', function () {
             });
         }
 
-        expect(_try).to.throw('Partitioner must be a function');
+        expect(_try).to.throw('Partitioner must inherit from Kafka.DefaultPartitioner');
     });
 
-    it('should determine topic partition using sync partitioner function', function () {
-        var _producer = new Kafka.Producer({
+    it('should determine topic partition using inherited partitioner', function () {
+        var _producer;
+
+        function MyPartitioner() {}
+        util.inherits(MyPartitioner, DefaultPartitioner);
+
+        MyPartitioner.prototype.partition = function dummySyncPartitioner(/*topicName, partitions, message*/) {
+            return 1;
+        };
+
+        _producer = new Kafka.Producer({
             clientId: 'producer',
-            partitioner: function dummySyncPartitioner(/*topicName, partitions, message*/) {
-                return 1;
-            }
+            partitioner: new MyPartitioner()
         });
+
         return _producer.init().then(function () {
             return _producer.send({
                 topic: 'kafka-test-topic',
@@ -203,13 +222,13 @@ describe('Producer', function () {
 
     it('should determine topic partition using async partitioner function', function () {
         var _producer = new Kafka.Producer({
-            clientId: 'producer',
-            partitioner: function dummyASyncPartitioner(/*topicName, partitions, message*/) {
-                return Promise.delay(100).then(function () {
-                    return 2;
-                });
-            }
+            clientId: 'producer'
         });
+        _producer.partitioner.partition = function dummySyncPartitioner(/*topicName, partitions, message*/) {
+            return Promise.delay(100).then(function () {
+                return 2;
+            });
+        };
         return _producer.init().then(function () {
             return _producer.send({
                 topic: 'kafka-test-topic',
@@ -228,12 +247,9 @@ describe('Producer', function () {
         });
     });
 
-    it('should throw error for unknown topic', function () {
+    it('should return error for unknown topic', function () {
         var _producer = new Kafka.Producer({
-            clientId: 'producer',
-            partitioner: function dummyPartitioner(/*topicName, partitions, message*/) {
-                return 2;
-            }
+            clientId: 'producer'
         });
         return _producer.init().then(function () {
             return _producer.send({
@@ -241,8 +257,18 @@ describe('Producer', function () {
                 message: {
                     value: 'Hello!'
                 }
+            }, {
+                retries: {
+                    attempts: 1
+                }
             });
-        }).should.be.rejected.and.eventually.have.property('code', 'UnknownTopicOrPartition');
+        })
+        .then(function (result) {
+            result.should.be.an('array').and.have.length(1);
+            result[0].should.be.an('object');
+            result[0].should.have.property('error');
+            result[0].error.should.have.property('code', 'UnknownTopicOrPartition');
+        });
     });
 
     it('should group messages by global batch.size', function () {

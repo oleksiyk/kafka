@@ -35,22 +35,20 @@ describe('Weighted Round Robin Assignment', function () {
     before(function () {
         return Promise.map(consumers, function (consumer, ind) {
             return consumer.init({
-                strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
                 metadata: {
                     weight: ind + 1
                 },
-                fn: Kafka.WeightedRoundRobinAssignment,
+                strategy: new Kafka.WeightedRoundRobinAssignmentStrategy(),
                 handler: function () {}
             });
         }).delay(200);
     });
 
     after(function () {
-        this.timeout(5000);
         return Promise.map(consumers, function (c) {
             return c.end();
-        }).delay(3000);
+        });
     });
 
     it('should split partitions according to consumer weight', function () {
@@ -83,23 +81,21 @@ describe('Consistent Assignment', function () {
     before(function () {
         return Promise.map(consumers, function (consumer, ind) {
             return consumer.init({
-                strategy: 'TestStrategy',
                 subscriptions: ['kafka-test-topic'],
                 metadata: {
                     id: 'id' + ind,
                     weight: 10
                 },
-                fn: Kafka.ConsistentAssignment,
+                strategy: new Kafka.ConsistentAssignmentStrategy(),
                 handler: function () {}
             });
         }).delay(200);
     });
 
     after(function () {
-        this.timeout(5000);
         return Promise.map(consumers, function (c) {
             return c.end();
-        }).delay(3000);
+        });
     });
 
     it('should split partitions according to consumer weight', function () {
