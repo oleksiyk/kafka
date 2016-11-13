@@ -12,6 +12,8 @@ Supports sync and async Gzip and Snappy compression, producer batching and contr
 
 All methods will return a [promise](https://github.com/petkaantonov/bluebird)
 
+__Please check a [CHANGELOG](CHANGELOG.md) for backward incompatible changes in version 3.x__
+
 * [Using](#using)
 * [Producer](#producer)
   * [Keyed Messages](#keyed-messages)
