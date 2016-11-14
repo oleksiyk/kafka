@@ -1,4 +1,4 @@
-## 3.0 [not released yet]
+## 3.0
 
 ### Backward incompatible changes
 - Producer partitioner is now implemented as a class and `Kafka.DefaultPartitioner` matches Java client implementation. Custom partitioners should inherit `Kafka.DefaultPartitioner`
