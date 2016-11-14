@@ -74,3 +74,23 @@ describe('Default Partitioner', function () {
         }).should.equal(6);
     });
 });
+
+describe('Hash CRC32 Partitioner', function () {
+    it('should be able to handle missing key', function () {
+        var partitioner = new Kafka.HashCRC32Partitioner();
+
+        partitioner.partition('topic', new Array(10), {}).should.equal(0);
+    });
+
+    it('should partition correctly with crc32', function () {
+        var partitioner = new Kafka.HashCRC32Partitioner();
+
+        partitioner.partition('topic', new Array(10), {
+            key: 'test-key'
+        }).should.equal(1);
+
+        partitioner.partition('topic', new Array(7), {
+            key: 'test-key'
+        }).should.equal(5);
+    });
+});
