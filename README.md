@@ -488,7 +488,9 @@ __no-kafka__ will connect to the hosts specified in `connectionString` construct
 All network errors are handled by the library: producer will retry sending failed messages for configured amount of times, simple consumer and group consumer will try to reconnect to failed host, update metadata as needed as so on.
 
 ### SSL
-To connect to Kafka with [SSL endpoint enabled](http://kafka.apache.org/090/documentation.html#security_ssl) specify SSL certificate and key file options:
+To connect to Kafka with [SSL endpoint enabled](http://kafka.apache.org/090/documentation.html#security_ssl) specify SSL certificate and key file options to load cert/key from files or provide certificate/key as strings:
+
+Loading certificate and key from file:
 
 ```javascript
 var producer = new Kafka.Producer({
@@ -500,13 +502,30 @@ var producer = new Kafka.Producer({
 });
 ```
 
+Specifying certificate and key directly as strings:
+
+```javascript
+var producer = new Kafka.Producer({
+  connectionString: 'kafka://127.0.0.1:9093', // should match `listeners` SSL option in Kafka config
+  ssl: {
+    certStr: '-----BEGIN CERTIFICATE-----\nMIIChTCCAe4C...............',
+    keyStr: '-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBA.......'
+  }
+});
+```
+
 Other Node.js SSL options are available such as `rejectUnauthorized`, `secureProtocol`, `ciphers`, etc. See Node.js `tls.createServer` method documentation for more details.
 
-It is also possible to use `KAFKA_CLIENT_CERT` and `KAFKA_CLIENT_CERT_KEY` environment variables to specify SSL certificate and key locations:
+It is also possible to use `KAFKA_CLIENT_CERT`/`KAFKA_CLIENT_CERT_STR` and `KAFKA_CLIENT_CERT_KEY`/`KAFKA_CLIENT_CERT_KEY_STR` environment variables to specify SSL certificate and key:
 
 ```bash
 KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT=./test/ssl/client.crt KAFKA_CLIENT_CERT_KEY=./test/ssl/client.key node producer.js
 ```
+
+```bash
+KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT_STR=`cat ./test/ssl/client.crt` KAFKA_CLIENT_CERT_KEY_STR=`cat ./test/ssl/client.key` node producer.js
+```
+
 
 ### Remapping Broker Addresses
 Sometimes the advertised listener addresses for a Kafka cluster may be incorrect from the client,
