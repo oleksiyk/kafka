@@ -56,6 +56,38 @@ describe('connectionString', function () {
     });
 });
 
+describe('ssl configuration', function () {
+    it('should set defaults for the ssl configuration', function () {
+        var expectedOptions = {
+            rejectUnauthorized: false,
+            certFile: process.env.KAFKA_CLIENT_CERT,
+            keyFile: process.env.KAFKA_CLIENT_CERT_KEY,
+            certStr: process.env.KAFKA_CLIENT_CERT_STR,
+            keyStr: process.env.KAFKA_CLIENT_CERT_KEY_STR,
+        };
+        var producer = new Kafka.Producer();
+        producer.client.options.ssl.should.be.an('object');
+        producer.client.options.ssl.should.contain.all.keys(expectedOptions);
+    });
+
+    it('should not set additional cert and key parameters if the user provided them', function () {
+        var expectedOptions = {
+            rejectUnauthorized: false,
+            certStr: process.env.KAFKA_CLIENT_CERT_STR,
+            keyStr: process.env.KAFKA_CLIENT_CERT_KEY_STR,
+        };
+        var producer = new Kafka.Producer({
+            ssl: {
+                certStr: process.env.KAFKA_CLIENT_CERT_STR,
+                keyStr: process.env.KAFKA_CLIENT_CERT_KEY_STR
+            }
+        });
+        producer.client.options.ssl.should.be.an('object');
+        producer.client.options.ssl.should.contain.all.keys(expectedOptions);
+        producer.client.options.ssl.should.not.contain.any.keys(['certFile', 'keyFile']);
+    });
+});
+
 describe('brokerRedirection', function () {
     it('Should execute a function passed for direction', function () {
         var latched = false;
