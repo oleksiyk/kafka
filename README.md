@@ -488,7 +488,7 @@ __no-kafka__ will connect to the hosts specified in `connectionString` construct
 All network errors are handled by the library: producer will retry sending failed messages for configured amount of times, simple consumer and group consumer will try to reconnect to failed host, update metadata as needed as so on.
 
 ### SSL
-To connect to Kafka with [SSL endpoint enabled](http://kafka.apache.org/090/documentation.html#security_ssl) specify SSL certificate and key file options to load cert/key from files or provide certificate/key as strings:
+To connect to Kafka with [SSL endpoint enabled](http://kafka.apache.org/090/documentation.html#security_ssl) specify SSL certificate and key options to load cert/key from files or provide certificate/key directly as strings:
 
 Loading certificate and key from file:
 
@@ -496,8 +496,8 @@ Loading certificate and key from file:
 var producer = new Kafka.Producer({
   connectionString: 'kafka://127.0.0.1:9093', // should match `listeners` SSL option in Kafka config
   ssl: {
-    certFile: '/path/to/client.crt',
-    keyFile: '/path/to/client.key'
+    cert: '/path/to/client.crt',
+    key: '/path/to/client.key'
   }
 });
 ```
@@ -508,22 +508,24 @@ Specifying certificate and key directly as strings:
 var producer = new Kafka.Producer({
   connectionString: 'kafka://127.0.0.1:9093', // should match `listeners` SSL option in Kafka config
   ssl: {
-    certStr: '-----BEGIN CERTIFICATE-----\nMIIChTCCAe4C...............',
-    keyStr: '-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBA.......'
+    cert: '-----BEGIN CERTIFICATE-----\nMIIChTCCAe4C...............',
+    key: '-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBA.......'
   }
 });
 ```
 
 Other Node.js SSL options are available such as `rejectUnauthorized`, `secureProtocol`, `ciphers`, etc. See Node.js `tls.createServer` method documentation for more details.
 
-It is also possible to use `KAFKA_CLIENT_CERT`/`KAFKA_CLIENT_CERT_STR` and `KAFKA_CLIENT_CERT_KEY`/`KAFKA_CLIENT_CERT_KEY_STR` environment variables to specify SSL certificate and key:
+It is also possible to use `KAFKA_CLIENT_CERT` and `KAFKA_CLIENT_CERT_KEY` environment variables to specify SSL certificate and key:
 
 ```bash
 KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT=./test/ssl/client.crt KAFKA_CLIENT_CERT_KEY=./test/ssl/client.key node producer.js
 ```
 
+Or as text strings:
+
 ```bash
-KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT_STR=`cat ./test/ssl/client.crt` KAFKA_CLIENT_CERT_KEY_STR=`cat ./test/ssl/client.key` node producer.js
+KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT=`cat ./test/ssl/client.crt` KAFKA_CLIENT_CERT_KEY=`cat ./test/ssl/client.key` node producer.js
 ```
 
 
