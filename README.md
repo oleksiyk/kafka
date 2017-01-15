@@ -32,7 +32,7 @@ __Please check a [CHANGELOG](CHANGELOG.md) for backward incompatible changes in 
   * [Remapping Broker Addresses](#remapping-broker-addresses)
 * [Logging](#logging)
 * [Topic Creation](#topic-creation)
-* [License](#license)
+* [License](#license-mit)
 
 ## Using
 
