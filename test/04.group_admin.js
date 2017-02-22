@@ -43,10 +43,16 @@ describe('GroupAdmin', function () {
 
     it('should list groups', function () {
         return admin.listGroups().then(function (groups) {
+            var found = false;
+
             groups.should.be.an('array').and.have.length.gt(0);
-            groups[0].should.be.an('object');
-            groups[0].should.have.property('groupId', consumer.options.groupId);
-            groups[0].should.have.property('protocolType', 'consumer');
+            groups.forEach(function (group) {
+                if (group.groupId === consumer.options.groupId) {
+                    group.should.have.property('protocolType', 'consumer');
+                    found = true;
+                }
+            });
+            found.should.equal(true);
         });
     });
 
