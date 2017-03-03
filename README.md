@@ -388,12 +388,13 @@ You can also write your own assignment strategy by inheriting from Kafka.Default
 
 ## GroupAdmin (consumer groups API)
 
-Offes two methods:
+Offers methods:
 
 * `listGroups` - list existing consumer groups
 * `describeGroup` - describe existing group by its id
+* `fetchConsumerLag` - fetches consumer lag for topics/partitions
 
-Example:
+listGroups, describeGroup:
 
 ```javascript
 var admin = new Kafka.GroupAdmin();
@@ -429,6 +430,38 @@ return admin.init().then(function(){
     });
 });
 ```
+
+fetchConsumerLag:
+```javascript
+var admin = new Kafka.GroupAdmin();
+
+return admin.init().then(function(){
+    return admin.fetchConsumerLag('no-kafka-admin-test-group', [{
+        topicName: 'kafka-test-topic',
+        partitions: [0, 1, 2]
+    }]).then(function (consumerLag) {
+        /*
+        [ { topic: 'kafka-test-topic',
+            partition: 0,
+            offset: 11300,
+            highwaterMark: 11318,
+            consumerLag: 18 },
+          { topic: 'kafka-test-topic',
+            partition: 1,
+            offset: 10380,
+            highwaterMark: 10380,
+            consumerLag: 0 },
+          { topic: 'kafka-test-topic',
+            partition: 2,
+            offset: -1,
+            highwaterMark: 10435,
+            consumerLag: null } ]
+         */
+    });
+});
+```
+
+Note that group consumer has to commit offsets first, in order for consumerLag to be available. Otherwise the offset will be set to -1.
 
 ## Compression
 
