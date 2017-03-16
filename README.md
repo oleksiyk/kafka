@@ -215,7 +215,7 @@ var dataHandler = function (messageSet, topic, partition) {
     });
 };
 
-return consumer.init().then(function () {
+consumer.init().then(function () {
     // Subscribe partitons 0 and 1 in a topic:
     return consumer.subscribe('kafka-test-topic', [0, 1], dataHandler);
 });
