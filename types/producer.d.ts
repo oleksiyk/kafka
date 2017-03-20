@@ -1,6 +1,11 @@
 
+/// <reference path="./client.d.ts" />
+/// <reference types="./index.d.ts" />
 
-declare module "no-kafka" {
+
+declare module "producer" {
+
+    import { Kafka } from "./index";
 
     export class Producer {
         /**
@@ -10,15 +15,12 @@ declare module "no-kafka" {
          * 
          * @memberOf Producer
          */
-        init(): Promise<Producer>;
+        init(): Promise<Client>;
         /**
          * The send can take a single message or an array of messages.
          * It can have options
          * 
-         * @type {({
-         *             (data: KeyedMessage | KeyedMessage[]): Promise<any>;
-         *             (data: KeyedMessage | KeyedMessage[], options: Options): Promise<any>;
-         *         })}
+         * @type (data: KeyedMessage | KeyedMessage[]): Promise<any>;
          * @memberOf Producer
          */
         send(data: KeyedMessage | KeyedMessage[], options?: Options): Promise<any>;
