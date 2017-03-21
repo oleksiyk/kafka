@@ -1,11 +1,11 @@
 
 /// <reference path="./client.d.ts" />
-/// <reference types="./index.d.ts" />
+/// <reference path="./index.d.ts" />
 
+import Kafka = require("no-kafka");
+import { Client } from "client";
 
 declare module "producer" {
-
-    import { Kafka } from "./index";
 
     export class Producer {
         /**
