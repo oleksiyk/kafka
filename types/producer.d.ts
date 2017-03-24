@@ -8,6 +8,7 @@ import { Client } from "client";
 declare module "producer" {
 
     export class Producer {
+        constructor(options?: ProducerOptions);
         /**
          * Initializes the client for the producer.
          * 
@@ -19,27 +20,47 @@ declare module "producer" {
         /**
          * The send can take a single message or an array of messages.
          * It can have options
-         * 
-         * @type (data: KeyedMessage | KeyedMessage[]): Promise<any>;
          * @memberOf Producer
          */
-        send(data: KeyedMessage | KeyedMessage[], options?: Options): Promise<any>;
+        send(data: Message | Message[], options?: SendOptions): Promise<Result[]>;
         /**
          * Close all connections.
          */
         end(): void;
     }
 
-    export interface KeyedMessage {
+    export interface ProducerOptions {
+        partitioner?: Partitioner;
+        clientId?: string;
+        asyncCompression?: boolean;
+        codec?: Kafka.COMPRESSION_GZIP |
+                Kafka.COMPRESSION_NONE |
+                Kafka.COMPRESSION_SNAPPY;
+    }
+
+    export interface Partitioner {
+
+    }
+    export class DefaultPartitioner implements Partitioner {
+        constructor();
+    }
+
+    export interface Result {
         topic: string;
-        partition: string;
+        partition: number;
+        offset: number;
+    }
+
+    export interface Message {
+        topic: string;
+        partition?: string;
         message: {
             key?: string;
             value: string;
             attributes?: string[];
         }
     }
-    export interface Options {
+    export interface SendOptions {
         /**
          * requiredAcks - require acknoledgments for produce request. 
          * If it is 0 the server will not send any response. 
