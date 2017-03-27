@@ -29,8 +29,8 @@ declare module "connection" {
         connectionTimeout?: number;
         initialBufferSize?: number;
         ssl?: {
-cert: string;
-key: string;
+            cert: string;
+            key: string;
         }
     }
 }

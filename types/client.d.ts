@@ -54,11 +54,7 @@ declare module "client" {
         offsetCommitRequestV2(groupId: any, memberId: any, generationId: any, requests: any): Promise<any>;
 
         listGroupsRequest(): Promise<any>;
-describeGroupRequest(groupId: any): Promise<any>;
-
-
-
-
+        describeGroupRequest(groupId: any): Promise<any>;
     }
 
     export interface Options {

@@ -1,10 +1,10 @@
 
 /// <reference path="./producer.d.ts" />
 
-import {Producer as P} from  "producer";
+import { Producer as P } from "producer";
 
 declare module "no-kafka" {
-    export class Producer extends P {}
+    export class Producer extends P { }
 
     // exports.SimpleConsumer = require('./simple_consumer');
     // exports.GroupConsumer = require('./group_consumer');
