@@ -1,11 +1,8 @@
 
-/// <reference path="./client.d.ts" />
-/// <reference path="./index.d.ts" />
 
-import Kafka = require("no-kafka");
-import { Client } from "client";
 
-declare module "consumer" {
+declare module "base_consumer" {
+    import * as Kafka from "kafka";
 
     export class BaseConsumer {
         constructor(options: ConsumerOptions);
@@ -26,11 +23,11 @@ declare module "consumer" {
     export interface ConsumerOptions {
         offset?: number;
         maxBytes: number;
-        time?: Kafka.EARLIEST_OFFSET | Kafka.LATEST_OFFSET
+        time?: Kafka.OFFSET
     }
 
     export interface DataHandler {
-        (messageSet: Message[],
+        (messageSet: Kafka.Message[],
             topic: string,
             partition?: number): Promise<any>;
     }

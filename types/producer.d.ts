@@ -1,11 +1,8 @@
 
-/// <reference path="./client.d.ts" />
-/// <reference path="./index.d.ts" />
-
-import Kafka = require("no-kafka");
-import { Client } from "client";
 
 declare module "producer" {
+    import {Client} from "client";
+    import * as Kafka from "kafka";
 
     export class Producer {
         constructor(options?: ProducerOptions);
@@ -22,7 +19,7 @@ declare module "producer" {
          * It can have options
          * @memberOf Producer
          */
-        send(data: Message | Message[], options?: SendOptions): Promise<Result[]>;
+        send(data: Kafka.Message | Kafka.Message[], options?: SendOptions): Promise<Result[]>;
         /**
          * Close all connections.
          */
@@ -33,9 +30,8 @@ declare module "producer" {
         partitioner?: Partitioner;
         clientId?: string;
         asyncCompression?: boolean;
-        codec?: Kafka.COMPRESSION_GZIP |
-                Kafka.COMPRESSION_NONE |
-                Kafka.COMPRESSION_SNAPPY;
+        
+        codec?: Kafka.COMPRESSION;
     }
 
     export interface Partitioner {
@@ -51,15 +47,6 @@ declare module "producer" {
         offset: number;
     }
 
-    export interface Message {
-        topic: string;
-        partition?: string;
-        message: {
-            key?: string;
-            value: string;
-            attributes?: string[];
-        }
-    }
     export interface SendOptions {
         /**
          * requiredAcks - require acknoledgments for produce request. 
@@ -148,7 +135,7 @@ declare module "producer" {
          * codec - compression codec, one of 
          *   Kafka.COMPRESSION_NONE, Kafka.COMPRESSION_SNAPPY, Kafka.COMPRESSION_GZIP
          */
-        codec: Kafka.COMPRESSION_NONE | Kafka.COMPRESSION_SNAPPY | Kafka.COMPRESSION_GZIP;
+        codec: number; // Kafka.COMPRESSION_NONE | Kafka.COMPRESSION_SNAPPY | Kafka.COMPRESSION_GZIP;
         /**
          * batch - control batching (grouping) of requests
          */

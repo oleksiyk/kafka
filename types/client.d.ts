@@ -1,12 +1,5 @@
 
-/// <reference path="./connection.d.ts" />
-/// <reference path="./errors.d.ts" />
-/// <reference path="./protocol/index.d.ts" />
-/// <reference path="./index.d.ts" />
 
-import Kafka = require("no-kafka");
-import { Connection } from "connection";
-import { errors } from "errors";
 
 declare module "client" {
 
@@ -54,10 +47,7 @@ declare module "client" {
         offsetCommitRequestV2(groupId: any, memberId: any, generationId: any, requests: any): Promise<any>;
 
         listGroupsRequest(): Promise<any>;
-describeGroupRequest(groupId: any): Promise<any>;
-
-
-
+        describeGroupRequest(groupId: any): Promise<any>;
 
     }
 

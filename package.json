@@ -8,7 +8,7 @@
   },
   "version": "3.1.3-0",
   "main": "./lib/index.js",
-  "types": "./types/kafka.d.ts",
+  "types": "./types/index.d.ts",
   "keywords": [
     "kafka"
   ],
@@ -28,8 +28,9 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
-    "eslint": "^2.2.0",
+    "eslint": "^2.13.1",
     "eslint-config-magictoolbox": "^0.0.2",
+    "eslint-plugin-react": "^6.10.3",
     "istanbul": "^0.4.2",
     "mocha": "^3.1.2",
     "sinon": "^1.4.0",

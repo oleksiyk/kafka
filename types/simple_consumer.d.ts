@@ -1,15 +1,11 @@
-/// <reference path="./base_consumer.d.ts" />
-/// <reference path="./index.d.ts" />
 
-import Kafka = require("no-kafka");
-import { Client } from "client";
-import { BaseConsumer } from "base_consumer";
 
 declare module "simple_consumer" {
+    import { BaseConsumer } from "base_consumer";
 
     export class SimpleConsumer extends BaseConsumer {
         // constructor(options?: ConsumerOptions);
-        commitOffset(commits: Commit[]): Promise<any>;
+        // commitOffset(commits: Commit[]): Promise<any>;
         fetchOffset(commits): Promise<number[]>;  
     }
 
