@@ -4,12 +4,12 @@ declare module "simple_consumer" {
     import { BaseConsumer } from "base_consumer";
 
     export class SimpleConsumer extends BaseConsumer {
-        // constructor(options?: ConsumerOptions);
+        constructor(options?: SimpleConsumerOptions);
         // commitOffset(commits: Commit[]): Promise<any>;
         fetchOffset(commits): Promise<number[]>;  
     }
 
-    export interface ConsumerOptions {
+    export interface SimpleConsumerOptions {
         /**
          * `groupId` - group ID for comitting and 
          * fetching offsets. 
@@ -95,6 +95,8 @@ declare module "simple_consumer" {
          * default: 10
          */
         handlerConcurrency?: number;
+
+        brokerRedirection?: Kafka.BrokerRedirectionFunction | Kafka.BrokerRedirectionMap;
     }
 
     

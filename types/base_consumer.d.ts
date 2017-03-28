@@ -5,12 +5,12 @@ declare module "base_consumer" {
     import * as Kafka from "kafka";
 
     export class BaseConsumer {
-        constructor(options: ConsumerOptions);
+        constructor(options: BaseConsumerOptions);
 
         init(): Promise<void>;
 
         subscribe(topic: string, offset: number | number[],
-            options: ConsumerOptions,
+            options: BaseConsumerOptions,
             handler: DataHandler): Promise<void>;
 
         unsubscribe(topic: string, partitions: number | number[]): Promise<number[]>;
@@ -20,7 +20,7 @@ declare module "base_consumer" {
 
     }
 
-    export interface ConsumerOptions {
+    export interface BaseConsumerOptions {
         offset?: number;
         maxBytes: number;
         time?: Kafka.OFFSET

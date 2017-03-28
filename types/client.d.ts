@@ -24,7 +24,7 @@ declare module "client" {
      * @class Client
      */
     export class Client {
-        constructor(options?: Options);
+        constructor(options?: ClientOptions);
         init(): Promise<Client>;
         end(): void;
         parseHostString(hostString: string): Promise<any[]>;
@@ -51,7 +51,7 @@ declare module "client" {
 
     }
 
-    export interface Options {
+    export interface ClientOptions {
         clientId?: string;
         connectionString?: string;
         ssl?: {

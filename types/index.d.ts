@@ -7,6 +7,7 @@
 
 declare module "no-kafka" {
 
+    export * from "kafka";
     export { Producer } from "producer";
     export { SimpleConsumer } from "simple_consumer";
     export { GroupConsumer } from "group_consumer";
