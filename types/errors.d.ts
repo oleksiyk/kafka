@@ -1,32 +1,34 @@
 
+
 declare module "errors" {
 
-    export interface KafkaErrorI {
+    export class KafkaErrorAbstract {
         name: string;
         code: any;
         message: string;
 
     }
-    export class KafkaError implements KafkaErrorI {
+    export class KafkaError extends KafkaErrorAbstract {
         constructor(code: any, message: string);
 
-        toJSON(): KafkaErrorI;
+        toJSON(): KafkaErrorAbstract;
         toString(): string;
+
 
     }
     export function byCode(code: any): null | KafkaError;
     export function byName(name: string): null | KafkaError;
 
-    export interface NoKafkaConnectionErrorI {
+    export class NoKafkaConnectionErrorAbstract {
         name: string;
         server: any;
         message: string;
 
     }
-    export class NoKafkaConnectionError implements NoKafkaConnectionErrorI {
+    export class NoKafkaConnectionError extends NoKafkaConnectionErrorAbstract {
         constructor(server: any, message: string);
 
-        toJSON(): NoKafkaConnectionErrorI;
+        toJSON(): NoKafkaConnectionErrorAbstract;
         toString(): string;
 
     }

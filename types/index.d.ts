@@ -1,13 +1,26 @@
+/// <reference path="producer.d.ts" />
+/// <reference path="simple_consumer.d.ts" />
+/// <reference path="group_consumer.d.ts" />
 
+<<<<<<< HEAD
 /// <reference path="./producer.d.ts" />
 
 import { Producer as P } from "producer";
 
 declare module "no-kafka" {
     export class Producer extends P { }
+=======
+/// <reference path="kafka.d.ts" />
+/// <reference path="client.d.ts" />
 
-    // exports.SimpleConsumer = require('./simple_consumer');
-    // exports.GroupConsumer = require('./group_consumer');
+declare module "no-kafka" {
+>>>>>>> 014b43fa5b06d797f5ac801db41fb6fffa46eac0
+
+    export * from "kafka";
+    export { Producer } from "producer";
+    export { SimpleConsumer } from "simple_consumer";
+    export { GroupConsumer } from "group_consumer";
+
     // exports.GroupAdmin = require('./group_admin');
 
     // exports.DefaultPartitioner = require('./assignment/partitioners/default');
@@ -17,12 +30,4 @@ declare module "no-kafka" {
     // exports.ConsistentAssignmentStrategy = require('./assignment/strategies/consistent');
     // exports.WeightedRoundRobinAssignmentStrategy = require('./assignment/strategies/weighted_round_robin');
 
-    // offset request time constants
-    export const EARLIEST_OFFSET = -2;
-    export const LATEST_OFFSET = -1;
-
-    // compression codecs
-    export const COMPRESSION_SNAPPY = 2;
-    export const COMPRESSION_GZIP = 1;
-    export const COMPRESSION_NONE = 0;
 }

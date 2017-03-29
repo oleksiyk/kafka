@@ -1,12 +1,5 @@
 
-/// <reference path="./connection.d.ts" />
-/// <reference path="./errors.d.ts" />
-/// <reference path="./protocol/index.d.ts" />
-/// <reference path="./index.d.ts" />
 
-import Kafka = require("no-kafka");
-import { Connection } from "connection";
-import { errors } from "errors";
 
 declare module "client" {
 
@@ -31,7 +24,7 @@ declare module "client" {
      * @class Client
      */
     export class Client {
-        constructor(options?: Options);
+        constructor(options?: ClientOptions);
         init(): Promise<Client>;
         end(): void;
         parseHostString(hostString: string): Promise<any[]>;
@@ -55,9 +48,13 @@ declare module "client" {
 
         listGroupsRequest(): Promise<any>;
         describeGroupRequest(groupId: any): Promise<any>;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 014b43fa5b06d797f5ac801db41fb6fffa46eac0
     }
 
-    export interface Options {
+    export interface ClientOptions {
         clientId?: string;
         connectionString?: string;
         ssl?: {
