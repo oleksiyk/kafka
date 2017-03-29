@@ -337,7 +337,6 @@ Using `Kafka.WeightedRoundRobinAssignmentStrategy`:
 
 ```javascript
 var strategies = {
-    strategy: 'TestStrategy',
     subscriptions: ['kafka-test-topic'],
     metadata: {
         weight: 4

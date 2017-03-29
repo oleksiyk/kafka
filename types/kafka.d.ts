@@ -23,50 +23,7 @@ declare module "kafka" {
         }
     }
 
-
-    export class DefaultPartitioner {
-        constructor();
-        /**
-         * The partition method receives 3 arguments: 
-         * * the topic name, 
-         * * an array with topic partitions, and 
-         * * the message (useful to partition by key, etc.). 
-         * The call to partition can be sync or async (return a Promise).
-         */
-        partition(topic: string, partitions: number[], message: string): Promise<number>;
-
-    }
-    /**
-     * 
-     * 
-     * @export
-     * @class AbstractAssignmentStrategy
-     */
-    export class AbstractAssignmentStrategy {
-        constructor();
-    }
-    /**
-     * simple round robin assignment strategy (default).
-     * 
-     * @export
-     * @class DefaultAssignmentStrategy
-     */
-    export class DefaultAssignmentStrategy extends AbstractAssignmentStrategy {
-        constructor();
-    }
-    /** 
-    * WeightedRoundRobinAssignmentStrategy weighted round robin assignment (based on wrr-pool).
-    */
-    export class WeightedRoundRobinAssignmentStrategy extends AbstractAssignmentStrategy {
-        constructor();
-    }
-    /** 
-    * ConsistentAssignmentStrategy which is based on a consistent hash ring and so provides consistent assignment across consumers in a group based on supplied metadata.id and metadata.weight options.
-    */
-    export class ConsistentAssignmentStrategy extends AbstractAssignmentStrategy {
-        constructor();
-    }
-
+   
     /**
      * A function returning a tuple of host (string) and port (integer), such as:
     
