@@ -54,30 +54,29 @@ npm install no-kafka
 
 Example:
 
-```javascript
-var Kafka = require('no-kafka');
-var producer = new Kafka.Producer();
+```typescript
+import {Producer} from "no-kafka";
+let producer = new Producer();
 
-return producer.init().then(function(){
-  return producer.send({
-      topic: 'kafka-test-topic',
+await producer.init();
+let result = await producer.send({
+      topic: "kafka-test-topic",
       partition: 0,
       message: {
-          value: 'Hello!'
+          value: "Hello!"
       }
   });
-})
-.then(function (result) {
-  /*
-  [ { topic: 'kafka-test-topic', partition: 0, offset: 353 } ]
-  */
-});
+
+/*
+result =
+  [ { topic: "kafka-test-topic", partition: 0, offset: 353 } ]
+*/
 ```
 
 Send and retry if failed within 100ms delay:
 
-```javascript
-return producer.send(messages, {
+```typescript
+let result = await producer.send(messages, {
   retries: {
     attempts: 2,
     delay: {
@@ -92,14 +91,14 @@ return producer.send(messages, {
 
 Accumulate messages into single batch until their total size is >= 1024 bytes or 100ms timeout expires (overwrite Producer constructor options):
 
-```javascript
-producer.send(messages, {
+```typescript
+await producer.send(messages, {
   batch: {
     size: 1024,
     maxWait: 100
   }
 });
-producer.send(messages, {
+await producer.send(messages, {
   batch: {
     size: 1024,
     maxWait: 100
@@ -109,9 +108,9 @@ producer.send(messages, {
 
 Please note, that if you pass different options to the `send()` method then these messages will be grouped into separate batches:
 
-```javascript
+```typescript
 // will be sent in batch 1
-producer.send(messages, {
+await producer.send(messages, {
   batch: {
     size: 1024,
     maxWait: 100
@@ -119,7 +118,7 @@ producer.send(messages, {
   codec: Kafka.COMPRESSION_GZIP
 });
 // will be sent in batch 2
-producer.send(messages, {
+await producer.send(messages, {
   batch: {
     size: 1024,
     maxWait: 100
@@ -132,13 +131,13 @@ producer.send(messages, {
 
 Send a message with the key:
 
-```javascript
+```typescript
 producer.send({
-    topic: 'kafka-test-topic',
+    topic: "kafka-test-topic",
     partition: 0,
     message: {
-        key: 'some-key'
-        value: 'Hello!'
+        key: "some-key"
+        value: "Hello!"
     }
 });
 ```
@@ -147,43 +146,38 @@ producer.send({
 
 Example: override the default partitioner with a custom partitioner that only uses a portion of the key.
 
-```javascript
-var util  = require('util');
-var Kafka = require('no-kafka');
+```typescript
+import Kafka = require("no-kafka");
 
-var Producer           = Kafka.Producer;
-var DefaultPartitioner = Kafka.DefaultPartitioner;
+let Producer           = Kafka.Producer;
+let DefaultPartitioner = Kafka.DefaultPartitioner;
 
-function MyPartitioner() {
-    DefaultPartitioner.apply(this, arguments);
+class MyPartitioner extends DefaultPartitioner {
+    getKey(message) => {
+        return message.key.split("-")[0];
+    }
 }
 
-util.inherits(MyPartitioner, DefaultPartitioner);
-
-MyPartitioner.prototype.getKey = function getKey(message) {
-    return message.key.split('-')[0];
-};
-
-var producer = new Producer({
+let producer = new Producer({
     partitioner : new MyPartitioner()
 });
 
-return producer.init().then(function(){
-  return producer.send({
-      topic: 'kafka-test-topic',
+await producer.init();
+let result = await producer.send({
+      topic: "kafka-test-topic",
       message: {
-          key   : 'namespace-key',
-          value : 'Hello!'
+          key   : "namespace-key",
+          value : "Hello!"
       }
   });
-});
+return result;
 ```
 
 ### Producer options:
 * `requiredAcks` - require acknoledgments for produce request. If it is 0 the server will not send any response.  If it is 1 (default), the server will wait the data is written to the local log before sending a response. If it is -1 the server will block until the message is committed by all in sync replicas before sending a response. For any number > 1 the server will block waiting for this number of acknowledgements to occur (but the server will never wait for more acknowledgements than there are in-sync replicas).
 * `timeout` - timeout in ms for produce request
-* `clientId` - ID of this client, defaults to 'no-kafka-client'
-* `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
+* `clientId` - ID of this client, defaults to "no-kafka-client"
+* `connectionString` - comma delimited list of initial brokers list, defaults to "127.0.0.1:9092"
 * `reconnectionDelay` - controls optionally progressive delay between reconnection attempts in case of network error:
   * `min` - minimum delay, used as increment value for next attempts, defaults to 1000ms
   * `max` - maximum delay value, defaults to 1000ms
@@ -205,52 +199,56 @@ Manually specify topic, partition and offset when subscribing. Suitable for simp
 
 Example:
 
-```javascript
-var consumer = new Kafka.SimpleConsumer();
+```typescript
+let consumer = new Kafka.SimpleConsumer();
 
 // data handler function can return a Promise
-var dataHandler = function (messageSet, topic, partition) {
+let dataHandler = function (messageSet, topic, partition) {
     messageSet.forEach(function (m) {
-        console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
+        console.log(topic, partition, m.offset, m.message.value.toString("utf8"));
     });
 };
 
-return consumer.init().then(function () {
-    // Subscribe partitons 0 and 1 in a topic:
-    return consumer.subscribe('kafka-test-topic', [0, 1], dataHandler);
-});
+await consumer.init();
+// Subscribe partitons 0 and 1 in a topic:
+let result =
+   await consumer.subscribe("kafka-test-topic",
+                            [0, 1], dataHandler);
 ```
 
 Subscribe (or change subscription) to specific offset and limit maximum received MessageSet size:
 
-```javascript
-consumer.subscribe('kafka-test-topic', 0, {offset: 20, maxBytes: 30}, dataHandler)
+```typescript
+consumer.subscribe("kafka-test-topic", 0, 
+                   {offset: 20,
+                    maxBytes: 30}, 
+                   dataHandler)
 ```
 
 Subscribe to latest or earliest offsets in the topic/parition:
 
-```javascript
-consumer.subscribe('kafka-test-topic', 0, {time: Kafka.LATEST_OFFSET}, dataHandler)
-consumer.subscribe('kafka-test-topic', 0, {time: Kafka.EARLIEST_OFFSET}, dataHandler)
+```typescript
+consumer.subscribe("kafka-test-topic", 0, {time: Kafka.LATEST_OFFSET}, dataHandler)
+consumer.subscribe("kafka-test-topic", 0, {time: Kafka.EARLIEST_OFFSET}, dataHandler)
 ```
 
 Subscribe to all partitions in a topic:
 
-```javascript
-consumer.subscribe('kafka-test-topic', dataHandler)
+```typescript
+consumer.subscribe("kafka-test-topic", dataHandler)
 ```
 
 Commit offset(s) (V0, Kafka saves these commits to Zookeeper)
 
-```javascript
+```typescript
 consumer.commitOffset([
   {
-      topic: 'kafka-test-topic',
+      topic: "kafka-test-topic",
       partition: 0,
       offset: 1
   },
   {
-      topic: 'kafka-test-topic',
+      topic: "kafka-test-topic",
       partition: 1,
       offset: 2
   }
@@ -259,40 +257,41 @@ consumer.commitOffset([
 
 Fetch commited offset(s)
 
-```javascript
-consumer.fetchOffset([
+```typescript
+let result = await consumer.fetchOffset([
   {
-      topic: 'kafka-test-topic',
+      topic: "kafka-test-topic",
       partition: 0
   },
   {
-      topic: 'kafka-test-topic',
+      topic: "kafka-test-topic",
       partition: 1
   }
-]).then(function (result) {
+]);
+
 /*
-[ { topic: 'kafka-test-topic',
+result =
+[ { topic: "kafka-test-topic",
     partition: 1,
     offset: 2,
     metadata: null,
     error: null },
-  { topic: 'kafka-test-topic',
+  { topic: "kafka-test-topic",
     partition: 0,
     offset: 1,
     metadata: null,
     error: null } ]
 */
-});
 ```
 
 ### SimpleConsumer options
-* `groupId` - group ID for comitting and fetching offsets. Defaults to 'no-kafka-group-v0'
+* `groupId` - group ID for comitting and fetching offsets. Defaults to "no-kafka-group-v0"
 * `maxWaitTime` - maximum amount of time in milliseconds to block waiting if insufficient data is available at the time the fetch request is issued, defaults to 100ms
 * `idleTimeout` - timeout between fetch calls, defaults to 1000ms
 * `minBytes` - minimum number of bytes to wait from Kafka before returning the fetch call, defaults to 1 byte
 * `maxBytes` - maximum size of messages in a fetch response, defaults to 1MB
-* `clientId` - ID of this client, defaults to 'no-kafka-client'
-* `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
+* `clientId` - ID of this client, defaults to "no-kafka-client"
+* `connectionString` - comma delimited list of initial brokers list, defaults to "127.0.0.1:9092"
 * `reconnectionDelay` - controls optionally progressive delay between reconnection attempts in case of network error:
   * `min` - minimum delay, used as increment value for next attempts, defaults to 1000ms
   * `max` - maximum delay value, defaults to 1000ms
@@ -306,24 +305,24 @@ Specify an assignment strategy (or use __no-kafka__ built-in consistent or round
 
 Example:
 
-```javascript
-var Promise = require('bluebird');
-var consumer = new Kafka.GroupConsumer();
+```typescript
+let consumer = new Kafka.GroupConsumer();
 
-var dataHandler = function (messageSet, topic, partition) {
+let dataHandler = function (messageSet, topic, partition) {
     return Promise.each(messageSet, function (m){
-        console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
+        console.log(topic, partition, m.offset, m.message.value.toString("utf8"));
         // commit offset
-        return consumer.commitOffset({topic: topic, partition: partition, offset: m.offset, metadata: 'optional'});
+        return consumer.commitOffset({topic: topic, partition: partition, offset: m.offset, metadata: "optional"});
     });
 };
 
-var strategies = [{
-    subscriptions: ['kafka-test-topic'],
+let strategies = [{
+    subscriptions: ["kafka-test-topic"],
     handler: dataHandler
 }];
 
-consumer.init(strategies); // all done, now wait for messages in dataHandler
+// all done, now wait for messages in dataHandler
+await consumer.init(strategies); 
 ```
 
 ### Assignment strategies
@@ -335,9 +334,9 @@ __no-kafka__ provides three built-in strategies:
 
 Using `Kafka.WeightedRoundRobinAssignmentStrategy`:
 
-```javascript
-var strategies = {
-    subscriptions: ['kafka-test-topic'],
+```typescript
+let strategies = {
+    subscriptions: ["kafka-test-topic"],
     metadata: {
         weight: 4
     },
@@ -349,11 +348,11 @@ var strategies = {
 
 Using `Kafka.ConsistentAssignmentStrategy`:
 
-```javascript
-var strategies = {
-    subscriptions: ['kafka-test-topic'],
+```typescript
+let strategies = {
+    subscriptions: ["kafka-test-topic"],
     metadata: {
-        id: process.argv[2] || 'consumer_1',
+        id: process.argv[2] || "consumer_1",
         weight: 50
     },
     strategy: new Kafka.ConsistentAssignmentStrategy(),
@@ -367,13 +366,13 @@ You can also write your own assignment strategy by inheriting from Kafka.Default
 
 ### GroupConsumer options
 
-* `groupId` - group ID for comitting and fetching offsets. Defaults to 'no-kafka-group-v0.9'
+* `groupId` - group ID for comitting and fetching offsets. Defaults to "no-kafka-group-v0.9"
 * `maxWaitTime` - maximum amount of time in milliseconds to block waiting if insufficient data is available at the time the fetch request is issued, defaults to 100ms
 * `idleTimeout` - timeout between fetch calls, defaults to 1000ms
 * `minBytes` - minimum number of bytes to wait from Kafka before returning the fetch call, defaults to 1 byte
 * `maxBytes` - maximum size of messages in a fetch response
-* `clientId` - ID of this client, defaults to 'no-kafka-client'
-* `connectionString` - comma delimited list of initial brokers list, defaults to '127.0.0.1:9092'
+* `clientId` - ID of this client, defaults to "no-kafka-client"
+* `connectionString` - comma delimited list of initial brokers list, defaults to "127.0.0.1:9092"
 * `reconnectionDelay` - controls optionally progressive delay between reconnection attempts in case of network error:
   * `min` - minimum delay, used as increment value for next attempts, defaults to 1000ms
   * `max` - maximum delay value, defaults to 1000ms
@@ -395,69 +394,69 @@ Offers methods:
 
 listGroups, describeGroup:
 
-```javascript
-var admin = new Kafka.GroupAdmin();
+```typescript
+let admin = new Kafka.GroupAdmin();
 
-return admin.init().then(function(){
-    return admin.listGroups().then(function(groups){
-        // [ { groupId: 'no-kafka-admin-test-group', protocolType: 'consumer' } ]
-        return admin.describeGroup('no-kafka-admin-test-group').then(function(group){
-            /*
-            { error: null,
-              groupId: 'no-kafka-admin-test-group',
-              state: 'Stable',
-              protocolType: 'consumer',
-              protocol: 'DefaultAssignmentStrategy',
-              members:
-               [ { memberId: 'group-consumer-82646843-b4b8-4e91-94c9-b4708c8b05e8',
-                   clientId: 'group-consumer',
-                   clientHost: '/192.168.1.4',
-                   version: 0,
-                   subscriptions: [ 'kafka-test-topic'],
-                   metadata: <Buffer 63 6f 6e 73 75 6d 65 72 2d 6d 65 74 61 64 61 74 61>,
-                   memberAssignment:
-                    { _blength: 44,
-                      version: 0,
-                      partitionAssignment:
-                       [ { topic: 'kafka-test-topic',
-                           partitions: [ 0, 1, 2 ] },
-                          ],
-                      metadata: null } },
-                  ] }
-             */
-        })
-    });
-});
+await admin.init();
+let groups = await admin.listGroups();
+/* 
+groups =
+    [ { groupId: "no-kafka-admin-test-group", protocolType: "consumer" } ]
+*/
+let group = await admin.describeGroup("no-kafka-admin-test-group");
+/*
+group =
+{ error: null,
+    groupId: "no-kafka-admin-test-group",
+    state: "Stable",
+    protocolType: "consumer",
+    protocol: "DefaultAssignmentStrategy",
+    members:
+    [ { memberId: "group-consumer-82646843-b4b8-4e91-94c9-b4708c8b05e8",
+        clientId: "group-consumer",
+        clientHost: "/192.168.1.4",
+        version: 0,
+        subscriptions: [ "kafka-test-topic"],
+        metadata: <Buffer 63 6f 6e 73 75 6d 65 72 2d 6d 65 74 61 64 61 74 61>,
+        memberAssignment:
+        { _blength: 44,
+            version: 0,
+            partitionAssignment:
+            [ { topic: "kafka-test-topic",
+                partitions: [ 0, 1, 2 ] },
+                ],
+            metadata: null } },
+        ] }
+    */
 ```
 
 fetchConsumerLag:
-```javascript
-var admin = new Kafka.GroupAdmin();
+```typescript
+let admin = new Kafka.GroupAdmin();
 
-return admin.init().then(function(){
-    return admin.fetchConsumerLag('no-kafka-admin-test-group', [{
-        topicName: 'kafka-test-topic',
-        partitions: [0, 1, 2]
-    }]).then(function (consumerLag) {
-        /*
-        [ { topic: 'kafka-test-topic',
-            partition: 0,
-            offset: 11300,
-            highwaterMark: 11318,
-            consumerLag: 18 },
-          { topic: 'kafka-test-topic',
-            partition: 1,
-            offset: 10380,
-            highwaterMark: 10380,
-            consumerLag: 0 },
-          { topic: 'kafka-test-topic',
-            partition: 2,
-            offset: -1,
-            highwaterMark: 10435,
-            consumerLag: null } ]
-         */
-    });
-});
+await admin.init();
+let consumerLag = 
+    await admin.fetchConsumerLag("no-kafka-admin-test-group", [{
+        topicName: "kafka-test-topic",
+        partitions: [0, 1, 2] }]);
+/*
+consumerLag =
+[ { topic: "kafka-test-topic",
+    partition: 0,
+    offset: 11300,
+    highwaterMark: 11318,
+    consumerLag: 18 },
+    { topic: "kafka-test-topic",
+    partition: 1,
+    offset: 10380,
+    highwaterMark: 10380,
+    consumerLag: 0 },
+    { topic: "kafka-test-topic",
+    partition: 2,
+    offset: -1,
+    highwaterMark: 10435,
+    consumerLag: null } ]
+    */
 ```
 
 Note that group consumer has to commit offsets first, in order for consumerLag to be available. Otherwise the offset will be set to -1.
@@ -468,23 +467,25 @@ __no-kafka__ supports both SNAPPY and Gzip compression. To use SNAPPY you must i
 
 Enable compression in Producer:
 
-```javascript
-var Kafka = require('no-kafka');
+```typescript
+let Kafka = require("no-kafka");
 
-var producer = new Kafka.Producer({
-    clientId: 'producer',
-    codec: Kafka.COMPRESSION_SNAPPY // Kafka.COMPRESSION_NONE, Kafka.COMPRESSION_SNAPPY, Kafka.COMPRESSION_GZIP
-});
+let producer = new Kafka.Producer({
+    clientId: "producer",
+    codec: Kafka.COMPRESSION_SNAPPY  });
+    // Kafka.COMPRESSION_NONE, 
+    // Kafka.COMPRESSION_SNAPPY, 
+    // Kafka.COMPRESSION_GZIP
 ```
 
 Alternatively just send some messages with specified compression codec (overwrites codec set in contructor):
 
-```javascript
+```typescript
 return producer.send({
-    topic: 'kafka-test-topic',
+    topic: "kafka-test-topic",
     partition: 0,
-    message: { value: 'p00' }
-}, { codec: Kafka.COMPRESSION_SNAPPY })
+    message: { value: "p00" } },
+    { codec: Kafka.COMPRESSION_SNAPPY })
 ```
 
 By default __no-kafka__ will use asynchronous compression and decompression.
@@ -492,9 +493,9 @@ Disable async compression/decompression (and use sync) with `asyncCompression` o
 
 Producer:
 
-```javascript
-var producer = new Kafka.Producer({
-    clientId: 'producer',
+```typescript
+let producer = new Kafka.Producer({
+    clientId: "producer",
     asyncCompression: false, // use sync compression/decompression
     codec: Kafka.COMPRESSION_SNAPPY
 });
@@ -502,10 +503,10 @@ var producer = new Kafka.Producer({
 
 Consumer:
 
-```javascript
-var consumer = new Kafka.SimpleConsumer({
+```typescript
+let consumer = new Kafka.SimpleConsumer({
     idleTimeout: 100,
-    clientId: 'simple-consumer',
+    clientId: "simple-consumer",
     asyncCompression: true
 });
 ```
@@ -524,24 +525,24 @@ To connect to Kafka with [SSL endpoint enabled](http://kafka.apache.org/090/docu
 
 Loading certificate and key from file:
 
-```javascript
-var producer = new Kafka.Producer({
-  connectionString: 'kafka://127.0.0.1:9093', // should match `listeners` SSL option in Kafka config
+```typescript
+let producer = new Kafka.Producer({
+  connectionString: "kafka://127.0.0.1:9093", // should match `listeners` SSL option in Kafka config
   ssl: {
-    cert: '/path/to/client.crt',
-    key: '/path/to/client.key'
+    cert: "/path/to/client.crt",
+    key: "/path/to/client.key"
   }
 });
 ```
 
 Specifying certificate and key directly as strings:
 
-```javascript
-var producer = new Kafka.Producer({
-  connectionString: 'kafka://127.0.0.1:9093', // should match `listeners` SSL option in Kafka config
+```typescript
+let producer = new Kafka.Producer({
+  connectionString: "kafka://127.0.0.1:9093", // should match `listeners` SSL option in Kafka config
   ssl: {
-    cert: '-----BEGIN CERTIFICATE-----\nMIIChTCCAe4C...............',
-    key: '-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBA.......'
+    cert: "-----BEGIN CERTIFICATE-----\nMIIChTCCAe4C...............",
+    key: "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBA......."
   }
 });
 ```
@@ -572,7 +573,7 @@ The value of the `brokerDirection` can be either:
 
         brokerRedirection: function (host, port) {
             return {
-                host: host + '.somesuffix.com', // Fully qualify
+                host: host + ".somesuffix.com", // Fully qualify
                 port: port + 100,               // Port NAT
             }
         }
@@ -580,9 +581,9 @@ The value of the `brokerDirection` can be either:
   - A simple map of connection strings to new connection strings, such as:
 
         brokerRedirection: {
-            'some-host:9092': 'actual-host:9092',
-            'kafka://another-host:9092': 'another-host:9093',
-            'third-host:9092': 'kafka://third-host:9000'
+            "some-host:9092": "actual-host:9092",
+            "kafka://another-host:9092": "another-host:9093",
+            "third-host:9092": "kafka://third-host:9000"
         }
 
 A common scenario for this kind of remapping is when a Kafka cluster exists within a Docker application, and the
@@ -596,12 +597,12 @@ In case of network error which prevents further operations __no-kafka__ will try
 
 You can differentiate messages from several instances of producer/consumer by providing unique `clientId` in options:
 
-```javascript
-var consumer1 = new Kafka.GroupConsumer({
-    clientId: 'group-consumer-1'
+```typescript
+let consumer1 = new Kafka.GroupConsumer({
+    clientId: "group-consumer-1"
 });
-var consumer2 = new Kafka.GroupConsumer({
-    clientId: 'group-consumer-2'
+let consumer2 = new Kafka.GroupConsumer({
+    clientId: "group-consumer-2"
 });
 ```
 =>
@@ -613,9 +614,9 @@ var consumer2 = new Kafka.GroupConsumer({
 
 Change the logging level:
 
-```javascript
-var consumer = new Kafka.GroupConsumer({
-    clientId: 'group-consumer',
+```typescript
+let consumer = new Kafka.GroupConsumer({
+    clientId: "group-consumer",
     logger: {
         logLevel: 1 // 0 - nothing, 1 - just errors, 2 - +warnings, 3 - +info, 4 - +debug, 5 - +trace
     }
@@ -624,14 +625,14 @@ var consumer = new Kafka.GroupConsumer({
 
 Send log messages to Logstash server(s) via UDP:
 
-```javascript
-var consumer = new Kafka.GroupConsumer({
-    clientId: 'group-consumer',
+```typescript
+let consumer = new Kafka.GroupConsumer({
+    clientId: "group-consumer",
     logger: {
         logstash: {
             enabled: true,
-            connectionString: '10.0.1.1:9999,10.0.1.2:9999',
-            app: 'myApp-kafka-consumer'
+            connectionString: "10.0.1.1:9999,10.0.1.2:9999",
+            app: "myApp-kafka-consumer"
         }
     }
 });
@@ -639,9 +640,9 @@ var consumer = new Kafka.GroupConsumer({
 
 You can overwrite the function that outputs messages to stdout/stderr:
 
-```javascript
-var consumer = new Kafka.GroupConsumer({
-    clientId: 'group-consumer',
+```typescript
+let consumer = new Kafka.GroupConsumer({
+    clientId: "group-consumer",
     logger: {
         logFunction: console.log
     }
@@ -650,7 +651,7 @@ var consumer = new Kafka.GroupConsumer({
 
 ## Topic Creation
 
-There is no Kafka API call to create a topic. Kafka supports auto creating of topics when their metadata is first requested (`auto.create.topic` option) but the topic is created with all default parameters, which is useless. There is no way to be notified when the topic has been created, so the library will need to ping the server with some interval. There is also no way to be notified of any error for this operation. For this reason, having no guarantees, __no-kafka__ won't provide topic creation method until there will be a specific Kafka API call to create/manage topics.
+There is no Kafka API call to create a topic. Kafka supports auto creating of topics when their metadata is first requested (`auto.create.topic` option) but the topic is created with all default parameters, which is useless. There is no way to be notified when the topic has been created, so the library will need to ping the server with some interval. There is also no way to be notified of any error for this operation. For this reason, having no guarantees, __no-kafka__ won"t provide topic creation method until there will be a specific Kafka API call to create/manage topics.
 
 ## License: [MIT](https://github.com/oleksiyk/kafka/blob/master/LICENSE)
 
