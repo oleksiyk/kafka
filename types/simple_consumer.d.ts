@@ -1,12 +1,13 @@
 
 
 declare module "simple_consumer" {
+    import * as Kafka from "kafka";
     import { BaseConsumer } from "base_consumer";
 
     export class SimpleConsumer extends BaseConsumer {
         constructor(options?: SimpleConsumerOptions);
         // commitOffset(commits: Commit[]): Promise<any>;
-        fetchOffset(commits): Promise<number[]>;  
+        fetchOffset(commits: Commit | Commit[]): Promise<number[]>;  
     }
 
     export interface SimpleConsumerOptions {
@@ -98,6 +99,15 @@ declare module "simple_consumer" {
 
         brokerRedirection?: Kafka.BrokerRedirectionFunction | Kafka.BrokerRedirectionMap;
     }
+
+
+    export interface Commit {
+        topic?: string;
+        partition?: number;
+        offset?: number;
+        metadata?: string;
+    }
+
 
     
 }

@@ -23,7 +23,7 @@ declare module "kafka" {
         }
     }
 
-   
+
     /**
      * A function returning a tuple of host (string) and port (integer), such as:
     
@@ -48,6 +48,12 @@ declare module "kafka" {
     }
      */
     export type BrokerRedirectionMap = {};
+
+
+    export interface AbstractAssignmentStrategy {
+    }
+
+    export { DefaultPartitioner } from "assignment/partitioners/default";
 
     export interface Logger {
         /**

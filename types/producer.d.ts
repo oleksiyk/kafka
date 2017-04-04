@@ -1,8 +1,9 @@
 
 
 declare module "producer" {
-    import { Client } from "client";
     import * as Kafka from "kafka";
+    import { Client } from "client";
+    import { DefaultPartitioner } from "assignment/partitioners/default";
 
     export class Producer {
         constructor(options?: ProducerOptions);

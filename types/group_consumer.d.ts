@@ -4,12 +4,12 @@
 declare module "group_consumer" {
     import * as Kafka from "kafka";
     import { BaseConsumer } from "base_consumer";
-
+    
     export class GroupConsumer extends BaseConsumer {
         constructor(options?: GroupConsumerOptions);
 
         commitOffset(commits: Commit | Commit[]): Promise<any>;
-        fetchOffset(commits): Promise<number[]>;
+        fetchOffset(commits: Commit | Commit[]): Promise<number[]>;
 
         init(strategies?: Strategy | Strategy[]): Promise<any>;
     }

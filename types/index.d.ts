@@ -1,21 +1,19 @@
 /// <reference path="producer.d.ts" />
+/// <reference path="base_consumer.d.ts" />
 /// <reference path="simple_consumer.d.ts" />
 /// <reference path="group_consumer.d.ts" />
 /// <reference path="group_admin.d.ts" />
 
-<<<<<<< HEAD
-/// <reference path="./producer.d.ts" />
-
-import { Producer as P } from "producer";
-
-declare module "no-kafka" {
-    export class Producer extends P { }
-=======
 /// <reference path="kafka.d.ts" />
 /// <reference path="client.d.ts" />
 
+/// <reference path="assignment/partitioners/default.d.ts" />
+/// <reference path="assignment/partitioners/hash_crc32.d.ts" />
+/// <reference path="assignment/strategies/default.d.ts" />
+/// <reference path="assignment/strategies/consistent.d.ts" />
+/// <reference path="assignment/strategies/weighted_round_robin.d.ts" />
+
 declare module "no-kafka" {
->>>>>>> 014b43fa5b06d797f5ac801db41fb6fffa46eac0
 
     export * from "kafka";
     export { Producer, Result } from "producer";
