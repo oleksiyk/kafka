@@ -23,7 +23,9 @@
     "wrr-pool": "^1.0.3",
     "@types/lodash": "^4.14.55",
     "@types/bluebird": "3.5.0",
-    "typescript": "2.2.1"
+    "typescript": "2.2.1",
+    "readable-stream": "^2.2.9",
+    "through2": "^2.0.3"
   },
   "devDependencies": {
     "chai": "^3.5.0",
