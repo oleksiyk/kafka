@@ -137,13 +137,15 @@ describe('Connection', function () {
         var configuredCert, configuredKey;
 
         before(function () {
-            configuredCert = process.env.KAFKA_CLIENT_CERT_STR;
-            configuredKey = process.env.KAFKA_CLIENT_CERT_KEY_STR;
+            configuredCert = process.env.KAFKA_CLIENT_CERT;
+            configuredKey = process.env.KAFKA_CLIENT_CERT_KEY;
+            process.env.KAFKA_CLIENT_CERT = null;
+            process.env.KAFKA_CLIENT_CERT_KEY = null;
         });
 
         after(function () {
-            process.env.KAFKA_CLIENT_CERT_STR = configuredCert;
-            process.env.KAFKA_CLIENT_CERT_KEY_STR = configuredKey;
+            process.env.KAFKA_CLIENT_CERT = configuredCert;
+            process.env.KAFKA_CLIENT_CERT_KEY = configuredKey;
         });
 
         it('should load from file', function () {
