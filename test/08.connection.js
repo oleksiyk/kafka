@@ -139,8 +139,8 @@ describe('Connection', function () {
         before(function () {
             configuredCert = process.env.KAFKA_CLIENT_CERT;
             configuredKey = process.env.KAFKA_CLIENT_CERT_KEY;
-            process.env.KAFKA_CLIENT_CERT = null;
-            process.env.KAFKA_CLIENT_CERT_KEY = null;
+            delete process.env.KAFKA_CLIENT_CERT;
+            delete process.env.KAFKA_CLIENT_CERT_KEY;
         });
 
         after(function () {
