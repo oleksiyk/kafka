@@ -1,6 +1,6 @@
 'use strict';
 
-/* global describe, it, before, sinon, after  */
+/* global describe, it, before, after  */
 
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');

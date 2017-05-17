@@ -154,7 +154,8 @@ describe('Producer', function () {
         var _producer = new Kafka.Producer({
             clientId: 'producer'
         });
-        var partitionerSpy = _producer.partitioner.partition = sinon.spy(function () { return 1; });
+        var partitionerSpy = sinon.spy(function () { return 1; });
+        _producer.partitioner.partition = partitionerSpy;
         return _producer.init().then(function () {
             return _producer.send({
                 topic: 'kafka-test-topic',
