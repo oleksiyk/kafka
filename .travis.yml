@@ -10,8 +10,8 @@ env:
   # - CXX=g++-4.8 KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT_STR="`cat ${TRAVIS_BUILD_DIR}/test/ssl/client.crt`" KAFKA_CLIENT_CERT_KEY_STR="`cat ${TRAVIS_BUILD_DIR}/test/ssl/client.key`"
 
 addons:
-  # code_climate:
-    # repo_token: 3ea8622d957330fec45b641e8ed2650f7a83bc905a38d94f3d43738caf8b227a
+  code_climate:
+    repo_token: 3ea8622d957330fec45b641e8ed2650f7a83bc905a38d94f3d43738caf8b227a
   apt:
     sources:
       - ubuntu-toolchain-r-test
@@ -34,6 +34,6 @@ before_install:
   - sleep 10
   - kafka/bin/kafka-topics.sh --zookeeper 127.0.0.1:2181 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
 
-# after_script:
-#   - npm install codeclimate-test-reporter
-#   - codeclimate-test-reporter < coverage/lcov.info
+after_script:
+  - npm install codeclimate-test-reporter
+  - codeclimate-test-reporter < coverage/lcov.info
