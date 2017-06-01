@@ -48,6 +48,72 @@ describe('requiredAcks: 0', function () {
     });
 });
 
+describe('null and empty', function () {
+    var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
+    var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
+
+    var dataHanlderSpy = sinon.spy(function () {});
+
+    before(function () {
+        return Promise.all([
+            producer.init(),
+            consumer.init()
+        ]);
+    });
+
+    after(function () {
+        return Promise.all([
+            producer.end(),
+            consumer.end()
+        ]);
+    });
+
+    it('should send/receive null byte string', function () {
+        return consumer.subscribe('kafka-test-topic', 0, dataHanlderSpy).then(function () {
+            return producer.send({
+                topic: 'kafka-test-topic',
+                partition: 0,
+                message: { value: null, key: null }
+            });
+        })
+        .delay(100)
+        .then(function () {
+            dataHanlderSpy.should.have.been.called; // eslint-disable-line
+            dataHanlderSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
+            dataHanlderSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+            dataHanlderSpy.lastCall.args[2].should.be.a('number', 0);
+
+            dataHanlderSpy.lastCall.args[0][0].should.be.an('object');
+            dataHanlderSpy.lastCall.args[0][0].should.have.property('message').that.is.an('object');
+            dataHanlderSpy.lastCall.args[0][0].message.should.have.property('value', null);
+            dataHanlderSpy.lastCall.args[0][0].message.should.have.property('key', null);
+        });
+    });
+
+    it('should send/receive empty byte string', function () {
+        dataHanlderSpy.reset();
+        return producer.send({
+            topic: 'kafka-test-topic',
+            partition: 0,
+            message: { value: '', key: '' }
+        })
+        .delay(100)
+        .then(function () {
+            dataHanlderSpy.should.have.been.called; // eslint-disable-line
+            dataHanlderSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
+            dataHanlderSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+            dataHanlderSpy.lastCall.args[2].should.be.a('number', 0);
+
+            dataHanlderSpy.lastCall.args[0][0].should.be.an('object');
+            dataHanlderSpy.lastCall.args[0][0].should.have.property('message').that.is.an('object');
+            dataHanlderSpy.lastCall.args[0][0].message.should.have.property('value');
+            dataHanlderSpy.lastCall.args[0][0].message.value.toString('utf8').should.be.eql('');
+            dataHanlderSpy.lastCall.args[0][0].message.should.have.property('key');
+            dataHanlderSpy.lastCall.args[0][0].message.key.toString('utf8').should.be.eql('');
+        });
+    });
+});
+
 describe('connectionString', function () {
     it('should throw when connectionString is wrong', function () {
         var producer = new Kafka.Producer({ connectionString: 'localhost' });
