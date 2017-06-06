@@ -326,6 +326,26 @@ var strategies = [{
 consumer.init(strategies); // all done, now wait for messages in dataHandler
 ```
 
+## PeriodicOffsetCommitter
+
+Periodically commit offsets at a set interval (default 5 seconds).  Can perform better than calling 
+consumer.commitOffset for every message when processing a high volume of messages.
+ 
+ Example:
+ 
+ ```javascript
+ var Promise = require('bluebird');
+ var consumer = new Kafka.GroupConsumer();
+ var periodicOffsetCommitter = new Kafka.PeriodicOffsetCommitter(consumer);
+ 
+ var dataHandler = function (messageSet, topic, partition) {
+     return Promise.each(messageSet, function (m){
+         console.log(topic, partition, m.offset, m.message.value.toString('utf8'));
+         periodicOffsetCommitter.setOffset({topic: topic, partition: partition, offset: m.offset});
+     });
+ };
+ ````
+
 ### Assignment strategies
 
 __no-kafka__ provides three built-in strategies:
