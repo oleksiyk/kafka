@@ -17,7 +17,7 @@ declare module "kafka" {
     export interface Message {
         topic: string;
         partition?: number;
-        offset: number;
+        offset?: number;
         message: {
             key?: string;
             value: Buffer | string;
