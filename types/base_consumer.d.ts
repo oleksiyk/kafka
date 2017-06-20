@@ -13,7 +13,7 @@ declare module "base_consumer" {
             options: BaseConsumerOptions,
             handler: DataHandler): Promise<void>;
 
-        unsubscribe(topic: string, partitions: number | number[]): Promise<number[]>;
+        unsubscribe(topic: string, partitions?: number | number[]): Promise<number[]>;
         offset(topic: string, partition?: number): Promise<number>;
 
         end(): Promise<void>;
@@ -22,7 +22,7 @@ declare module "base_consumer" {
 
     export interface BaseConsumerOptions {
         offset?: number;
-        maxBytes: number;
+        maxBytes?: number;
         time?: Kafka.OFFSET
     }
 

@@ -4,6 +4,7 @@ declare module "kafka" {
 
     // offset request time constants
 
+    export const EARLIEST_OFFSET = -2;
     export const LATEST_OFFSET = -1;
     export type OFFSET = -2 | -1;
 
@@ -16,6 +17,7 @@ declare module "kafka" {
     export interface Message {
         topic: string;
         partition?: number;
+        offset: number;
         message: {
             key?: string;
             value: string;
