@@ -20,7 +20,7 @@ declare module "kafka" {
         offset: number;
         message: {
             key?: string;
-            value: string;
+            value: Buffer | string;
             attributes?: string[];
         }
     }
