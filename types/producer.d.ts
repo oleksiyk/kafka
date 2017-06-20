@@ -162,6 +162,8 @@ declare module "producer" {
         ssl?: tls.ConnectionOptions;
 
         brokerRedirection?: Kafka.BrokerRedirectionFunction | Kafka.BrokerRedirectionMap;
+
+        logger?: Kafka.Logger;
     }
 
 
