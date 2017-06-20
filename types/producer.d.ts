@@ -25,7 +25,7 @@ declare module "producer" {
         /**
          * Close all connections.
          */
-        end(): void;
+        end(): Promise<void>;
     }
 
     export interface ProducerOptions {
