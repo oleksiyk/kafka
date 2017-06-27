@@ -1,6 +1,7 @@
 
 
 declare module "producer" {
+    import * as tls from "tls";
     import * as Kafka from "kafka";
     import { Client } from "client";
     import { DefaultPartitioner } from "assignment/partitioners/default";
@@ -24,7 +25,7 @@ declare module "producer" {
         /**
          * Close all connections.
          */
-        end(): void;
+        end(): Promise<void>;
     }
 
     export interface ProducerOptions {
@@ -158,12 +159,11 @@ declare module "producer" {
          * 
          * Should match `listeners` SSL option in Kafka config
          */
-        ssl?: {
-            cert: string; // "/path/to/client.crt"
-            key: string; // "/path/to/client.key"
-        }
+        ssl?: tls.ConnectionOptions;
 
         brokerRedirection?: Kafka.BrokerRedirectionFunction | Kafka.BrokerRedirectionMap;
+
+        logger?: Kafka.Logger;
     }
 
 
