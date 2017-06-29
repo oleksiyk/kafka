@@ -6,24 +6,25 @@
     "name": "Oleksiy Krivoshey",
     "email": "oleksiyk@gmail.com"
   },
-  "version": "3.1.10",
+  "version": "3.1.11",
   "main": "./lib/index.js",
   "types": "./types/index.d.ts",
   "keywords": [
     "kafka"
   ],
   "dependencies": {
-    "bin-protocol": "^3.0.4",
+    "@types/bluebird": "3.5.0",
+    "@types/lodash": "^4.14.55",
+    "bin-protocol": "https://github.com/sagansystems/binary-protocol",
     "bluebird": "^3.3.3",
     "buffer-crc32": "^0.2.5",
     "hashring": "^3.2.0",
     "lodash": "=4.16.4",
     "murmur-hash-js": "^1.0.0",
     "nice-simple-logger": "^1.0.1",
-    "wrr-pool": "^1.0.3",
-    "@types/lodash": "^4.14.55",
-    "@types/bluebird": "3.5.0",
-    "typescript": "2.2.1"
+    "node-statsd": "^0.1.1",
+    "typescript": "2.2.1",
+    "wrr-pool": "^1.0.3"
   },
   "devDependencies": {
     "chai": "^3.5.0",
