@@ -15,7 +15,7 @@
   "dependencies": {
     "@types/bluebird": "3.5.0",
     "@types/lodash": "^4.14.55",
-    "bin-protocol": "git+ssh://git@github.com/sagansystems/binary-protocol.git",
+    "bin-protocol": "https://github.com/sagansystems/binary-protocol",
     "bluebird": "^3.3.3",
     "buffer-crc32": "^0.2.5",
     "hashring": "^3.2.0",
