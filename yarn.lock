@@ -155,8 +155,8 @@ bcrypt-pbkdf@^1.0.0:
     tweetnacl "^0.14.3"
 
 "bin-protocol@git+ssh://git@github.com/sagansystems/binary-protocol.git":
-  version "3.0.4"
-  resolved "git+ssh://git@github.com/sagansystems/binary-protocol.git#a76b48e9d29eab73ea2bede7dddeb17f92e92779"
+  version "3.0.5"
+  resolved "git+ssh://git@github.com/sagansystems/binary-protocol.git#be1497a25d802d8b29415def389160af162d1971"
   dependencies:
     lodash "^4.1.0"
     long "^3.0.3"
