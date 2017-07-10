@@ -198,6 +198,8 @@ return producer.init().then(function(){
   * `size` - group messages together into single batch until their total size exceeds this value, defaults to 16384 bytes. Set to 0 to disable batching.
   * `maxWait` - send grouped messages after this amount of milliseconds expire even if their total size doesn't exceed `batch.size` yet, defaults to 10ms. Set to 0 to disable batching.
 * `asyncCompression` - boolean, use asynchronouse compression instead of synchronous, defaults to `false`
+* `connectionTimeout` - timeout for establishing connection to Kafka in milliseconds, defaults to 3000ms
+* `socketTimeout` - timeout for Kafka connection socket in milliseconds, defaults to 0 (disabled)
 
 ## SimpleConsumer
 
@@ -299,6 +301,8 @@ consumer.fetchOffset([
 * `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
 * `asyncCompression` - boolean, use asynchronouse decompression instead of synchronous, defaults to `false`
 * `handlerConcurrency` - specify concurrency level for the consumer handler function, defaults to 10
+* `connectionTimeout` - timeout for establishing connection to Kafka in milliseconds, defaults to 3000ms
+* `socketTimeout` - timeout for Kafka connection socket in milliseconds, defaults to 0 (disabled)
 
 ## GroupConsumer (new unified consumer API)
 
@@ -384,6 +388,8 @@ You can also write your own assignment strategy by inheriting from Kafka.Default
 * `recoveryOffset` - recovery position (time) which will used to recover subscription in case of OffsetOutOfRange error, defaults to Kafka.LATEST_OFFSET
 * `asyncCompression` - boolean, use asynchronouse decompression instead of synchronous, defaults to `false`
 * `handlerConcurrency` - specify concurrency level for the consumer handler function, defaults to 10
+* `connectionTimeout` - timeout for establishing connection to Kafka in milliseconds, defaults to 3000ms
+* `socketTimeout` - timeout for Kafka connection socket in milliseconds, defaults to 0 (disabled)
 
 ## GroupAdmin (consumer groups API)
 

@@ -160,6 +160,18 @@ declare module "producer" {
          * Should match `listeners` SSL option in Kafka config
          */
         ssl?: tls.ConnectionOptions;
+        /**
+         * connectionTimeout - timeout for establishing connection to Kafka in milliseconds
+         * 
+         * defaults to 3000ms
+         */
+        connectionTimeout?: number
+        /**
+         * socketTimeout - timeout for Kafka connection socket in milliseconds
+         * 
+         * defaults to 0 (disabled)
+         */
+        socketTimeout?: number
 
         brokerRedirection?: Kafka.BrokerRedirectionFunction | Kafka.BrokerRedirectionMap;
 

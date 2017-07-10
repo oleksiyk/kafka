@@ -27,6 +27,7 @@ declare module "connection" {
         port?: number;
         host?: string;
         connectionTimeout?: number;
+        socketTimeout?: number;
         initialBufferSize?: number;
         ssl?: {
             cert: string;
