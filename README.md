@@ -566,6 +566,22 @@ Or as text strings:
 KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT=`cat ./test/ssl/client.crt` KAFKA_CLIENT_CERT_KEY=`cat ./test/ssl/client.key` node producer.js
 ```
 
+Using a self signed certificate:
+
+```javascript
+Kafka.Producer({
+  connectionString: 'kafka://127.0.0.1:9093', // should match `listeners` SSL option in Kafka config
+  ssl: {
+    ca: '/path/to/my-cert.crt' // or fs.readFileSync('my-cert.crt')
+  }
+});
+```
+
+It is also possible to use `KAFKA_CLIENT_CA` environment variable to specify a self signed SSL certificate:
+
+```bash
+KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CA=./test/ssl/my-cert.crt node producer.js
+```
 
 ### Remapping Broker Addresses
 Sometimes the advertised listener addresses for a Kafka cluster may be incorrect from the client,

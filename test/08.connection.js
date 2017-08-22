@@ -2,6 +2,8 @@
 
 /* global describe, it, before, sinon, after  */
 
+var path = require('path');
+var fs = require('fs');
 var Promise = require('bluebird');
 var crc32   = require('buffer-crc32');
 var Kafka   = require('../lib/index');
@@ -128,6 +130,41 @@ describe('Connection', function () {
             p.client.initialBrokers[0].server().should.be.eql('127.0.0.1:9092');
             p.client.initialBrokers[1].server().should.be.eql('127.0.0.1:9092');
             p.client.initialBrokers[2].server().should.be.eql('127.0.0.1:9092');
+        });
+    });
+
+    describe('when configuring SSL CA', function () {
+        var configuredCert, configuredKey;
+
+        before(function () {
+            configuredCert = process.env.KAFKA_CLIENT_CERT;
+            configuredKey = process.env.KAFKA_CLIENT_CERT_KEY;
+            delete process.env.KAFKA_CLIENT_CERT;
+            delete process.env.KAFKA_CLIENT_CERT_KEY;
+        });
+
+        after(function () {
+            process.env.KAFKA_CLIENT_CERT = configuredCert;
+            process.env.KAFKA_CLIENT_CERT_KEY = configuredKey;
+        });
+
+        it('should load from file', function () {
+            var caPath = path.join(__dirname, './ssl/client.crt');
+            var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9093', ssl: { ca: caPath } });
+
+            return p.init().then(function () {
+                p.client.options.ssl.ca.should.be.eql(fs.readFileSync(caPath));
+            });
+        });
+
+        it('should load from string', function () {
+            var caPath = path.join(__dirname, './ssl/client.crt');
+            var caContent = fs.readFileSync(caPath);
+            var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9093', ssl: { ca: caContent } });
+
+            return p.init().then(function () {
+                p.client.options.ssl.ca.should.be.eql(caContent);
+            });
         });
     });
 });
