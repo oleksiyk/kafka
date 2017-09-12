@@ -1,15 +1,12 @@
 language: node_js
 
-# https://blog.travis-ci.com/2017-08-29-trusty-image-updates
-group: deprecated-2017Q3
-
 node_js:
   - "0.10"
   - "4.4"
 
 env:
   - CXX=g++-4.8
-  - CXX=g++-4.8 KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT=${TRAVIS_BUILD_DIR}/test/ssl/client.crt KAFKA_CLIENT_CERT_KEY=${TRAVIS_BUILD_DIR}/test/ssl/client.key
+  - CXX=g++-4.8 KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT="${TRAVIS_BUILD_DIR}/test/ssl/client.crt" KAFKA_CLIENT_CERT_KEY="${TRAVIS_BUILD_DIR}/test/ssl/client.key"
   # - CXX=g++-4.8 KAFKA_URL=kafka://127.0.0.1:9093 KAFKA_CLIENT_CERT_STR="`cat ${TRAVIS_BUILD_DIR}/test/ssl/client.crt`" KAFKA_CLIENT_CERT_KEY_STR="`cat ${TRAVIS_BUILD_DIR}/test/ssl/client.key`"
 
 addons:
