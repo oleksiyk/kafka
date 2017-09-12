@@ -1,5 +1,8 @@
 language: node_js
 
+# https://blog.travis-ci.com/2017-08-29-trusty-image-updates
+group: deprecated-2017Q3
+
 node_js:
   - "0.10"
   - "4.4"
