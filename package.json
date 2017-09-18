@@ -1,12 +1,12 @@
 {
-  "name": "no-kafka",
+  "name": "no-kafka-fork-ibm",
   "description": "Apache Kafka 0.9 client for Node.JS",
   "homepage": "http://github.com/oleksiyk/kafka",
   "author": {
     "name": "Oleksiy Krivoshey",
     "email": "oleksiyk@gmail.com"
   },
-  "version": "3.2.2",
+  "version": "3.2.3",
   "main": "./lib/index.js",
   "types": "./types/index.d.ts",
   "keywords": [
