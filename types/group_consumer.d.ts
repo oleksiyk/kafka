@@ -158,6 +158,6 @@ declare module "group_consumer" {
 
 
     export interface DataHandler {
-        (messageSet: string[], topic: string, partition: number): Promise<any>;
+        (messageSet: Kafka.Message[], topic: string, partition: number): Promise<any>;
     }
 }
