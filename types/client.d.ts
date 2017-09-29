@@ -24,6 +24,8 @@ declare module "client" {
      * @class Client
      */
     export class Client {
+        options: ClientOptions;
+        finished: boolean;
         constructor(options?: ClientOptions);
         init(): Promise<Client>;
         end(): void;
