@@ -51,11 +51,11 @@ declare module "client" {
         listGroupsRequest(): Promise<any>;
         describeGroupRequest(groupId: any): Promise<any>;
 
-        log(...any: []): void;
-        debug(...any: []): void;
-        error(...any: []): void;
-        warn(...any: []): void;
-        trace(...any: []): void;
+        log(...args: any[]): void;
+        debug(...args: any[]): void;
+        error(...args: any[]): void;
+        warn(...args: any[]): void;
+        trace(...args: any[]): void;
     }
 
     export interface ClientOptions {
