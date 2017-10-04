@@ -273,7 +273,7 @@ declare module "producer" {
          * codec - compression codec, one of 
          *   Kafka.COMPRESSION_NONE, Kafka.COMPRESSION_SNAPPY, Kafka.COMPRESSION_GZIP
          */
-        codec: number; // Kafka.COMPRESSION_NONE | Kafka.COMPRESSION_SNAPPY | Kafka.COMPRESSION_GZIP;
+        codec?: number; // Kafka.COMPRESSION_NONE | Kafka.COMPRESSION_SNAPPY | Kafka.COMPRESSION_GZIP;
         /**
          * batch - control batching (grouping) of requests
          */

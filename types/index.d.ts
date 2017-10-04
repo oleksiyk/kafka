@@ -16,11 +16,13 @@
 declare module "no-kafka" {
 
     export * from "kafka";
-    export { Producer, Result } from "producer";
-    export { SimpleConsumer } from "simple_consumer";
-    export { GroupConsumer } from "group_consumer";
+    export * from "client";
 
-    export { GroupAdmin } from "group_admin";
+    export * from "producer";
+    export * from "simple_consumer";
+    export * from "group_consumer";
+
+    export * from "group_admin";
 
     export { DefaultPartitioner } from "assignment/partitioners/default";
     export { HashCRC32Partitioner } from "assignment/partitioners/hash_crc32";

@@ -24,6 +24,8 @@ declare module "client" {
      * @class Client
      */
     export class Client {
+        options: ClientOptions;
+        finished: boolean;
         constructor(options?: ClientOptions);
         init(): Promise<Client>;
         end(): void;
@@ -48,6 +50,12 @@ declare module "client" {
 
         listGroupsRequest(): Promise<any>;
         describeGroupRequest(groupId: any): Promise<any>;
+
+        log(...args: any[]): void;
+        debug(...args: any[]): void;
+        error(...args: any[]): void;
+        warn(...args: any[]): void;
+        trace(...args: any[]): void;
     }
 
     export interface ClientOptions {
