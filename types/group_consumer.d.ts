@@ -9,7 +9,7 @@ declare module "group_consumer" {
         constructor(options?: GroupConsumerOptions);
 
         commitOffset(commits: Commit | Commit[]): Promise<any>;
-        fetchOffset(commits: Commit | Commit[]): Promise<number[]>;
+        fetchOffset(commits: Commit | Commit[]): Promise<Commit[]>;
 
         init(strategies?: Strategy | Strategy[]): Promise<any>;
     }
