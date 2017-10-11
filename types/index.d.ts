@@ -1,34 +1,10 @@
-/// <reference path="producer.d.ts" />
-/// <reference path="base_consumer.d.ts" />
-/// <reference path="simple_consumer.d.ts" />
-/// <reference path="group_consumer.d.ts" />
-/// <reference path="group_admin.d.ts" />
+export * from "./kafka";
+export * from "./client";
 
-/// <reference path="kafka.d.ts" />
-/// <reference path="client.d.ts" />
+export * from "./producer";
+export * from "./simple_consumer";
+export * from "./group_consumer";
 
-/// <reference path="assignment/partitioners/default.d.ts" />
-/// <reference path="assignment/partitioners/hash_crc32.d.ts" />
-/// <reference path="assignment/strategies/default.d.ts" />
-/// <reference path="assignment/strategies/consistent.d.ts" />
-/// <reference path="assignment/strategies/weighted_round_robin.d.ts" />
+export * from "./group_admin";
 
-declare module "no-kafka" {
-
-    export * from "kafka";
-    export * from "client";
-
-    export * from "producer";
-    export * from "simple_consumer";
-    export * from "group_consumer";
-
-    export * from "group_admin";
-
-    export { DefaultPartitioner } from "assignment/partitioners/default";
-    export { HashCRC32Partitioner } from "assignment/partitioners/hash_crc32";
-
-    export { DefaultAssignmentStrategy } from "assignment/strategies/default";
-    export { ConsistentAssignmentStrategy } from "assignment/strategies/consistent";
-    export { WeightedRoundRobinAssignmentStrategy } from "assignment/strategies/weighted_round_robin";
-
-}
+export * from "./assignment";
