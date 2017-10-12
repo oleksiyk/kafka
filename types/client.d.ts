@@ -2,6 +2,7 @@
 
 
 declare module "client" {
+    import * as tls from 'tls';
 
     /**
      * Something to hold the socket endpoint.
@@ -61,11 +62,7 @@ declare module "client" {
     export interface ClientOptions {
         clientId?: string;
         connectionString?: string;
-        ssl?: {
-            cert: string;
-            key: string;
-            rejectUnauthorized?: boolean;
-        }
+        ssl?: tls.ConnectionOptions;
         asyncCompression?: boolean;
         brokerRedirection?: boolean;
         reconnectionDelay?: {

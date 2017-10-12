@@ -9,7 +9,7 @@ declare module "base_consumer" {
 
         init(): Promise<void>;
 
-        subscribe(topic: string, offset: number | number[],
+        subscribe(topic: string, partitions: number | number[],
             options: BaseConsumerOptions,
             handler: DataHandler): Promise<void>;
 

@@ -7,8 +7,8 @@ declare module "simple_consumer" {
 
     export class SimpleConsumer extends BaseConsumer {
         constructor(options?: SimpleConsumerOptions);
-        // commitOffset(commits: Commit[]): Promise<any>;
-        fetchOffset(commits: Commit | Commit[]): Promise<number[]>;  
+        commitOffset(commits: Commit[]): Promise<any>;
+        fetchOffset(commits: Commit | Commit[]): Promise<Commit[]>;
     }
 
     export interface SimpleConsumerOptions {
