@@ -56,11 +56,7 @@ export class Client {
 export interface ClientOptions {
     clientId?: string;
     connectionString?: string;
-    ssl?: {
-        cert: string;
-        key: string;
-        rejectUnauthorized?: boolean;
-    }
+    ssl?: tls.ConnectionOptions;
     asyncCompression?: boolean;
     brokerRedirection?: boolean;
     reconnectionDelay?: {

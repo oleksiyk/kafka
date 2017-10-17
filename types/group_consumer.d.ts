@@ -5,7 +5,7 @@ export class GroupConsumer extends BaseConsumer {
     constructor(options?: GroupConsumerOptions);
 
     commitOffset(commits: Kafka.Commit | Kafka.Commit[]): Promise<any>;
-    fetchOffset(commits: Kafka.Commit | Kafka.Commit[]): Promise<number[]>;
+    fetchOffset(commits: Kafka.Commit | Kafka.Commit[]): Promise<Kafka.Commit[]>;
 
     init(strategies?: Strategy | Strategy[]): Promise<any>;
 }

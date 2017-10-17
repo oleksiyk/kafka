@@ -4,7 +4,7 @@ import { BaseConsumer } from "./base_consumer";
 
 export class SimpleConsumer extends BaseConsumer {
     constructor(options?: SimpleConsumerOptions);
-    // commitOffset(commits: Commit[]): Promise<any>;
+    commitOffset(commits: Kafka.Commit[]): Promise<any>;
     fetchOffset(commits: Kafka.Commit | Kafka.Commit[]): Promise<number[]>;  
 }
 
