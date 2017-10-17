@@ -1,3 +1,4 @@
+import * as tls from 'tls';
 /**
   * Something to hold the socket endpoint.
   * 
