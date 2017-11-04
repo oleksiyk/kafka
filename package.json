@@ -6,7 +6,7 @@
     "name": "Oleksiy Krivoshey",
     "email": "oleksiyk@gmail.com"
   },
-  "version": "3.2.5",
+  "version": "3.2.7",
   "main": "./lib/index.js",
   "types": "./types/index.d.ts",
   "keywords": [
@@ -22,8 +22,7 @@
     "nice-simple-logger": "^1.0.1",
     "wrr-pool": "^1.0.3",
     "@types/lodash": "^4.14.55",
-    "@types/bluebird": "3.5.0",
-    "typescript": "2.2.1"
+    "@types/bluebird": "3.5.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
