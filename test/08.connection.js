@@ -133,6 +133,13 @@ describe('Connection', function () {
         });
     });
 
+    it('should throw an error when clientId is invalid', function () {
+        (function () {
+            var p = new Kafka.Producer({ clientId: 'client:1' });
+            p.init();
+        }).should.throw('Invalid clientId');
+    });
+
     describe('when configuring SSL CA', function () {
         var configuredCert, configuredKey;
 
