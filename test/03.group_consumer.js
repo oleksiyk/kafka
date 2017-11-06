@@ -244,4 +244,15 @@ describe('GroupConsumer', function () {
             spy.should.not.have.been.called; //eslint-disable-line
         });
     });
+    it('should throw an error when groupId is invalid', function () {
+        (function () {
+            var c = new Kafka.GroupConsumer({
+                groupId: 'bad?group'
+            });
+            return c.init({
+                subscriptions: ['kafka-test-topic'],
+                handler: function () {}
+            });
+        }).should.throw('Invalid groupId');
+    });
 });
