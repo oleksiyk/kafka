@@ -18,6 +18,8 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-4.8
+    update: true
+
 
 before_install:
   - wget https://archive.apache.org/dist/kafka/0.10.0.0/kafka_2.11-0.10.0.0.tgz -O kafka.tgz
