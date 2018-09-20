@@ -76,7 +76,7 @@ describe('Compression', function () {
         });
 
         it('should send/receive with Snappy compression (>32kb)', function () {
-            var buf = new Buffer(90 * 1024), crc = crc32.signed(buf);
+            var buf = Buffer.alloc(90 * 1024), crc = crc32.signed(buf);
 
             dataHandlerSpy.reset();
 
@@ -214,7 +214,7 @@ describe('Compression', function () {
         });
 
         it('should send/receive with async Snappy compression (>32kb)', function () {
-            var buf = new Buffer(90 * 1024), crc = crc32.signed(buf);
+            var buf = Buffer.alloc(90 * 1024), crc = crc32.signed(buf);
 
             dataHandlerSpy.reset();
 
@@ -260,7 +260,7 @@ describe('Compression', function () {
         });
 
         it('should send/receive with async Gzip compression (>32kb)', function () {
-            var buf = new Buffer(90 * 1024), crc = crc32.signed(buf);
+            var buf = Buffer.alloc(90 * 1024), crc = crc32.signed(buf);
 
             dataHandlerSpy.reset();
 
