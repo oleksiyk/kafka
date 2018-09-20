@@ -5,6 +5,7 @@
 var crc32   = require('buffer-crc32');
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
+var Buffer  = require('safer-buffer').Buffer;
 
 describe('Compression', function () {
     describe('sync', function () {

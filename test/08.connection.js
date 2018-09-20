@@ -7,6 +7,7 @@ var fs = require('fs');
 var Promise = require('bluebird');
 var crc32   = require('buffer-crc32');
 var Kafka   = require('../lib/index');
+var Buffer  = require('safer-buffer').Buffer;
 
 describe('Connection', function () {
     var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
