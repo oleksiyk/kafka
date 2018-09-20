@@ -5,6 +5,7 @@
 var crc32   = require('buffer-crc32');
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
+var Buffer  = require('safer-buffer').Buffer;
 
 describe('Compression', function () {
     describe('sync', function () {
@@ -76,7 +77,7 @@ describe('Compression', function () {
         });
 
         it('should send/receive with Snappy compression (>32kb)', function () {
-            var buf = new Buffer(90 * 1024), crc = crc32.signed(buf);
+            var buf = Buffer.alloc(90 * 1024), crc = crc32.signed(buf);
 
             dataHandlerSpy.reset();
 
@@ -214,7 +215,7 @@ describe('Compression', function () {
         });
 
         it('should send/receive with async Snappy compression (>32kb)', function () {
-            var buf = new Buffer(90 * 1024), crc = crc32.signed(buf);
+            var buf = Buffer.alloc(90 * 1024), crc = crc32.signed(buf);
 
             dataHandlerSpy.reset();
 
@@ -260,7 +261,7 @@ describe('Compression', function () {
         });
 
         it('should send/receive with async Gzip compression (>32kb)', function () {
-            var buf = new Buffer(90 * 1024), crc = crc32.signed(buf);
+            var buf = Buffer.alloc(90 * 1024), crc = crc32.signed(buf);
 
             dataHandlerSpy.reset();
 

@@ -7,6 +7,7 @@ var fs = require('fs');
 var Promise = require('bluebird');
 var crc32   = require('buffer-crc32');
 var Kafka   = require('../lib/index');
+var Buffer  = require('safer-buffer').Buffer;
 
 describe('Connection', function () {
     var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
@@ -32,7 +33,7 @@ describe('Connection', function () {
     });
 
     it('should be able to grow receive buffer', function () {
-        var buf = new Buffer(384 * 1024), crc = crc32.signed(buf);
+        var buf = Buffer.alloc(384 * 1024), crc = crc32.signed(buf);
 
         dataHandlerSpy.reset();
 
