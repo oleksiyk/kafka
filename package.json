@@ -6,7 +6,7 @@
     "name": "Oleksiy Krivoshey",
     "email": "oleksiyk@gmail.com"
   },
-  "version": "3.3.3",
+  "version": "3.3.4",
   "main": "./lib/index.js",
   "types": "./types/index.d.ts",
   "keywords": [
