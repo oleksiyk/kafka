@@ -6,8 +6,8 @@ var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 
 describe('requiredAcks: 0', function () {
-    var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
-    var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
+    var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer', topic: 'kafka-test-topic' });
+    var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer', topic: 'kafka-test-topic' });
 
     var dataHanlderSpy = sinon.spy(function () {});
 
@@ -28,7 +28,6 @@ describe('requiredAcks: 0', function () {
     it('should send/receive messages', function () {
         return consumer.subscribe('kafka-test-topic', 0, dataHanlderSpy).then(function () {
             return producer.send({
-                topic: 'kafka-test-topic',
                 partition: 0,
                 message: { value: 'p00' }
             });
@@ -49,8 +48,8 @@ describe('requiredAcks: 0', function () {
 });
 
 describe('null and empty', function () {
-    var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
-    var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
+    var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer', topic: 'kafka-test-topic' });
+    var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer', topic: 'kafka-test-topic' });
 
     var dataHanlderSpy = sinon.spy(function () {});
 
@@ -116,7 +115,7 @@ describe('null and empty', function () {
 
 describe('connectionString', function () {
     it('should throw when connectionString is wrong', function () {
-        var producer = new Kafka.Producer({ connectionString: 'localhost' });
+        var producer = new Kafka.Producer({ connectionString: 'localhost', topic: '???' });
 
         return producer.init().should.be.rejected;
     });
@@ -126,6 +125,7 @@ describe('brokerRedirection', function () {
     it('Should execute a function passed for direction', function () {
         var latched = false;
         var producer = new Kafka.Producer({
+            topic: 'kafka-test-topic',
             brokerRedirection: function (host, port) {
                 latched = true;
                 return {
@@ -144,6 +144,7 @@ describe('brokerRedirection', function () {
     it('Should apply function remapping', function () {
         var latched = false;
         var producer = new Kafka.Producer({
+            topic: 'kafka-test-topic',
             connectionString: 'does-not-exist:9092',
             ssl: false,
             brokerRedirection: function () {
@@ -165,6 +166,7 @@ describe('brokerRedirection', function () {
 
     it('Should apply lookup remap (host:port)', function () {
         var producer = new Kafka.Producer({
+            topic: 'kafka-test-topic',
             connectionString: 'does-not-exist:9092',
             ssl: false,
             brokerRedirection: {
@@ -179,6 +181,7 @@ describe('brokerRedirection', function () {
 
     it('Should apply lookup remap (kafka://host:port)', function () {
         var producer = new Kafka.Producer({
+            topic: 'kafka-test-topic',
             connectionString: 'does-not-exist:9092',
             ssl: false,
             brokerRedirection: {
@@ -193,6 +196,7 @@ describe('brokerRedirection', function () {
 
     it('Should apply lookup remap prefixed with Kafka', function () {
         var producer = new Kafka.Producer({
+            topic: 'kafka-test-topic',
             connectionString: 'does-not-exist:9092',
             ssl: false,
             brokerRedirection: {

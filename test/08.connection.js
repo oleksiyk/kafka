@@ -9,8 +9,8 @@ var crc32   = require('buffer-crc32');
 var Kafka   = require('../lib/index');
 
 describe('Connection', function () {
-    var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
-    var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
+    var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer', topic: 'kafka-test-topic' });
+    var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer', topic: 'kafka-test-topic' });
 
     var dataHandlerSpy = sinon.spy(function () {});
 
@@ -37,7 +37,6 @@ describe('Connection', function () {
         dataHandlerSpy.reset();
 
         return producer.send({
-            topic: 'kafka-test-topic',
             partition: 0,
             message: { value: buf }
         })
@@ -56,7 +55,7 @@ describe('Connection', function () {
     });
 
     it('should parse connection string with protocol', function () {
-        var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9092', ssl: { cert: null, key: null } });
+        var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9092', topic: 'kafka-test-topic', ssl: { cert: null, key: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(1);
@@ -65,7 +64,7 @@ describe('Connection', function () {
     });
 
     it('should parse connection string without protocol', function () {
-        var p = new Kafka.Producer({ connectionString: '127.0.0.1:9092', ssl: { cert: null, key: null } });
+        var p = new Kafka.Producer({ connectionString: '127.0.0.1:9092', topic: 'kafka-test-topic', ssl: { cert: null, key: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(1);
@@ -74,7 +73,7 @@ describe('Connection', function () {
     });
 
     it('should parse connection string with multiple hosts with and without protocol', function () {
-        var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9092,127.0.0.1:9092', ssl: { cert: null, key: null } });
+        var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9092,127.0.0.1:9092', topic: 'kafka-test-topic', ssl: { cert: null, key: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(2);
@@ -84,7 +83,7 @@ describe('Connection', function () {
     });
 
     it('should parse connection string with multiple hosts without protocol', function () {
-        var p = new Kafka.Producer({ connectionString: '127.0.0.1:9092,127.0.0.1:9092', ssl: { cert: null, key: null } });
+        var p = new Kafka.Producer({ connectionString: '127.0.0.1:9092,127.0.0.1:9092', topic: 'kafka-test-topic', ssl: { cert: null, key: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(2);
@@ -94,7 +93,7 @@ describe('Connection', function () {
     });
 
     it('should strip whitespaces in connectionString', function () {
-        var p = new Kafka.Producer({ connectionString: ' kafka://127.0.0.1:9092, localhost:9092 ', ssl: { cert: null, key: null } });
+        var p = new Kafka.Producer({ connectionString: ' kafka://127.0.0.1:9092, localhost:9092 ', topic: 'kafka-test-topic', ssl: { cert: null, key: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(2);
@@ -104,7 +103,7 @@ describe('Connection', function () {
     });
 
     it('should parse connection string with + in the protocol', function () {
-        var p = new Kafka.Producer({ connectionString: 'kafka+ssl://127.0.0.1:9092', ssl: { cert: null, key: null } });
+        var p = new Kafka.Producer({ connectionString: 'kafka+ssl://127.0.0.1:9092', topic: 'kafka-test-topic', ssl: { cert: null, key: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(1);
@@ -113,7 +112,7 @@ describe('Connection', function () {
     });
 
     it('should parse connection string with multiple hosts with + in the protocol', function () {
-        var p = new Kafka.Producer({ connectionString: 'kafka+ssl://127.0.0.1:9092,kafka+ssl://127.0.0.1:9092', ssl: { cert: null, key: null } });
+        var p = new Kafka.Producer({ connectionString: 'kafka+ssl://127.0.0.1:9092,kafka+ssl://127.0.0.1:9092', topic: 'kafka-test-topic', ssl: { cert: null, key: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(2);
@@ -123,7 +122,7 @@ describe('Connection', function () {
     });
 
     it('should parse connection string with hosts with and without + in the protocol', function () {
-        var p = new Kafka.Producer({ connectionString: 'kafka+ssl://127.0.0.1:9092,kafka://127.0.0.1:9092,127.0.0.1:9092', ssl: { cert: null, key: null } });
+        var p = new Kafka.Producer({ connectionString: 'kafka+ssl://127.0.0.1:9092,kafka://127.0.0.1:9092,127.0.0.1:9092', topic: 'kafka-test-topic', ssl: { cert: null, key: null } });
 
         return p.init().then(function () {
             p.client.initialBrokers.should.be.an('array').and.have.length(3);
@@ -135,7 +134,7 @@ describe('Connection', function () {
 
     it('should throw an error when clientId is invalid', function () {
         (function () {
-            var p = new Kafka.Producer({ clientId: 'client:1' });
+            var p = new Kafka.Producer({ clientId: 'client:1', topic: 'kafka-test-topic' });
             p.init();
         }).should.throw('Invalid clientId');
     });
@@ -155,9 +154,9 @@ describe('Connection', function () {
             process.env.KAFKA_CLIENT_CERT_KEY = configuredKey;
         });
 
-        it('should load from file', function () {
+        it.only('should load from file', function () {
             var caPath = path.join(__dirname, './ssl/client.crt');
-            var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9093', ssl: { ca: caPath } });
+            var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9093', topic: 'kafka-test-topic', ssl: { ca: caPath } });
 
             return p.init().then(function () {
                 p.client.options.ssl.ca.should.be.eql(fs.readFileSync(caPath));
@@ -167,7 +166,7 @@ describe('Connection', function () {
         it('should load from string', function () {
             var caPath = path.join(__dirname, './ssl/client.crt');
             var caContent = fs.readFileSync(caPath);
-            var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9093', ssl: { ca: caContent } });
+            var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9093', topic: 'kafka-test-topic', ssl: { ca: caContent } });
 
             return p.init().then(function () {
                 p.client.options.ssl.ca.should.be.eql(caContent);

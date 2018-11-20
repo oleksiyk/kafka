@@ -6,13 +6,14 @@ var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 
 describe('GroupAdmin', function () {
-    var admin = new Kafka.GroupAdmin({ clientId: 'admin' });
+    var admin = new Kafka.GroupAdmin({ clientId: 'admin', topic: 'kafka-test-topic' });
     var consumer = new Kafka.GroupConsumer({
         groupId: 'no-kafka-admin-test-group',
         timeout: 1000,
         idleTimeout: 100,
         heartbeatTimeout: 100,
-        clientId: 'group-consumer'
+        clientId: 'group-consumer',
+        topic: 'kafka-test-topic'
     });
 
     before(function () {
@@ -83,17 +84,19 @@ describe('GroupAdmin', function () {
 });
 
 describe('GroupAdmin', function () {
-    var admin = new Kafka.GroupAdmin({ clientId: 'admin' });
+    var admin = new Kafka.GroupAdmin({ clientId: 'admin', topic: 'kafka-test-topic' });
     var consumer = new Kafka.GroupConsumer({
         groupId: 'no-kafka-admin-test-group',
         timeout: 1000,
         idleTimeout: 100,
         heartbeatTimeout: 100,
-        clientId: 'group-consumer'
+        clientId: 'group-consumer',
+        topic: 'kafka-test-topic'
     });
     var producer = new Kafka.Producer({
         requiredAcks: 1,
-        clientId: 'producer'
+        clientId: 'producer',
+        topic: 'kafka-test-topic',
     });
 
     after(function () {

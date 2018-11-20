@@ -8,22 +8,25 @@ var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 var _       = require('lodash');
 
-var producer = new Kafka.Producer({ requiredAcks: 1, clientId: 'producer' });
+var producer = new Kafka.Producer({ requiredAcks: 1, clientId: 'producer', topic: 'kafka-test-topic' });
 var consumers = [
     new Kafka.GroupConsumer({
         idleTimeout: 100,
         heartbeatTimeout: 100,
-        clientId: 'group-consumer1'
+        clientId: 'group-consumer1',
+        topic: 'kafka-test-topic',
     }),
     new Kafka.GroupConsumer({
         idleTimeout: 100,
         heartbeatTimeout: 100,
-        clientId: 'group-consumer2'
+        clientId: 'group-consumer2',
+        topic: 'kafka-test-topic',
     }),
     new Kafka.GroupConsumer({
         idleTimeout: 100,
         heartbeatTimeout: 100,
-        clientId: 'group-consumer3'
+        clientId: 'group-consumer3',
+        topic: 'kafka-test-topic',
     })
 ];
 var dataHandlerSpies;
@@ -48,7 +51,6 @@ describe('GroupConsumer', function () {
         return Promise.all([
             producer.init(),
             consumers[0].init({
-                subscriptions: ['kafka-test-topic'],
                 handler: dataHandlerSpies[0]
             }).delay(200) // let it consume previous messages in a topic (if any)
         ]);
@@ -77,7 +79,6 @@ describe('GroupConsumer', function () {
     it('should receive new messages', function () {
         dataHandlerSpies[0].reset();
         return producer.send({
-            topic: 'kafka-test-topic',
             partition: 0,
             message: { value: 'p00' }
         })
@@ -177,11 +178,9 @@ describe('GroupConsumer', function () {
         this.timeout(6000);
         return Promise.all([
             consumers[1].init({
-                subscriptions: ['kafka-test-topic'],
                 handler: dataHandlerSpies[1]
             }),
             consumers[2].init({
-                subscriptions: ['kafka-test-topic'],
                 handler: dataHandlerSpies[2]
             }),
         ])
@@ -221,6 +220,7 @@ describe('GroupConsumer', function () {
     it('should not log errors on clean shutdown', function () {
         var spy = sinon.spy(function () {});
         var consumer = new Kafka.GroupConsumer({
+            topic: 'kafka-test-topic',
             groupId: 'no-kafka-shutdown-test-group',
             timeout: 1000,
             idleTimeout: 100,
@@ -232,7 +232,6 @@ describe('GroupConsumer', function () {
         });
 
         return consumer.init({
-            subscriptions: ['kafka-test-topic'],
             handler: function () {}
         })
         .then(function () {
@@ -244,13 +243,14 @@ describe('GroupConsumer', function () {
             spy.should.not.have.been.called; //eslint-disable-line
         });
     });
+
     it('should throw an error when groupId is invalid', function () {
         (function () {
             var c = new Kafka.GroupConsumer({
+                topic: 'kafka-test-topic',
                 groupId: 'bad?group'
             });
             return c.init({
-                subscriptions: ['kafka-test-topic'],
                 handler: function () {}
             });
         }).should.throw('Invalid groupId');
