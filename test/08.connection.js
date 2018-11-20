@@ -154,7 +154,7 @@ describe('Connection', function () {
             process.env.KAFKA_CLIENT_CERT_KEY = configuredKey;
         });
 
-        it.only('should load from file', function () {
+        it('should load from file', function () {
             var caPath = path.join(__dirname, './ssl/client.crt');
             var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9093', topic: 'kafka-test-topic', ssl: { ca: caPath } });
 
