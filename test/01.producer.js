@@ -245,12 +245,6 @@ describe('Producer', function () {
             });
         })
         .should.eventually.be.rejectedWith('This request is for a topic or partition that does not exist on this broker.');
-        // .then(function (result) {
-        //     result.should.be.an('array').and.have.length(1);
-        //     result[0].should.be.an('object');
-        //     result[0].should.have.property('error');
-        //     result[0].error.should.have.property('code', 'UnknownTopicOrPartition');
-        // });
     });
 
     it('should group messages by global batch.size', function () {
