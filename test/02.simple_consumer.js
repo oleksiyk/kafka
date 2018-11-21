@@ -126,7 +126,7 @@ describe('SimpleConsumer', function () {
                 value: 'p00'
             }
         })
-        .delay(300)
+        .delay(500)
         .then(function () {
             /* jshint expr: true */
             dataHandlerSpy.should.have.been.called; // eslint-disable-line

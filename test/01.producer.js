@@ -32,7 +32,7 @@ describe('Producer', function () {
     });
 
     it('should create producer with default options', function () {
-        var _producer = new Kafka.Producer({ }); // eslint-disable-line
+        var _producer = new Kafka.Producer(); // eslint-disable-line
     });
 
     it('should send a single message', function () {
@@ -270,7 +270,7 @@ describe('Producer', function () {
 
     it('should return error for unknown topic', function () {
         var _producer = new Kafka.Producer({
-            clientId: 'producer',
+            clientId: 'producer'
         });
         return _producer.init().then(function () {
             return _producer.send({
@@ -451,6 +451,37 @@ describe('Producer', function () {
         })
         .then(function () {
             spy.should.have.been.calledTwice; // eslint-disable-line
+        });
+    });
+
+    it('should retry on send failure', function () {
+        var _producer = new Kafka.Producer({
+            clientId: 'producer2'
+        });
+
+        var stub = sinon.stub(_producer.client, 'produceRequest');
+
+        stub.onCall(0).resolves([{
+            error: {
+                code: 'UnknownTopicOrPartition'
+            },
+            topic: 'kafka-test-topic',
+            partition: 0,
+        }]);
+        stub.onCall(1).resolves({});
+
+        return _producer.init().then(function () {
+            return _producer.send({
+                topic: 'kafka-test-topic',
+                partition: 0,
+                message: {
+                    value: '12345'
+                }
+            })
+            .delay(200)
+            .then(function () {
+                stub.should.have.been.calledTwice; // eslint-disable-line
+            });
         });
     });
 });
