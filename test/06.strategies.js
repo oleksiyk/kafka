@@ -6,7 +6,7 @@ var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 var _       = require('lodash');
 
-var admin = new Kafka.GroupAdmin({ clientId: 'admin', topic: 'kafka-test-topic' });
+var admin = new Kafka.GroupAdmin({ clientId: 'admin' });
 
 before(function () {
     return admin.init();
@@ -22,15 +22,13 @@ describe('Weighted Round Robin Assignment', function () {
             groupId: 'no-kafka-group-v0.9-wrr',
             idleTimeout: 100,
             heartbeatTimeout: 100,
-            clientId: 'group-consumer1',
-            topic: 'kafka-test-topic'
+            clientId: 'group-consumer1'
         }),
         new Kafka.GroupConsumer({
             groupId: 'no-kafka-group-v0.9-wrr',
             idleTimeout: 100,
             heartbeatTimeout: 100,
-            clientId: 'group-consumer2',
-            topic: 'kafka-test-topic'
+            clientId: 'group-consumer2'
         })
     ];
 
@@ -70,15 +68,13 @@ describe('Consistent Assignment', function () {
             groupId: 'no-kafka-group-v0.9-ring',
             idleTimeout: 100,
             heartbeatTimeout: 100,
-            clientId: 'group-consumer1',
-            topic: 'kafka-test-topic'
+            clientId: 'group-consumer1'
         }),
         new Kafka.GroupConsumer({
             groupId: 'no-kafka-group-v0.9-ring',
             idleTimeout: 100,
             heartbeatTimeout: 100,
-            clientId: 'group-consumer2',
-            topic: 'kafka-test-topic'
+            clientId: 'group-consumer2'
         })
     ];
 

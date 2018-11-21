@@ -8,8 +8,8 @@ var Kafka   = require('../lib/index');
 
 describe('Compression', function () {
     describe('sync', function () {
-        var producer = new Kafka.Producer({ clientId: 'producer', asyncCompression: false, topic: 'kafka-test-topic' });
-        var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer', asyncCompression: false, topic: 'kafka-test-topic' });
+        var producer = new Kafka.Producer({ clientId: 'producer', asyncCompression: false });
+        var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer', asyncCompression: false });
 
         var dataHandlerSpy = sinon.spy(function () {});
 

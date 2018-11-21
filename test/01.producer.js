@@ -12,7 +12,6 @@ var DefaultPartitioner = Kafka.DefaultPartitioner;
 
 describe('Producer', function () {
     var producer = new Kafka.Producer({
-        topic: 'kafka-test-topic',
         requiredAcks: 1,
         clientId: 'producer'
     });
@@ -33,11 +32,12 @@ describe('Producer', function () {
     });
 
     it('should create producer with default options', function () {
-        var _producer = new Kafka.Producer({ topic: 'kafka-test-topic' }); // eslint-disable-line
+        var _producer = new Kafka.Producer({ }); // eslint-disable-line
     });
 
     it('should send a single message', function () {
         return producer.send({
+            topic: 'kafka-test-topic',
             partition: 0,
             message: {
                 value: 'Hello!'
@@ -54,6 +54,7 @@ describe('Producer', function () {
 
     it('should send a single keyed message', function () {
         return producer.send({
+            topic: 'kafka-test-topic',
             partition: 0,
             message: {
                 key: 'test-key',
@@ -70,7 +71,12 @@ describe('Producer', function () {
     });
 
     it('should fail when missing topic field', function () {
-        return (() => new Kafka.Producer({})).should.throw('Missing or wrong topic field');
+        return producer.send({
+            partition: 0,
+            message: {
+                value: 'Hello!'
+            }
+        }).should.eventually.be.rejectedWith('Missing or wrong topic field');
     });
 
     it('should use default partitioner when missing partition field and no partitioner function defined', function () {
@@ -111,12 +117,12 @@ describe('Producer', function () {
 
     it('should return an error for unknown partition/topic', function () {
         const unknownTopicProducer = new Kafka.Producer({
-            topic: 'kafka-test-unknown-topic',
             requiredAcks: 1,
             clientId: 'producer'
         });
 
         var msgs = [{
+            topic: 'kafka-test-unknown-topic',
             partition: 0,
             message: { value: 'Hello!' }
         }];
@@ -134,11 +140,11 @@ describe('Producer', function () {
     it('partitioner arguments', function () {
         var _producer = new Kafka.Producer({
             clientId: 'producer',
-            topic: 'kafka-test-topic',
         });
         var partitionerSpy = _producer.partitioner.partition = sinon.spy(function () { return 1; });
         return _producer.init().then(function () {
             return _producer.send({
+                topic: 'kafka-test-topic',
                 message: {
                     value: 'Hello!'
                 }
@@ -180,12 +186,12 @@ describe('Producer', function () {
 
         _producer = new Kafka.Producer({
             clientId: 'producer',
-            topic: 'kafka-test-topic',
             partitioner: new MyPartitioner(),
         });
 
         return _producer.init().then(function () {
             return _producer.send({
+                topic: 'kafka-test-topic',
                 message: {
                     value: 'Hello!'
                 }
@@ -203,7 +209,7 @@ describe('Producer', function () {
 
     it('should determine topic partition using async partitioner function', function () {
         var _producer = new Kafka.Producer({
-            topic: 'kafka-test-topic',
+
             clientId: 'producer'
         });
         _producer.partitioner.partition = function dummySyncPartitioner(/*topicName, partitions, message*/) {
@@ -213,6 +219,7 @@ describe('Producer', function () {
         };
         return _producer.init().then(function () {
             return _producer.send({
+                topic: 'kafka-test-topic',
                 message: {
                     value: 'Hello!'
                 }
@@ -231,10 +238,10 @@ describe('Producer', function () {
     it('should return error for unknown topic', function () {
         var _producer = new Kafka.Producer({
             clientId: 'producer',
-            topic: 'kafka-test-unknown-topic',
         });
         return _producer.init().then(function () {
             return _producer.send({
+                topic: 'kafka-test-unknown-topic',
                 message: {
                     value: 'Hello!'
                 }
@@ -250,7 +257,6 @@ describe('Producer', function () {
     it('should group messages by global batch.size', function () {
         var _producer = new Kafka.Producer({
             clientId: 'producer',
-            topic: 'kafka-test-topic',
             batch: {
                 size: 10
             }
@@ -261,12 +267,14 @@ describe('Producer', function () {
         return _producer.init().then(function () {
             return Promise.all([
                 _producer.send({
+                    topic: 'kafka-test-topic',
                     partition: 0,
                     message: {
                         value: '12345'
                     }
                 }),
                 _producer.send({
+                    topic: 'kafka-test-topic',
                     partition: 0,
                     message: {
                         value: '12345'
@@ -282,7 +290,6 @@ describe('Producer', function () {
     it('should not group messages with size > batch.size', function () {
         var _producer = new Kafka.Producer({
             clientId: 'producer',
-            topic: 'kafka-test-topic',
             batch: {
                 size: 1
             }
@@ -293,12 +300,14 @@ describe('Producer', function () {
         return _producer.init().then(function () {
             return Promise.all([
                 _producer.send({
+                    topic: 'kafka-test-topic',
                     partition: 0,
                     message: {
                         value: '12345'
                     }
                 }),
                 _producer.send({
+                    topic: 'kafka-test-topic',
                     partition: 0,
                     message: {
                         value: '12345'
@@ -314,7 +323,6 @@ describe('Producer', function () {
     it('should group messages by batch.size in options', function () {
         var _producer = new Kafka.Producer({
             clientId: 'producer',
-            topic: 'kafka-test-topic',
             batch: {
                 size: 1
             }
@@ -325,12 +333,14 @@ describe('Producer', function () {
         return _producer.init().then(function () {
             return Promise.all([
                 _producer.send({
+                    topic: 'kafka-test-topic',
                     partition: 0,
                     message: {
                         value: '12345'
                     }
                 }, { batch: { size: 10 } }),
                 _producer.send({
+                    topic: 'kafka-test-topic',
                     partition: 0,
                     message: {
                         value: '12345'
@@ -346,7 +356,6 @@ describe('Producer', function () {
     it('should not group messages with different options', function () {
         var _producer = new Kafka.Producer({
             clientId: 'producer',
-            topic: 'kafka-test-topic',
             batch: {
                 size: 1
             }
@@ -357,12 +366,14 @@ describe('Producer', function () {
         return _producer.init().then(function () {
             return Promise.all([
                 _producer.send({
+                    topic: 'kafka-test-topic',
                     partition: 0,
                     message: {
                         value: '12345'
                     }
                 }, { batch: { size: 100 } }),
                 _producer.send({
+                    topic: 'kafka-test-topic',
                     partition: 0,
                     message: {
                         value: '12345'
@@ -378,7 +389,6 @@ describe('Producer', function () {
     it('should wait up to maxWait time', function () {
         var _producer = new Kafka.Producer({
             clientId: 'producer',
-            topic: 'kafka-test-topic',
             batch: {
                 size: 16384,
                 maxWait: 20
@@ -389,6 +399,7 @@ describe('Producer', function () {
 
         return _producer.init().then(function () {
             return _producer.send({
+                topic: 'kafka-test-topic',
                 partition: 0,
                 message: {
                     value: '12345'
@@ -397,6 +408,7 @@ describe('Producer', function () {
             .delay(100)
             .then(function () {
                 return _producer.send({
+                    topic: 'kafka-test-topic',
                     partition: 0,
                     message: {
                         value: '12345'

@@ -8,8 +8,8 @@ var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 var _       = require('lodash');
 
-var producer = new Kafka.Producer({ requiredAcks: 1, clientId: 'producer', topic: 'kafka-test-topic' });
-var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer', topic: 'kafka-test-topic' });
+var producer = new Kafka.Producer({ requiredAcks: 1, clientId: 'producer' });
+var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
 
 var dataHandlerSpy = sinon.spy(function () {});
 
@@ -42,7 +42,7 @@ describe('SimpleConsumer', function () {
     it('should receive new messages', function () {
         return consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy).then(function () {
             return producer.send({
-
+                topic: 'kafka-test-topic',
                 partition: 0,
                 message: { value: 'p00' }
             });
@@ -75,7 +75,7 @@ describe('SimpleConsumer', function () {
                 value: 'p00'
             }
         })
-        .delay(500)
+        .delay(300)
         .then(function () {
             /* jshint expr: true */
             dataHandlerSpy.should.have.been.called; // eslint-disable-line
@@ -166,14 +166,14 @@ describe('SimpleConsumer', function () {
     });
 
     it('should receive messages in maxBytes batches', function () {
-        var maxBytesTestMessagesSize = 1024; // dataHandlerSpy.lastCall.args[0][0].messageSize + dataHandlerSpy.lastCall.args[0][1].messageSize;
+        var maxBytesTestMessagesSize = 1024;
         return consumer.unsubscribe('kafka-test-topic', 0).then(function () {
             dataHandlerSpy.reset();
             return consumer.offset('kafka-test-topic', 0).then(function (offset) {
                 // ask for maxBytes that is only 1 byte less then required for both last messages
                 var maxBytes = 2 * (8 + 4) + maxBytesTestMessagesSize - 1;
                 return consumer.subscribe('kafka-test-topic', 0, { offset: offset - 2, maxBytes: maxBytes }, dataHandlerSpy)
-                .delay(400)
+                .delay(300)
                 .then(function () {
                     /* jshint expr: true */
                     dataHandlerSpy.should.have.been.called; // eslint-disable-line
@@ -190,13 +190,15 @@ describe('SimpleConsumer', function () {
         var mSize;
         dataHandlerSpy.reset();
         return producer.send([{
+            topic: 'kafka-test-topic',
             partition: 0,
             message: { value: 'p0000000000000001' }
         }, {
+            topic: 'kafka-test-topic',
             partition: 0,
             message: { value: 'p001' }
         }])
-        .delay(400)
+        .delay(300)
         .then(function () {
             dataHandlerSpy.should.have.been.called; // eslint-disable-line
             mSize = dataHandlerSpy.getCall(0).args[0][0].messageSize;
@@ -369,6 +371,7 @@ describe('SimpleConsumer', function () {
         });
         return consumer.subscribe('kafka-test-topic', 0, spy).then(function () {
             return producer.send({
+                topic: 'kafka-test-topic',
                 partition: 0,
                 message: { value: 'p00' }
             });
@@ -385,6 +388,7 @@ describe('SimpleConsumer', function () {
         });
         return consumer.subscribe('kafka-test-topic', 0, spy).then(function () {
             return producer.send({
+                topic: 'kafka-test-topic',
                 partition: 0,
                 message: { value: 'p00' }
             });
