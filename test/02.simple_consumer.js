@@ -65,6 +65,57 @@ describe('SimpleConsumer', function () {
         });
     });
 
+    it('should receive messages from multiple topics', function () {
+        dataHandlerSpy.reset();
+        return Promise.all([
+            consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy).then(function () {
+                return producer.send({
+                    topic: 'kafka-test-topic',
+                    partition: 0,
+                    message: { value: 'p00' }
+                });
+            }),
+            consumer.subscribe('kafka-test-topic-2', 0, dataHandlerSpy).then(function () {
+                return producer.send({
+                    topic: 'kafka-test-topic-2',
+                    partition: 0,
+                    message: { value: 'p01' }
+                });
+            }),
+            consumer.subscribe('kafka-test-topic-3', 0, dataHandlerSpy).then(function () {
+                return producer.send({
+                    topic: 'kafka-test-topic-3',
+                    partition: 0,
+                    message: { value: 'p01' }
+                });
+            })
+        ])
+        .delay(500)
+        .then(function () {
+            dataHandlerSpy.should.have.been.calledThrice; // eslint-disable-line
+            dataHandlerSpy.getCall(0).args[0].should.be.an('array').and.have.length(1);
+            dataHandlerSpy.getCall(0).args[1].should.be.a('string');
+            dataHandlerSpy.getCall(0).args[1].should.be.eql('kafka-test-topic');
+            dataHandlerSpy.getCall(0).args[2].should.be.a('number');
+            dataHandlerSpy.getCall(0).args[2].should.be.eql(0);
+            dataHandlerSpy.getCall(0).args[3].should.be.a('number');
+
+            dataHandlerSpy.getCall(1).args[0].should.be.an('array').and.have.length(1);
+            dataHandlerSpy.getCall(1).args[1].should.be.a('string');
+            dataHandlerSpy.getCall(1).args[1].should.be.eql('kafka-test-topic-2');
+            dataHandlerSpy.getCall(1).args[2].should.be.a('number');
+            dataHandlerSpy.getCall(1).args[2].should.be.eql(0);
+            dataHandlerSpy.getCall(1).args[3].should.be.a('number');
+
+            dataHandlerSpy.getCall(2).args[0].should.be.an('array').and.have.length(1);
+            dataHandlerSpy.getCall(2).args[1].should.be.a('string');
+            dataHandlerSpy.getCall(2).args[1].should.be.eql('kafka-test-topic-3');
+            dataHandlerSpy.getCall(2).args[2].should.be.a('number');
+            dataHandlerSpy.getCall(2).args[2].should.be.eql(0);
+            dataHandlerSpy.getCall(2).args[3].should.be.a('number');
+        });
+    });
+
     it('should receive new keyed messages', function () {
         dataHandlerSpy.reset();
         return producer.send({

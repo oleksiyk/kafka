@@ -115,6 +115,40 @@ describe('Producer', function () {
         });
     });
 
+    it('should send messages to multiple topics with the same instance', function () {
+        var msgs = [{
+            topic: 'kafka-test-topic',
+            partition: 1,
+            message: { value: 'Hello!' }
+        }, {
+            topic: 'kafka-test-topic-2',
+            partition: 2,
+            message: { value: 'Hello!' }
+        }, {
+            topic: 'kafka-test-topic-3',
+            partition: 2,
+            message: { value: 'Hello!' }
+        }];
+        return producer.send(msgs).then(function (result) {
+            result.should.be.an('array').and.have.length(3);
+            result[0].should.be.an('object');
+            result[1].should.be.an('object');
+            result[2].should.be.an('object');
+            result[0].should.have.property('topic', 'kafka-test-topic-2');
+            result[0].should.have.property('partition').that.is.a('number');
+            result[0].should.have.property('offset').that.is.a('number');
+            result[0].should.have.property('error', null);
+            result[1].should.have.property('topic', 'kafka-test-topic-3');
+            result[1].should.have.property('partition').that.is.a('number');
+            result[1].should.have.property('offset').that.is.a('number');
+            result[1].should.have.property('error', null);
+            result[2].should.have.property('topic', 'kafka-test-topic');
+            result[2].should.have.property('partition').that.is.a('number');
+            result[2].should.have.property('offset').that.is.a('number');
+            result[2].should.have.property('error', null);
+        });
+    });
+
     it('should return an error for unknown partition/topic', function () {
         const unknownTopicProducer = new Kafka.Producer({
             requiredAcks: 1,

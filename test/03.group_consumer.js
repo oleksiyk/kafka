@@ -13,20 +13,27 @@ var consumers = [
     new Kafka.GroupConsumer({
         idleTimeout: 100,
         heartbeatTimeout: 100,
-        clientId: 'group-consumer1',
-        topic: 'kafka-test-topic',
+        clientId: 'group-consumer1'
     }),
     new Kafka.GroupConsumer({
         idleTimeout: 100,
         heartbeatTimeout: 100,
-        clientId: 'group-consumer2',
-        topic: 'kafka-test-topic',
+        clientId: 'group-consumer2'
     }),
     new Kafka.GroupConsumer({
         idleTimeout: 100,
         heartbeatTimeout: 100,
-        clientId: 'group-consumer3',
-        topic: 'kafka-test-topic',
+        clientId: 'group-consumer3'
+    }),
+    new Kafka.GroupConsumer({
+        idleTimeout: 100,
+        heartbeatTimeout: 100,
+        clientId: 'group-consumer4'
+    }),
+    new Kafka.GroupConsumer({
+        idleTimeout: 100,
+        heartbeatTimeout: 100,
+        clientId: 'group-consumer5'
     })
 ];
 var dataHandlerSpies;
@@ -43,6 +50,8 @@ dataHandlerSpies = [
     dataHandlerFactory(consumers[0]),
     dataHandlerFactory(consumers[1]),
     dataHandlerFactory(consumers[2]),
+    dataHandlerFactory(consumers[3]),
+    dataHandlerFactory(consumers[4]),
 ];
 
 describe('GroupConsumer', function () {
@@ -96,6 +105,41 @@ describe('GroupConsumer', function () {
             dataHandlerSpies[0].lastCall.args[0][0].should.have.property('message').that.is.an('object');
             dataHandlerSpies[0].lastCall.args[0][0].message.should.have.property('value');
             dataHandlerSpies[0].lastCall.args[0][0].message.value.toString('utf8').should.be.eql('p00');
+        });
+    });
+
+    it('should receive messages from different topics', function () {
+        dataHandlerSpies[3].reset();
+        dataHandlerSpies[4].reset();
+
+        return Promise.all([
+            consumers[3].init({
+                subscriptions: ['kafka-test-topic-2'],
+                handler: dataHandlerSpies[3],
+            }),
+            consumers[4].init({
+                subscriptions: ['kafka-test-topic-3'],
+                handler: dataHandlerSpies[4],
+            }),
+        ]).then(function () {
+            return Promise.all([
+                producer.send({
+                    topic: 'kafka-test-topic-2',
+                    partition: 0,
+                    message: { value: 'p01' }
+                }),
+                producer.send({
+                    topic: 'kafka-test-topic-3',
+                    partition: 0,
+                    message: { value: 'p02' }
+                }),
+            ]);
+        }).delay(400).then(function () {
+            dataHandlerSpies[3].should.have.been.calledOnce; //eslint-disable-line
+            dataHandlerSpies[4].should.have.been.calledOnce; //eslint-disable-line
+
+            dataHandlerSpies[3].lastCall.args[1].should.be.a('string', 'kafka-test-topic-2');
+            dataHandlerSpies[4].lastCall.args[1].should.be.a('string', 'kafka-test-topic-3');
         });
     });
 
