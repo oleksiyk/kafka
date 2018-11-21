@@ -145,8 +145,8 @@ describe('Compression', function () {
     });
 
     describe('async', function () {
-        var producer = new Kafka.Producer({ clientId: 'producer', asyncCompression: true, topic: 'kafka-test-topic' });
-        var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer', asyncCompression: true, topic: 'kafka-test-topic' });
+        var producer = new Kafka.Producer({ clientId: 'producer', asyncCompression: true });
+        var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer', asyncCompression: true });
 
         var dataHandlerSpy = sinon.spy(function () {});
 

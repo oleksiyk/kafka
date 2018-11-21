@@ -173,7 +173,7 @@ describe('Producer', function () {
 
     it('partitioner arguments', function () {
         var _producer = new Kafka.Producer({
-            clientId: 'producer',
+            clientId: 'producer'
         });
         var partitionerSpy = _producer.partitioner.partition = sinon.spy(function () { return 1; });
         return _producer.init().then(function () {
@@ -220,7 +220,7 @@ describe('Producer', function () {
 
         _producer = new Kafka.Producer({
             clientId: 'producer',
-            partitioner: new MyPartitioner(),
+            partitioner: new MyPartitioner()
         });
 
         return _producer.init().then(function () {
@@ -243,7 +243,6 @@ describe('Producer', function () {
 
     it('should determine topic partition using async partitioner function', function () {
         var _producer = new Kafka.Producer({
-
             clientId: 'producer'
         });
         _producer.partitioner.partition = function dummySyncPartitioner(/*topicName, partitions, message*/) {

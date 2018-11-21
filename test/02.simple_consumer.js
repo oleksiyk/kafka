@@ -263,7 +263,7 @@ describe('SimpleConsumer', function () {
                     return consumer.subscribe('kafka-test-topic', 0, { offset: offset - 2, maxBytes: maxBytes }, dataHandlerSpy)
                     .delay(300)
                     .then(function () {
-                        dataHandlerSpy.should.have.been.calledOnce; // eslint-disable-line
+                        dataHandlerSpy.should.have.been.calledTwice; // eslint-disable-line
                         dataHandlerSpy.getCall(0).args[0].should.be.an('array').and.have.length(1);
                         dataHandlerSpy.getCall(0).args[0][0].message.value.toString('utf8').should.be.eql('p001');
                     });

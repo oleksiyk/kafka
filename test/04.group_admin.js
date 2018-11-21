@@ -89,12 +89,11 @@ describe('GroupAdmin', function () {
         timeout: 1000,
         idleTimeout: 100,
         heartbeatTimeout: 100,
-        clientId: 'group-consumer',
-        topic: 'kafka-test-topic'
+        clientId: 'group-consumer'
     });
     var producer = new Kafka.Producer({
         requiredAcks: 1,
-        clientId: 'producer',
+        clientId: 'producer'
     });
 
     after(function () {

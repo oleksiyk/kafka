@@ -268,7 +268,6 @@ describe('GroupConsumer', function () {
     it('should not log errors on clean shutdown', function () {
         var spy = sinon.spy(function () {});
         var consumer = new Kafka.GroupConsumer({
-            topic: 'kafka-test-topic',
             groupId: 'no-kafka-shutdown-test-group',
             timeout: 1000,
             idleTimeout: 100,
@@ -296,10 +295,10 @@ describe('GroupConsumer', function () {
     it('should throw an error when groupId is invalid', function () {
         (function () {
             var c = new Kafka.GroupConsumer({
-                topic: 'kafka-test-topic',
                 groupId: 'bad?group'
             });
             return c.init({
+                subscriptions: ['kafka-test-topic'],
                 handler: function () {}
             });
         }).should.throw('Invalid groupId');
