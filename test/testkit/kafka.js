@@ -10,10 +10,6 @@ var dockerKafkaPort = 9092;
 var dockerKafkaSslPort = 9093;
 var dockerZookeeperPort = 2181;
 
-function getConnectionString() {
-    return `kafka://127.0.0.1:${dockerKafkaPort}`;
-}
-
 function createTopic(topicName) {
     var kafkaCommand = [
         '$KAFKA_HOME/bin/kafka-topics.sh',
@@ -67,10 +63,6 @@ before(function () {
     .then(function () {
         return docker.createContainer({
             Image: 'no-kafka',
-            Env: [
-                'ADVERTISED_HOST=localhost',
-                `ADVERTISED_PORT=${dockerKafkaPort}`,
-            ],
             HostConfig: {
                 PortBindings: {
                     ['2181/tcp']: [{ HostPort: `${dockerZookeeperPort}/tcp` }],
@@ -90,9 +82,6 @@ before(function () {
         });
     })
     .then(function () {
-        return Promise.delay(10000);
-    })
-    .then(function () {
         console.log('Kafka started'); // eslint-disable-line
     });
 });
@@ -108,7 +97,6 @@ after(function () {
 });
 
 module.exports = {
-    getConnectionString,
     createTopic,
     createTopics,
 };
