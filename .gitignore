@@ -1,3 +1,4 @@
 /node_modules
 /coverage
 *.swp
+package-lock.json
