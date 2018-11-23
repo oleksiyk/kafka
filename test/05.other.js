@@ -100,7 +100,7 @@ describe('null and empty', function () {
                 message: { value: null, key: null }
             });
         })
-        .delay(100)
+        .delay(200)
         .then(function () {
             dataHanlderSpy.should.have.been.called; // eslint-disable-line
             dataHanlderSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
