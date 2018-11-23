@@ -2,7 +2,7 @@
 
 var Docker = require('dockerode');
 var Promise = require('bluebird');
-var dockerUtils = require('dockerode-utils');
+var dockerUtils = require('./dockerode-utils');
 
 var docker = new Docker();
 var container = {};
@@ -25,29 +25,6 @@ function createTopic(topicName) {
         'bash', '-c', kafkaCommand.join(' '),
     ];
     return dockerUtils.containerExec(container, command);
-}
-
-function waitForOutput(_container, predicate, timeout = 30000) {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            reject(`waiting for container excited timeout ${timeout} (default 10s)`);
-        }, timeout);
-        _container.attach({ stream: true, stdout: true, stderr: true }, (err, res) => {
-            if (err) {
-                reject(err);
-            }
-            if (res) {
-                res.on('readable', () => {
-                    var line = res.read();
-                    if (line && predicate(line.toString())) {
-                        resolve();
-                    }
-                });
-            } else {
-                reject('cannot attach \'readable\' event on container\'s stream');
-            }
-        });
-    });
 }
 
 function createTopics(topicNames) {
@@ -85,7 +62,7 @@ before(function () {
     })
     .then(function () {
         console.log('Waiting for kafka to start...'); // eslint-disable-line
-        return waitForOutput(container, function (line) {
+        return dockerUtils.waitForOutput(container, function (line) {
             return line.search('kafka entered RUNNING state') > 0;
         });
     })
