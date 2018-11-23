@@ -2,7 +2,7 @@
 
 var Docker = require('dockerode');
 var Promise = require('bluebird');
-var { pullImageAsync, imageExists, containerExec, waitForOutput } = require('dockerode-utils');
+var dockerUtils = require('dockerode-utils');
 
 var docker = new Docker();
 var container = {};
@@ -24,7 +24,30 @@ function createTopic(topicName) {
     var command = [
         'bash', '-c', kafkaCommand.join(' '),
     ];
-    return containerExec(container, command);
+    return dockerUtils.containerExec(container, command);
+}
+
+function waitForOutput(_container, predicate, timeout = 30000) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            reject(`waiting for container excited timeout ${timeout} (default 10s)`);
+        }, timeout);
+        _container.attach({ stream: true, stdout: true, stderr: true }, (err, res) => {
+            if (err) {
+                reject(err);
+            }
+            if (res) {
+                res.on('readable', () => {
+                    var line = res.read();
+                    if (line && predicate(line.toString())) {
+                        resolve();
+                    }
+                });
+            } else {
+                reject('cannot attach \'readable\' event on container\'s stream');
+            }
+        });
+    });
 }
 
 function createTopics(topicNames) {
@@ -35,10 +58,10 @@ function createTopics(topicNames) {
 
 before(function () {
     this.timeout(120000);
-    return imageExists(docker, 'spotify/kafka')
+    return dockerUtils.imageExists(docker, 'spotify/kafka')
     .then(function (exists) {
         if (!exists) {
-            return pullImageAsync(docker, 'spotify/kafka');
+            return dockerUtils.pullImageAsync(docker, 'spotify/kafka');
         }
         return Promise.resolve();
     })
