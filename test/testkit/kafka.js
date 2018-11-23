@@ -65,7 +65,11 @@ before(function () {
         return waitForOutput(container, function (line) {
             return line.search('kafka entered RUNNING state') > 0;
         });
-    }).then(function () {
+    })
+    .then(function () {
+        return Promise.delay(2000);
+    })
+    .then(function () {
         console.log('Kafka started'); // eslint-disable-line
     });
 });
