@@ -5,14 +5,13 @@
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 var _       = require('lodash');
-var { getConnectionString, createTopics } = require('./testkit/kafka');
+var kafkaTestkit = require('./testkit/kafka');
 
 var admin;
 
 before(function () {
     admin = new Kafka.GroupAdmin({
-        clientId: 'admin',
-        connectionString: getConnectionString(),
+        clientId: 'admin'
     });
     return admin.init();
 });
@@ -39,7 +38,7 @@ describe('Weighted Round Robin Assignment', function () {
     ];
 
     before(function () {
-        return createTopics([KAFKA_TOPIC]).then(function () {
+        return kafkaTestkit.createTopics([KAFKA_TOPIC]).then(function () {
             return Promise.map(consumers, function (consumer, ind) {
                 return consumer.init({
                     subscriptions: [KAFKA_TOPIC],
@@ -89,7 +88,7 @@ describe('Consistent Assignment', function () {
     ];
 
     before(function () {
-        return createTopics([KAFKA_TOPIC]).then(function () {
+        return kafkaTestkit.createTopics([KAFKA_TOPIC]).then(function () {
             return Promise.map(consumers, function (consumer, ind) {
                 return consumer.init({
                     subscriptions: [KAFKA_TOPIC],

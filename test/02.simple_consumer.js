@@ -8,7 +8,7 @@ var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 var _       = require('lodash');
 
-var { getConnectionString, createTopics } = require('./testkit/kafka');
+var kafkaTestkit = require('./testkit/kafka');
 
 describe('SimpleConsumer', function () {
     describe('Single topic', function () {
@@ -26,20 +26,18 @@ describe('SimpleConsumer', function () {
         before(function () {
             producer = new Kafka.Producer({
                 requiredAcks: 1,
-                clientId: 'producer2',
-                connectionString: getConnectionString(),
+                clientId: 'producer2'
             });
             consumer = new Kafka.SimpleConsumer({
                 idleTimeout: 100,
-                clientId: 'simple-consumer',
-                connectionString: getConnectionString(),
+                clientId: 'simple-consumer'
             });
             return Promise.all([
                 producer.init(),
                 consumer.init(),
             ])
             .then(function () {
-                return createTopics([
+                return kafkaTestkit.createTopics([
                     'kafka-simple-consumer-topic-1',
                     'kafka-simple-consumer-topic-2',
                     'kafka-simple-consumer-topic-3',
@@ -433,13 +431,11 @@ describe('SimpleConsumer', function () {
         before(function () {
             producer = new Kafka.Producer({
                 requiredAcks: 1,
-                clientId: 'producer',
-                connectionString: getConnectionString(),
+                clientId: 'producer'
             });
             consumer = new Kafka.SimpleConsumer({
                 idleTimeout: 100,
-                clientId: 'simple-consumer',
-                connectionString: getConnectionString(),
+                clientId: 'simple-consumer'
             });
             return Promise.all([
                 producer.init(),

@@ -5,7 +5,7 @@
 var crc32   = require('buffer-crc32');
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
-var { getConnectionString, createTopics } = require('./testkit/kafka');
+var kafkaTestkit = require('./testkit/kafka');
 
 describe('Compression', function () {
     describe('sync', function () {
@@ -18,16 +18,14 @@ describe('Compression', function () {
         before(function () {
             producer = new Kafka.Producer({
                 clientId: 'producer',
-                asyncCompression: false,
-                connectionString: getConnectionString(),
+                asyncCompression: false
             });
             consumer = new Kafka.SimpleConsumer({
                 idleTimeout: 100,
                 clientId: 'simple-consumer',
-                asyncCompression: false,
-                connectionString: getConnectionString(),
+                asyncCompression: false
             });
-            return createTopics([KAFKA_TOPIC])
+            return kafkaTestkit.createTopics([KAFKA_TOPIC])
             .then(function () {
                 return Promise.all([
                     producer.init(),
@@ -170,17 +168,15 @@ describe('Compression', function () {
         before(function () {
             producer = new Kafka.Producer({
                 clientId: 'producer',
-                asyncCompression: true,
-                connectionString: getConnectionString(),
+                asyncCompression: true
             });
             consumer = new Kafka.SimpleConsumer({
                 idleTimeout: 100,
                 clientId: 'simple-consumer',
-                asyncCompression: true,
-                connectionString: getConnectionString(),
+                asyncCompression: true
             });
 
-            return createTopics([
+            return kafkaTestkit.createTopics([
                 KAFKA_TOPIC
             ]).then(function () {
                 return Promise.all([

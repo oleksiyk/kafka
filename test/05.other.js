@@ -4,7 +4,7 @@
 
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
-var { getConnectionString, createTopics } = require('./testkit/kafka');
+var kafkaTestkit = require('./testkit/kafka');
 
 describe('requiredAcks: 0', function () {
     var producer;
@@ -15,16 +15,14 @@ describe('requiredAcks: 0', function () {
     before(function () {
         producer = new Kafka.Producer({
             requiredAcks: 0,
-            clientId: 'producer',
-            connectionString: getConnectionString(),
+            clientId: 'producer'
         });
         consumer = new Kafka.SimpleConsumer({
             idleTimeout: 100,
-            clientId: 'simple-consumer',
-            connectionString: getConnectionString(),
+            clientId: 'simple-consumer'
         });
 
-        return createTopics(['kafka-require-acks-0-topic'])
+        return kafkaTestkit.createTopics(['kafka-require-acks-0-topic'])
             .then(function () {
                 return Promise.all([
                     producer.init(),
@@ -72,16 +70,14 @@ describe('null and empty', function () {
     before(function () {
         producer = new Kafka.Producer({
             requiredAcks: 0,
-            clientId: 'producer',
-            connectionString: getConnectionString(),
+            clientId: 'producer'
         });
         consumer = new Kafka.SimpleConsumer({
             idleTimeout: 100,
-            clientId: 'simple-consumer',
-            connectionString: getConnectionString(),
+            clientId: 'simple-consumer'
         });
 
-        return createTopics(['kafka-null-and-empty-topic']).then(function () {
+        return kafkaTestkit.createTopics(['kafka-null-and-empty-topic']).then(function () {
             return Promise.all([
                 producer.init(),
                 consumer.init()

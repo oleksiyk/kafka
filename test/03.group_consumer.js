@@ -7,7 +7,7 @@
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 var _       = require('lodash');
-var { getConnectionString, createTopics } = require('./testkit/kafka');
+var kafkaTestkit = require('./testkit/kafka');
 
 function dataHandlerFactory(consumer) {
     return sinon.spy(function (messageSet, topic, partition) {
@@ -27,8 +27,7 @@ describe('Group Consumer', function () {
             this.timeout(12000);
             producer = new Kafka.Producer({
                 requiredAcks: 1,
-                clientId: 'producer',
-                connectionString: getConnectionString(),
+                clientId: 'producer'
             });
             consumer = new Kafka.GroupConsumer({
                 groupId: 'group-single-consumer',
@@ -38,7 +37,7 @@ describe('Group Consumer', function () {
             });
             dataHandlerSpy = dataHandlerFactory(consumer);
 
-            return createTopics([
+            return kafkaTestkit.createTopics([
                 'kafka-group-consumer-topic-1'
             ]).then(function () {
                 return Promise.all([
@@ -193,19 +192,17 @@ describe('Group Consumer', function () {
         before(function () {
             producer = new Kafka.Producer({
                 requiredAcks: 1,
-                clientId: 'producer',
-                connectionString: getConnectionString(),
+                clientId: 'producer'
             });
             consumer = new Kafka.GroupConsumer({
                 groupId: 'group-multi-topic-consumer',
                 idleTimeout: 100,
                 heartbeatTimeout: 100,
-                clientId: 'group-consumer1',
-                connectionString: getConnectionString(),
+                clientId: 'group-consumer1'
             });
             dataHandlerSpy = dataHandlerFactory(consumer);
 
-            return createTopics([
+            return kafkaTestkit.createTopics([
                 'kafka-group-consumer-multi-topic-1',
                 'kafka-group-consumer-multi-topic-2',
                 'kafka-group-consumer-multi-topic-3',
@@ -290,35 +287,31 @@ describe('Group Consumer', function () {
         before(function () {
             producer = new Kafka.Producer({
                 requiredAcks: 1,
-                clientId: 'producer',
-                connectionString: getConnectionString(),
+                clientId: 'producer'
             });
             firstConsumer = new Kafka.GroupConsumer({
                 groupId: 'group-multi-consumer',
                 idleTimeout: 100,
                 heartbeatTimeout: 100,
-                clientId: 'group-consumer1',
-                connectionString: getConnectionString(),
+                clientId: 'group-consumer1'
             });
             secondConsumer = new Kafka.GroupConsumer({
                 groupId: 'group-multi-consumer',
                 idleTimeout: 100,
                 heartbeatTimeout: 100,
-                clientId: 'group-consumer2',
-                connectionString: getConnectionString(),
+                clientId: 'group-consumer2'
             });
             thirdConsumer = new Kafka.GroupConsumer({
                 groupId: 'group-multi-consumer',
                 idleTimeout: 100,
                 heartbeatTimeout: 100,
-                clientId: 'group-consumer2',
-                connectionString: getConnectionString(),
+                clientId: 'group-consumer2'
             });
             firstDataHandlerSpy = dataHandlerFactory(firstConsumer);
             secondDataHandlerSpy = dataHandlerFactory(secondConsumer);
             thirdDataHandlerSpy = dataHandlerFactory(thirdConsumer);
 
-            return createTopics([
+            return kafkaTestkit.createTopics([
                 'kafka-group-multi-consumer-topic-1',
             ]).then(function () {
                 return Promise.all([
@@ -396,8 +389,7 @@ describe('Group Consumer', function () {
                 logger: {
                     logFunction: spy
                 },
-                clientId: 'group-consumer4',
-                connectionString: getConnectionString(),
+                clientId: 'group-consumer4'
             });
 
             return consumer.init({
@@ -417,8 +409,7 @@ describe('Group Consumer', function () {
         it('should throw an error when groupId is invalid', function () {
             (function () {
                 var c = new Kafka.GroupConsumer({
-                    groupId: 'bad?group',
-                    connectionString: getConnectionString(),
+                    groupId: 'bad?group'
                 });
                 return c.init({
                     subscriptions: ['kafka-test-topic'],

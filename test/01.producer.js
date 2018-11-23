@@ -11,7 +11,7 @@ var Kafka   = require('../lib/index');
 var DefaultPartitioner = Kafka.DefaultPartitioner;
 var producer;
 
-var { createTopics } = require('./testkit/kafka');
+var kafkaTestkit = require('./testkit/kafka');
 
 describe('Producer', function () {
     before(function () {
@@ -20,7 +20,7 @@ describe('Producer', function () {
             clientId: 'producer',
         });
         return Promise.all([
-            createTopics([
+            kafkaTestkit.createTopics([
                 'kafka-producer-topic-1',
                 'kafka-producer-topic-2',
                 'kafka-producer-topic-3',

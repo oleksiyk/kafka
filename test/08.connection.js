@@ -7,7 +7,7 @@ var fs = require('fs');
 var Promise = require('bluebird');
 var crc32   = require('buffer-crc32');
 var Kafka   = require('../lib/index');
-var { createTopics } = require('./testkit/kafka');
+var kafkaTestkit = require('./testkit/kafka');
 
 describe('Connection', function () {
     var KAFKA_TOPIC = 'kafka-test-topic';
@@ -19,7 +19,7 @@ describe('Connection', function () {
     before(function () {
         producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
         consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
-        return createTopics([KAFKA_TOPIC])
+        return kafkaTestkit.createTopics([KAFKA_TOPIC])
         .then(function () {
             return Promise.all([
                 producer.init(),

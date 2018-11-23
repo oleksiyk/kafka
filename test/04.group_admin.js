@@ -4,7 +4,7 @@
 
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
-var { getConnectionString, createTopics } = require('./testkit/kafka');
+var kafkaTestkit = require('./testkit/kafka');
 
 describe('GroupAdmin', function () {
     var admin;
@@ -12,8 +12,7 @@ describe('GroupAdmin', function () {
 
     before(function () {
         admin = new Kafka.GroupAdmin({
-            clientId: 'admin',
-            connectionUrl: getConnectionString(),
+            clientId: 'admin'
         });
         consumer = new Kafka.GroupConsumer({
             groupId: 'no-kafka-admin-test-group',
@@ -22,7 +21,7 @@ describe('GroupAdmin', function () {
             heartbeatTimeout: 100,
             clientId: 'group-consumer'
         });
-        return createTopics(['kafka-admin-topic-1'])
+        return kafkaTestkit.createTopics(['kafka-admin-topic-1'])
             .then(function () {
                 return Promise.all([
                     admin.init(),
@@ -109,7 +108,7 @@ describe('GroupAdmin', function () {
             heartbeatTimeout: 100,
             clientId: 'group-consumer'
         });
-        return createTopics(['kafka-admin-topic-2']);
+        return kafkaTestkit.createTopics(['kafka-admin-topic-2']);
     });
 
     after(function () {
