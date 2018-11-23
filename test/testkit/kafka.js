@@ -7,6 +7,7 @@ var dockerUtils = require('./dockerode-utils');
 var docker = new Docker();
 var container = {};
 var dockerKafkaPort = 9092;
+var dockerKafkaSslPort = 9093;
 var dockerZookeeperPort = 2181;
 
 function getConnectionString() {
@@ -74,6 +75,7 @@ before(function () {
                 PortBindings: {
                     ['2181/tcp']: [{ HostPort: `${dockerZookeeperPort}/tcp` }],
                     ['9092/tcp']: [{ HostPort: `${dockerKafkaPort}/tcp` }],
+                    ['9093/tcp']: [{ HostPort: `${dockerKafkaSslPort}/tcp` }],
                 },
             }
         });
