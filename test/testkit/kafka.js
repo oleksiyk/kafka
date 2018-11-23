@@ -67,7 +67,7 @@ before(function () {
         });
     })
     .then(function () {
-        return Promise.delay(2000);
+        return Promise.delay(10000);
     })
     .then(function () {
         console.log('Kafka started'); // eslint-disable-line
