@@ -38,15 +38,11 @@ before(function () {
     return imageExists(docker, 'spotify/kafka')
     .then(function (exists) {
         if (!exists) {
-            console.log('Pulling image...');
-            return pullImageAsync(docker, 'spotify/kafka', function (p) {
-                console.log(p.status, p.progress);
-            });
+            return pullImageAsync(docker, 'spotify/kafka');
         }
         return Promise.resolve();
     })
     .then(function () {
-        console.log('Creating container..');
         return docker.createContainer({
             Image: 'spotify/kafka',
             Env: [
@@ -61,7 +57,6 @@ before(function () {
             }
         });
     }).then(function (_container) {
-        console.log('Starting container...');
         container = _container;
         return container.start();
     })
@@ -69,9 +64,6 @@ before(function () {
         return waitForOutput(container, function (line) {
             return line.search('kafka entered RUNNING state') > 0;
         });
-    })
-    .then(function () {
-        console.log('Kafka started');
     });
 });
 

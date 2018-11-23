@@ -410,7 +410,7 @@ describe('Group Consumer', function () {
             })
             .then(function () {
                 /* jshint expr: true */
-                spy.should.not.have.been.called; //eslint-diable-line
+                spy.should.not.have.been.called; //eslint-disable-line
             });
         });
 
