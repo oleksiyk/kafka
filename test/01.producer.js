@@ -9,15 +9,24 @@ var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
 
 var DefaultPartitioner = Kafka.DefaultPartitioner;
+var producer;
+
+var { createTopics } = require('./testkit/kafka');
 
 describe('Producer', function () {
-    var producer = new Kafka.Producer({
-        requiredAcks: 1,
-        clientId: 'producer'
-    });
-
     before(function () {
-        return producer.init();
+        producer = new Kafka.Producer({
+            requiredAcks: 1,
+            clientId: 'producer'
+        });
+        return Promise.all([
+            createTopics([
+                'kafka-producer-topic-1',
+                'kafka-producer-topic-2',
+                'kafka-producer-topic-3',
+            ]),
+            producer.init(),
+        ]);
     });
 
     after(function () {
@@ -37,7 +46,7 @@ describe('Producer', function () {
 
     it('should send a single message', function () {
         return producer.send({
-            topic: 'kafka-test-topic',
+            topic: 'kafka-producer-topic-1',
             partition: 0,
             message: {
                 value: 'Hello!'
@@ -45,7 +54,7 @@ describe('Producer', function () {
         }).then(function (result) {
             result.should.be.an('array').and.have.length(1);
             result[0].should.be.an('object');
-            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.have.property('topic', 'kafka-producer-topic-1');
             result[0].should.have.property('partition', 0);
             result[0].should.have.property('offset').that.is.a('number');
             result[0].should.have.property('error', null);
@@ -54,7 +63,7 @@ describe('Producer', function () {
 
     it('should send a single keyed message', function () {
         return producer.send({
-            topic: 'kafka-test-topic',
+            topic: 'kafka-producer-topic-1',
             partition: 0,
             message: {
                 key: 'test-key',
@@ -63,7 +72,7 @@ describe('Producer', function () {
         }).then(function (result) {
             result.should.be.an('array').and.have.length(1);
             result[0].should.be.an('object');
-            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.have.property('topic', 'kafka-producer-topic-1');
             result[0].should.have.property('partition', 0);
             result[0].should.have.property('offset').that.is.a('number');
             result[0].should.have.property('error', null);
@@ -81,7 +90,7 @@ describe('Producer', function () {
 
     it('should use default partitioner when missing partition field and no partitioner function defined', function () {
         return producer.send({
-            topic: 'kafka-test-topic',
+            topic: 'kafka-producer-topic-1',
             message: {
                 value: 'Hello!'
             }
@@ -92,11 +101,11 @@ describe('Producer', function () {
 
     it('should send an array of messages', function () {
         var msgs = [{
-            topic: 'kafka-test-topic',
+            topic: 'kafka-producer-topic-1',
             partition: 1,
             message: { value: 'Hello!' }
         }, {
-            topic: 'kafka-test-topic',
+            topic: 'kafka-producer-topic-1',
             partition: 2,
             message: { value: 'Hello!' }
         }];
@@ -104,11 +113,11 @@ describe('Producer', function () {
             result.should.be.an('array').and.have.length(2);
             result[0].should.be.an('object');
             result[1].should.be.an('object');
-            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.have.property('topic', 'kafka-producer-topic-1');
             result[0].should.have.property('error', null);
             result[0].should.have.property('partition').that.is.a('number');
             result[0].should.have.property('offset').that.is.a('number');
-            result[1].should.have.property('topic', 'kafka-test-topic');
+            result[1].should.have.property('topic', 'kafka-producer-topic-1');
             result[1].should.have.property('partition').that.is.a('number');
             result[1].should.have.property('offset').that.is.a('number');
             result[1].should.have.property('error', null);
@@ -117,32 +126,36 @@ describe('Producer', function () {
 
     it('should send messages to multiple topics with the same instance', function () {
         var msgs = [{
-            topic: 'kafka-test-topic',
+            topic: 'kafka-producer-topic-1',
             partition: 1,
             message: { value: 'Hello!' }
         }, {
-            topic: 'kafka-test-topic-2',
+            topic: 'kafka-producer-topic-2',
             partition: 2,
             message: { value: 'Hello!' }
         }, {
-            topic: 'kafka-test-topic-3',
+            topic: 'kafka-producer-topic-3',
             partition: 2,
             message: { value: 'Hello!' }
         }];
         return producer.send(msgs).then(function (result) {
+            var resultTopics = [result[0].topic, result[1].topic, result[2].topic];
+
             result.should.be.an('array').and.have.length(3);
             result[0].should.be.an('object');
             result[1].should.be.an('object');
             result[2].should.be.an('object');
-            result[0].should.have.property('topic', 'kafka-test-topic-2');
+
+            resultTopics.should.include('kafka-producer-topic-1');
+            resultTopics.should.include('kafka-producer-topic-2');
+            resultTopics.should.include('kafka-producer-topic-3');
+
             result[0].should.have.property('partition').that.is.a('number');
             result[0].should.have.property('offset').that.is.a('number');
             result[0].should.have.property('error', null);
-            result[1].should.have.property('topic', 'kafka-test-topic-3');
             result[1].should.have.property('partition').that.is.a('number');
             result[1].should.have.property('offset').that.is.a('number');
             result[1].should.have.property('error', null);
-            result[2].should.have.property('topic', 'kafka-test-topic');
             result[2].should.have.property('partition').that.is.a('number');
             result[2].should.have.property('offset').that.is.a('number');
             result[2].should.have.property('error', null);
@@ -178,7 +191,7 @@ describe('Producer', function () {
         var partitionerSpy = _producer.partitioner.partition = sinon.spy(function () { return 1; });
         return _producer.init().then(function () {
             return _producer.send({
-                topic: 'kafka-test-topic',
+                topic: 'kafka-producer-topic-1',
                 message: {
                     value: 'Hello!'
                 }
@@ -186,7 +199,7 @@ describe('Producer', function () {
         })
         .then(function () {
             partitionerSpy.should.have.been.called; // eslint-disable-line
-            partitionerSpy.lastCall.args[0].should.be.a('string').that.is.eql('kafka-test-topic');
+            partitionerSpy.lastCall.args[0].should.be.a('string').that.is.eql('kafka-producer-topic-1');
             partitionerSpy.lastCall.args[1].should.be.an('array').and.have.length(3);
             partitionerSpy.lastCall.args[1][0].should.be.an('object');
             partitionerSpy.lastCall.args[1][0].should.have.property('partitionId').that.is.a('number');
@@ -225,7 +238,7 @@ describe('Producer', function () {
 
         return _producer.init().then(function () {
             return _producer.send({
-                topic: 'kafka-test-topic',
+                topic: 'kafka-producer-topic-1',
                 message: {
                     value: 'Hello!'
                 }
@@ -234,7 +247,7 @@ describe('Producer', function () {
         .then(function (result) {
             result.should.be.an('array').and.have.length(1);
             result[0].should.be.an('object');
-            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.have.property('topic', 'kafka-producer-topic-1');
             result[0].should.have.property('partition', 1);
             result[0].should.have.property('offset').that.is.a('number');
             result[0].should.have.property('error', null);
@@ -252,7 +265,7 @@ describe('Producer', function () {
         };
         return _producer.init().then(function () {
             return _producer.send({
-                topic: 'kafka-test-topic',
+                topic: 'kafka-producer-topic-1',
                 message: {
                     value: 'Hello!'
                 }
@@ -261,7 +274,7 @@ describe('Producer', function () {
         .then(function (result) {
             result.should.be.an('array').and.have.length(1);
             result[0].should.be.an('object');
-            result[0].should.have.property('topic', 'kafka-test-topic');
+            result[0].should.have.property('topic', 'kafka-producer-topic-1');
             result[0].should.have.property('partition', 2);
             result[0].should.have.property('offset').that.is.a('number');
             result[0].should.have.property('error', null);
@@ -300,14 +313,14 @@ describe('Producer', function () {
         return _producer.init().then(function () {
             return Promise.all([
                 _producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: 'kafka-producer-topic-1',
                     partition: 0,
                     message: {
                         value: '12345'
                     }
                 }),
                 _producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: 'kafka-producer-topic-1',
                     partition: 0,
                     message: {
                         value: '12345'
@@ -333,14 +346,14 @@ describe('Producer', function () {
         return _producer.init().then(function () {
             return Promise.all([
                 _producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: 'kafka-producer-topic-1',
                     partition: 0,
                     message: {
                         value: '12345'
                     }
                 }),
                 _producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: 'kafka-producer-topic-1',
                     partition: 0,
                     message: {
                         value: '12345'
@@ -366,14 +379,14 @@ describe('Producer', function () {
         return _producer.init().then(function () {
             return Promise.all([
                 _producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: 'kafka-producer-topic-1',
                     partition: 0,
                     message: {
                         value: '12345'
                     }
                 }, { batch: { size: 10 } }),
                 _producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: 'kafka-producer-topic-1',
                     partition: 0,
                     message: {
                         value: '12345'
@@ -399,14 +412,14 @@ describe('Producer', function () {
         return _producer.init().then(function () {
             return Promise.all([
                 _producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: 'kafka-producer-topic-1',
                     partition: 0,
                     message: {
                         value: '12345'
                     }
                 }, { batch: { size: 100 } }),
                 _producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: 'kafka-producer-topic-1',
                     partition: 0,
                     message: {
                         value: '12345'
@@ -432,7 +445,7 @@ describe('Producer', function () {
 
         return _producer.init().then(function () {
             return _producer.send({
-                topic: 'kafka-test-topic',
+                topic: 'kafka-producer-topic-1',
                 partition: 0,
                 message: {
                     value: '12345'
@@ -441,7 +454,7 @@ describe('Producer', function () {
             .delay(100)
             .then(function () {
                 return _producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: 'kafka-producer-topic-1',
                     partition: 0,
                     message: {
                         value: '12345'
@@ -465,14 +478,14 @@ describe('Producer', function () {
             error: {
                 code: 'UnknownTopicOrPartition'
             },
-            topic: 'kafka-test-topic',
+            topic: 'kafka-producer-topic-1',
             partition: 0,
         }]);
         stub.onCall(1).resolves({});
 
         return _producer.init().then(function () {
             return _producer.send({
-                topic: 'kafka-test-topic',
+                topic: 'kafka-producer-topic-1',
                 partition: 0,
                 message: {
                     value: '12345'

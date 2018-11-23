@@ -7,20 +7,27 @@ var fs = require('fs');
 var Promise = require('bluebird');
 var crc32   = require('buffer-crc32');
 var Kafka   = require('../lib/index');
+var { createTopics } = require('./testkit/kafka');
 
 describe('Connection', function () {
-    var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
-    var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
+    var KAFKA_TOPIC = 'kafka-test-topic';
+    var producer;
+    var consumer;
 
     var dataHandlerSpy = sinon.spy(function () {});
 
     before(function () {
-        return Promise.all([
-            producer.init(),
-            consumer.init()
-        ])
+        producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
+        consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
+        return createTopics([KAFKA_TOPIC])
         .then(function () {
-            return consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy);
+            return Promise.all([
+                producer.init(),
+                consumer.init()
+            ]);
+        })
+        .then(function () {
+            return consumer.subscribe(KAFKA_TOPIC, 0, dataHandlerSpy);
         });
     });
 
@@ -37,7 +44,7 @@ describe('Connection', function () {
         dataHandlerSpy.reset();
 
         return producer.send({
-            topic: 'kafka-test-topic',
+            topic: KAFKA_TOPIC,
             partition: 0,
             message: { value: buf }
         })
@@ -45,7 +52,7 @@ describe('Connection', function () {
         .then(function () {
             dataHandlerSpy.should.have.been.called; // eslint-disable-line
             dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
-            dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+            dataHandlerSpy.lastCall.args[1].should.be.a('string', KAFKA_TOPIC);
             dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
             dataHandlerSpy.lastCall.args[0][0].should.be.an('object');

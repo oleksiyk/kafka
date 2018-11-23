@@ -4,18 +4,33 @@
 
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
+var { getConnectionString, createTopics } = require('./testkit/kafka');
 
 describe('requiredAcks: 0', function () {
-    var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
-    var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
+    var producer;
+    var consumer;
 
     var dataHanlderSpy = sinon.spy(function () {});
 
     before(function () {
-        return Promise.all([
-            producer.init(),
-            consumer.init()
-        ]);
+        producer = new Kafka.Producer({
+            requiredAcks: 0,
+            clientId: 'producer',
+            connectionString: getConnectionString(),
+        });
+        consumer = new Kafka.SimpleConsumer({
+            idleTimeout: 100,
+            clientId: 'simple-consumer',
+            connectionString: getConnectionString(),
+        });
+
+        return createTopics(['kafka-require-acks-0-topic'])
+            .then(function () {
+                return Promise.all([
+                    producer.init(),
+                    consumer.init()
+                ]);
+            });
     });
 
     after(function () {
@@ -26,9 +41,9 @@ describe('requiredAcks: 0', function () {
     });
 
     it('should send/receive messages', function () {
-        return consumer.subscribe('kafka-test-topic', 0, dataHanlderSpy).then(function () {
+        return consumer.subscribe('kafka-require-acks-0-topic', 0, dataHanlderSpy).then(function () {
             return producer.send({
-                topic: 'kafka-test-topic',
+                topic: 'kafka-require-acks-0-topic',
                 partition: 0,
                 message: { value: 'p00' }
             });
@@ -37,7 +52,7 @@ describe('requiredAcks: 0', function () {
         .then(function () {
             dataHanlderSpy.should.have.been.called; // eslint-disable-line
             dataHanlderSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
-            dataHanlderSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+            dataHanlderSpy.lastCall.args[1].should.be.a('string', 'kafka-require-acks-0-topic');
             dataHanlderSpy.lastCall.args[2].should.be.a('number', 0);
 
             dataHanlderSpy.lastCall.args[0][0].should.be.an('object');
@@ -49,16 +64,29 @@ describe('requiredAcks: 0', function () {
 });
 
 describe('null and empty', function () {
-    var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
-    var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
+    var producer;
+    var consumer;
 
     var dataHanlderSpy = sinon.spy(function () {});
 
     before(function () {
-        return Promise.all([
-            producer.init(),
-            consumer.init()
-        ]);
+        producer = new Kafka.Producer({
+            requiredAcks: 0,
+            clientId: 'producer',
+            connectionString: getConnectionString(),
+        });
+        consumer = new Kafka.SimpleConsumer({
+            idleTimeout: 100,
+            clientId: 'simple-consumer',
+            connectionString: getConnectionString(),
+        });
+
+        return createTopics(['kafka-null-and-empty-topic']).then(function () {
+            return Promise.all([
+                producer.init(),
+                consumer.init()
+            ]);
+        });
     });
 
     after(function () {
@@ -69,9 +97,9 @@ describe('null and empty', function () {
     });
 
     it('should send/receive null byte string', function () {
-        return consumer.subscribe('kafka-test-topic', 0, dataHanlderSpy).then(function () {
+        return consumer.subscribe('kafka-null-and-empty-topic', 0, dataHanlderSpy).then(function () {
             return producer.send({
-                topic: 'kafka-test-topic',
+                topic: 'kafka-null-and-empty-topic',
                 partition: 0,
                 message: { value: null, key: null }
             });
@@ -80,7 +108,8 @@ describe('null and empty', function () {
         .then(function () {
             dataHanlderSpy.should.have.been.called; // eslint-disable-line
             dataHanlderSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
-            dataHanlderSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+            dataHanlderSpy.lastCall.args[1].should.be.a('string');
+            dataHanlderSpy.lastCall.args[1].should.be.eql('kafka-null-and-empty-topic');
             dataHanlderSpy.lastCall.args[2].should.be.a('number', 0);
 
             dataHanlderSpy.lastCall.args[0][0].should.be.an('object');
@@ -93,7 +122,7 @@ describe('null and empty', function () {
     it('should send/receive empty byte string', function () {
         dataHanlderSpy.reset();
         return producer.send({
-            topic: 'kafka-test-topic',
+            topic: 'kafka-null-and-empty-topic',
             partition: 0,
             message: { value: '', key: '' }
         })
@@ -101,7 +130,8 @@ describe('null and empty', function () {
         .then(function () {
             dataHanlderSpy.should.have.been.called; // eslint-disable-line
             dataHanlderSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
-            dataHanlderSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+            dataHanlderSpy.lastCall.args[1].should.be.a('string');
+            dataHanlderSpy.lastCall.args[1].should.be.eql('kafka-null-and-empty-topic');
             dataHanlderSpy.lastCall.args[2].should.be.a('number', 0);
 
             dataHanlderSpy.lastCall.args[0][0].should.be.an('object');
@@ -118,7 +148,7 @@ describe('connectionString', function () {
     it('should throw when connectionString is wrong', function () {
         var producer = new Kafka.Producer({ connectionString: 'localhost' });
 
-        return producer.init().should.be.rejected;
+        return producer.init().should.be.rejectedWith('No initial hosts to connect');
     });
 });
 

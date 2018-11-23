@@ -27,6 +27,8 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
+    "dockerode": "^2.5.7",
+    "dockerode-utils": "0.0.7",
     "eslint": "^2.13.1",
     "eslint-config-magictoolbox": "^0.0.2",
     "eslint-plugin-react": "^6.10.3",
