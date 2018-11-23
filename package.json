@@ -46,7 +46,7 @@
     "eslint": "eslint .",
     "posttest": "npm run coverage",
     "pretest": "npm run eslint",
-    "test": "istanbul cover --report lcov --report text --report html ./node_modules/mocha/bin/_mocha \"test/**/*.js\""
+    "test": "istanbul cover --report lcov --report text --report html ./node_modules/mocha/bin/_mocha --timeout 20000 \"test/**/*.js\""
   },
   "repository": {
     "type": "git",

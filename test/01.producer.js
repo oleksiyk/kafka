@@ -14,7 +14,6 @@ var producer;
 var { createTopics } = require('./testkit/kafka');
 
 describe('Producer', function () {
-    this.timeout(20000);
     before(function () {
         producer = new Kafka.Producer({
             requiredAcks: 1,

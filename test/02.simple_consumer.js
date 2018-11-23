@@ -11,7 +11,6 @@ var _       = require('lodash');
 var { getConnectionString, createTopics } = require('./testkit/kafka');
 
 describe('SimpleConsumer', function () {
-    this.timeout(20000);
     describe('Single topic', function () {
         var producer;
         var consumer;
