@@ -43,8 +43,29 @@ before(function () {
         return Promise.resolve();
     })
     .then(function () {
+        return docker.buildImage({
+            context: __dirname,
+            src: [
+                'Dockerfile',
+                'ssl/server.keystore.jks',
+                'ssl/server.truststore.jks',
+            ],
+        }, { t: 'no-kafka' });
+    })
+    .then(function (stream) {
+        return new Promise(function (resolve, reject) {
+            docker.modem.followProgress(stream, function (err, res) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+            });
+        });
+    })
+    .then(function () {
         return docker.createContainer({
-            Image: 'spotify/kafka',
+            Image: 'no-kafka',
             Env: [
                 'ADVERTISED_HOST=localhost',
                 `ADVERTISED_PORT=${dockerKafkaPort}`,
@@ -76,7 +97,7 @@ before(function () {
 
 after(function () {
     return docker.listContainers().then(function (containers) {
-        return containers.filter(function (_container) { return _container.Image === 'spotify/kafka'; });
+        return containers.filter(function (_container) { return _container.Image === 'no-kafka'; });
     }).then(function (containers) {
         return Promise.map(containers, function (_container) {
             return docker.getContainer(_container.Id).stop();

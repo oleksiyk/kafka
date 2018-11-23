@@ -163,7 +163,7 @@ describe('Connection', function () {
         });
 
         it('should load from file', function () {
-            var caPath = path.join(__dirname, './ssl/client.crt');
+            var caPath = path.join(__dirname, './testkit/ssl/client.crt');
             var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9093', ssl: { ca: caPath } });
 
             return p.init().then(function () {
@@ -172,7 +172,7 @@ describe('Connection', function () {
         });
 
         it('should load from string', function () {
-            var caPath = path.join(__dirname, './ssl/client.crt');
+            var caPath = path.join(__dirname, './testkit/ssl/client.crt');
             var caContent = fs.readFileSync(caPath);
             var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9093', ssl: { ca: caContent } });
 
