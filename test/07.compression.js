@@ -5,21 +5,35 @@
 var crc32   = require('buffer-crc32');
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
+var kafkaTestkit = require('./testkit/kafka');
 
 describe('Compression', function () {
     describe('sync', function () {
-        var producer = new Kafka.Producer({ clientId: 'producer', asyncCompression: false });
-        var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer', asyncCompression: false });
+        var KAFKA_TOPIC = 'kafka-compression-sync-test-topic';
+        var producer;
+        var consumer;
 
         var dataHandlerSpy = sinon.spy(function () {});
 
         before(function () {
-            return Promise.all([
-                producer.init(),
-                consumer.init()
-            ])
+            producer = new Kafka.Producer({
+                clientId: 'producer',
+                asyncCompression: false
+            });
+            consumer = new Kafka.SimpleConsumer({
+                idleTimeout: 100,
+                clientId: 'simple-consumer',
+                asyncCompression: false
+            });
+            return kafkaTestkit.createTopics([KAFKA_TOPIC])
             .then(function () {
-                return consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy);
+                return Promise.all([
+                    producer.init(),
+                    consumer.init()
+                ]);
+            })
+            .then(function () {
+                return consumer.subscribe(KAFKA_TOPIC, 0, dataHandlerSpy);
             });
         });
 
@@ -34,36 +48,36 @@ describe('Compression', function () {
             var offset;
             return Promise.all([
                 producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: KAFKA_TOPIC,
                     partition: 0,
                     message: { value: 'p00' }
                 }, { codec: Kafka.COMPRESSION_SNAPPY }),
                 producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: KAFKA_TOPIC,
                     partition: 0,
                     message: { value: 'p01' }
                 }, { codec: Kafka.COMPRESSION_SNAPPY }),
                 Promise.delay(20).then(function () {
                     return producer.send({
-                        topic: 'kafka-test-topic',
+                        topic: KAFKA_TOPIC,
                         partition: 0,
                         message: { value: 'p02' }
                     }, { codec: Kafka.COMPRESSION_SNAPPY });
                 })
             ])
             .then(function () {
-                return consumer.offset('kafka-test-topic', 0, Kafka.LATEST_OFFSET).then(function (_offset) {
+                return consumer.offset(KAFKA_TOPIC, 0, Kafka.LATEST_OFFSET).then(function (_offset) {
                     offset = _offset - 3;
                 });
             })
             .then(function () {
-                return consumer.subscribe('kafka-test-topic', 0, { offset: offset }, dataHandlerSpy);
+                return consumer.subscribe(KAFKA_TOPIC, 0, { offset: offset }, dataHandlerSpy);
             })
             .delay(300)
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
                 dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(3);
-                dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+                dataHandlerSpy.lastCall.args[1].should.be.a('string', KAFKA_TOPIC);
                 dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
                 dataHandlerSpy.lastCall.args[0][0].should.be.an('object');
@@ -81,7 +95,7 @@ describe('Compression', function () {
             dataHandlerSpy.reset();
 
             return producer.send({
-                topic: 'kafka-test-topic',
+                topic: KAFKA_TOPIC,
                 partition: 0,
                 message: { value: buf }
             }, { codec: Kafka.COMPRESSION_SNAPPY })
@@ -89,7 +103,7 @@ describe('Compression', function () {
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
                 dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
-                dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+                dataHandlerSpy.lastCall.args[1].should.be.a('string', KAFKA_TOPIC);
                 dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
                 dataHandlerSpy.lastCall.args[0][0].should.be.an('object');
@@ -103,7 +117,7 @@ describe('Compression', function () {
             it('should send/receive with gzip compression', function () {
                 dataHandlerSpy.reset();
                 return producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: KAFKA_TOPIC,
                     partition: 0,
                     message: { value: 'p00' }
                 }, { codec: Kafka.COMPRESSION_GZIP })
@@ -111,7 +125,7 @@ describe('Compression', function () {
                 .then(function () {
                     dataHandlerSpy.should.have.been.called; // eslint-disable-line
                     dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
-                    dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+                    dataHandlerSpy.lastCall.args[1].should.be.a('string', KAFKA_TOPIC);
                     dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
                     dataHandlerSpy.lastCall.args[0][0].should.be.an('object');
@@ -125,7 +139,7 @@ describe('Compression', function () {
         it('producer should send uncompressed message when codec is not supported', function () {
             dataHandlerSpy.reset();
             return producer.send({
-                topic: 'kafka-test-topic',
+                topic: KAFKA_TOPIC,
                 partition: 0,
                 message: { value: 'p00' }
             }, { codec: 30 })
@@ -133,7 +147,7 @@ describe('Compression', function () {
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
                 dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
-                dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+                dataHandlerSpy.lastCall.args[1].should.be.a('string', KAFKA_TOPIC);
                 dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
                 dataHandlerSpy.lastCall.args[0][0].should.be.an('object');
@@ -145,18 +159,33 @@ describe('Compression', function () {
     });
 
     describe('async', function () {
-        var producer = new Kafka.Producer({ clientId: 'producer', asyncCompression: true });
-        var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer', asyncCompression: true });
+        var KAFKA_TOPIC = 'kafka-compression-async-test-topic';
+        var producer;
+        var consumer;
 
         var dataHandlerSpy = sinon.spy(function () {});
 
         before(function () {
-            return Promise.all([
-                producer.init(),
-                consumer.init()
-            ])
+            producer = new Kafka.Producer({
+                clientId: 'producer',
+                asyncCompression: true
+            });
+            consumer = new Kafka.SimpleConsumer({
+                idleTimeout: 100,
+                clientId: 'simple-consumer',
+                asyncCompression: true
+            });
+
+            return kafkaTestkit.createTopics([
+                KAFKA_TOPIC
+            ]).then(function () {
+                return Promise.all([
+                    producer.init(),
+                    consumer.init()
+                ]);
+            })
             .then(function () {
-                return consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy);
+                return consumer.subscribe(KAFKA_TOPIC, 0, dataHandlerSpy);
             });
         });
 
@@ -171,37 +200,37 @@ describe('Compression', function () {
             var offset;
             return Promise.all([
                 producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: KAFKA_TOPIC,
                     partition: 0,
                     message: { value: 'p00' }
                 }, { codec: Kafka.COMPRESSION_SNAPPY }),
                 producer.send({
-                    topic: 'kafka-test-topic',
+                    topic: KAFKA_TOPIC,
                     partition: 0,
                     message: { value: 'p01' }
                 }, { codec: Kafka.COMPRESSION_SNAPPY }),
                 Promise.delay(20).then(function () {
                     return producer.send({
-                        topic: 'kafka-test-topic',
+                        topic: KAFKA_TOPIC,
                         partition: 0,
                         message: { value: 'p02' }
                     }, { codec: Kafka.COMPRESSION_SNAPPY });
                 })
             ])
             .then(function () {
-                return consumer.offset('kafka-test-topic', 0, Kafka.LATEST_OFFSET).then(function (_offset) {
+                return consumer.offset(KAFKA_TOPIC, 0, Kafka.LATEST_OFFSET).then(function (_offset) {
                     offset = _offset - 3;
                 });
             })
             .then(function () {
                 dataHandlerSpy.reset();
-                return consumer.subscribe('kafka-test-topic', 0, { offset: offset }, dataHandlerSpy);
+                return consumer.subscribe(KAFKA_TOPIC, 0, { offset: offset }, dataHandlerSpy);
             })
             .delay(200)
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
                 dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(3);
-                dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+                dataHandlerSpy.lastCall.args[1].should.be.a('string', KAFKA_TOPIC);
                 dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
                 dataHandlerSpy.lastCall.args[0][0].should.be.an('object');
@@ -219,7 +248,7 @@ describe('Compression', function () {
             dataHandlerSpy.reset();
 
             return producer.send({
-                topic: 'kafka-test-topic',
+                topic: KAFKA_TOPIC,
                 partition: 0,
                 message: { value: buf }
             }, { codec: Kafka.COMPRESSION_SNAPPY })
@@ -227,7 +256,7 @@ describe('Compression', function () {
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
                 dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
-                dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+                dataHandlerSpy.lastCall.args[1].should.be.a('string', KAFKA_TOPIC);
                 dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
                 dataHandlerSpy.lastCall.args[0][0].should.be.an('object');
@@ -241,7 +270,7 @@ describe('Compression', function () {
             dataHandlerSpy.reset();
 
             return producer.send({
-                topic: 'kafka-test-topic',
+                topic: KAFKA_TOPIC,
                 partition: 0,
                 message: { value: 'p00' }
             }, { codec: Kafka.COMPRESSION_GZIP })
@@ -249,7 +278,7 @@ describe('Compression', function () {
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
                 dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
-                dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+                dataHandlerSpy.lastCall.args[1].should.be.a('string', KAFKA_TOPIC);
                 dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
                 dataHandlerSpy.lastCall.args[0][0].should.be.an('object');
@@ -265,7 +294,7 @@ describe('Compression', function () {
             dataHandlerSpy.reset();
 
             return producer.send({
-                topic: 'kafka-test-topic',
+                topic: KAFKA_TOPIC,
                 partition: 0,
                 message: { value: buf }
             }, { codec: Kafka.COMPRESSION_GZIP })
@@ -273,7 +302,7 @@ describe('Compression', function () {
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
                 dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
-                dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+                dataHandlerSpy.lastCall.args[1].should.be.a('string', KAFKA_TOPIC);
                 dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
                 dataHandlerSpy.lastCall.args[0][0].should.be.an('object');
@@ -286,7 +315,7 @@ describe('Compression', function () {
         it('producer should send uncompressed message when codec is not supported', function () {
             dataHandlerSpy.reset();
             return producer.send({
-                topic: 'kafka-test-topic',
+                topic: KAFKA_TOPIC,
                 partition: 0,
                 message: { value: 'p00' }
             }, { codec: 30 })
@@ -294,7 +323,7 @@ describe('Compression', function () {
             .then(function () {
                 dataHandlerSpy.should.have.been.called; // eslint-disable-line
                 dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
-                dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
+                dataHandlerSpy.lastCall.args[1].should.be.a('string', KAFKA_TOPIC);
                 dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
                 dataHandlerSpy.lastCall.args[0][0].should.be.an('object');

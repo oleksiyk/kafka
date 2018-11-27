@@ -27,6 +27,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
+    "dockerode": "^2.5.7",
     "eslint": "^2.13.1",
     "eslint-config-magictoolbox": "^0.0.2",
     "eslint-plugin-react": "^6.10.3",
@@ -44,7 +45,7 @@
     "eslint": "eslint .",
     "posttest": "npm run coverage",
     "pretest": "npm run eslint",
-    "test": "istanbul cover --report lcov --report text --report html ./node_modules/mocha/bin/_mocha \"test/**/*.js\""
+    "test": "istanbul cover --report lcov --report text --report html ./node_modules/mocha/bin/_mocha -- --timeout 20000 \"test/**/*.js\""
   },
   "repository": {
     "type": "git",
