@@ -36,6 +36,13 @@ __Please check a [CHANGELOG](CHANGELOG.md) for backward incompatible changes in 
 
 ## Using
 
+* [download and install Kafka](https://kafka.apache.org/documentation.html#quickstart)
+* create your test topic:
+
+```shell
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
+```
+
 * install __no-kafka__
 
 ```shell

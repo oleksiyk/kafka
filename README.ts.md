@@ -36,6 +36,13 @@ __Please check a [CHANGELOG](CHANGELOG.md) for backward incompatible changes in 
 
 ## Using
 
+* [download and install Kafka](https://kafka.apache.org/documentation.html#quickstart)
+* create your test topic:
+
+```shell
+kafka-topics.sh --zookeeper 127.0.0.1:2181 --create --topic kafka-test-topic --partitions 3 --replication-factor 1
+```
+
 * install __no-kafka__
 
 ```shell
@@ -212,9 +219,9 @@ let result =
 Subscribe (or change subscription) to specific offset and limit maximum received MessageSet size:
 
 ```typescript
-consumer.subscribe("kafka-test-topic", 0,
+consumer.subscribe("kafka-test-topic", 0, 
                    {offset: 20,
-                    maxBytes: 30},
+                    maxBytes: 30}, 
                    dataHandler)
 ```
 
@@ -315,7 +322,7 @@ let strategies = [{
 }];
 
 // all done, now wait for messages in dataHandler
-await consumer.init(strategies);
+await consumer.init(strategies); 
 ```
 
 ### Assignment strategies
@@ -392,7 +399,7 @@ let admin = new Kafka.GroupAdmin();
 
 await admin.init();
 let groups = await admin.listGroups();
-/*
+/* 
 groups =
     [ { groupId: "no-kafka-admin-test-group", protocolType: "consumer" } ]
 */
@@ -428,7 +435,7 @@ fetchConsumerLag:
 let admin = new Kafka.GroupAdmin();
 
 await admin.init();
-let consumerLag =
+let consumerLag = 
     await admin.fetchConsumerLag("no-kafka-admin-test-group", [{
         topicName: "kafka-test-topic",
         partitions: [0, 1, 2] }]);
@@ -466,8 +473,8 @@ let Kafka = require("no-kafka");
 let producer = new Kafka.Producer({
     clientId: "producer",
     codec: Kafka.COMPRESSION_SNAPPY  });
-    // Kafka.COMPRESSION_NONE,
-    // Kafka.COMPRESSION_SNAPPY,
+    // Kafka.COMPRESSION_NONE, 
+    // Kafka.COMPRESSION_SNAPPY, 
     // Kafka.COMPRESSION_GZIP
 ```
 
