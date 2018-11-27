@@ -34,7 +34,7 @@
     "mocha": "^3.1.2",
     "sinon": "^2.2.0",
     "sinon-chai": "^2.10.0",
-    "snappy": "^5.0.0"
+    "snappy": "^6.1.1"
   },
   "bugs": {
     "url": "https://github.com/oleksiyk/kafka/issues"
