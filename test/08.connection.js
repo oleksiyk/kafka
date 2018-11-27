@@ -7,27 +7,20 @@ var fs = require('fs');
 var Promise = require('bluebird');
 var crc32   = require('buffer-crc32');
 var Kafka   = require('../lib/index');
-var kafkaTestkit = require('./testkit/kafka');
 
 describe('Connection', function () {
-    var KAFKA_TOPIC = 'kafka-test-topic';
-    var producer;
-    var consumer;
+    var producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
+    var consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
 
     var dataHandlerSpy = sinon.spy(function () {});
 
     before(function () {
-        producer = new Kafka.Producer({ requiredAcks: 0, clientId: 'producer' });
-        consumer = new Kafka.SimpleConsumer({ idleTimeout: 100, clientId: 'simple-consumer' });
-        return kafkaTestkit.createTopics([KAFKA_TOPIC])
+        return Promise.all([
+            producer.init(),
+            consumer.init()
+        ])
         .then(function () {
-            return Promise.all([
-                producer.init(),
-                consumer.init()
-            ]);
-        })
-        .then(function () {
-            return consumer.subscribe(KAFKA_TOPIC, 0, dataHandlerSpy);
+            return consumer.subscribe('kafka-test-topic', 0, dataHandlerSpy);
         });
     });
 
@@ -44,7 +37,7 @@ describe('Connection', function () {
         dataHandlerSpy.reset();
 
         return producer.send({
-            topic: KAFKA_TOPIC,
+            topic: 'kafka-test-topic',
             partition: 0,
             message: { value: buf }
         })
@@ -52,7 +45,7 @@ describe('Connection', function () {
         .then(function () {
             dataHandlerSpy.should.have.been.called; // eslint-disable-line
             dataHandlerSpy.lastCall.args[0].should.be.an('array').and.have.length(1);
-            dataHandlerSpy.lastCall.args[1].should.be.a('string', KAFKA_TOPIC);
+            dataHandlerSpy.lastCall.args[1].should.be.a('string', 'kafka-test-topic');
             dataHandlerSpy.lastCall.args[2].should.be.a('number', 0);
 
             dataHandlerSpy.lastCall.args[0][0].should.be.an('object');
@@ -163,7 +156,7 @@ describe('Connection', function () {
         });
 
         it('should load from file', function () {
-            var caPath = path.join(__dirname, './testkit/ssl/client.crt');
+            var caPath = path.join(__dirname, './ssl/client.crt');
             var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9093', ssl: { ca: caPath } });
 
             return p.init().then(function () {
@@ -172,7 +165,7 @@ describe('Connection', function () {
         });
 
         it('should load from string', function () {
-            var caPath = path.join(__dirname, './testkit/ssl/client.crt');
+            var caPath = path.join(__dirname, './ssl/client.crt');
             var caContent = fs.readFileSync(caPath);
             var p = new Kafka.Producer({ connectionString: 'kafka://127.0.0.1:9093', ssl: { ca: caContent } });
 

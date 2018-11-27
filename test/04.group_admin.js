@@ -4,34 +4,26 @@
 
 var Promise = require('bluebird');
 var Kafka   = require('../lib/index');
-var kafkaTestkit = require('./testkit/kafka');
 
 describe('GroupAdmin', function () {
-    var admin;
-    var consumer;
+    var admin = new Kafka.GroupAdmin({ clientId: 'admin' });
+    var consumer = new Kafka.GroupConsumer({
+        groupId: 'no-kafka-admin-test-group',
+        timeout: 1000,
+        idleTimeout: 100,
+        heartbeatTimeout: 100,
+        clientId: 'group-consumer'
+    });
 
     before(function () {
-        admin = new Kafka.GroupAdmin({
-            clientId: 'admin'
-        });
-        consumer = new Kafka.GroupConsumer({
-            groupId: 'no-kafka-admin-test-group',
-            timeout: 1000,
-            idleTimeout: 100,
-            heartbeatTimeout: 100,
-            clientId: 'group-consumer'
-        });
-        return kafkaTestkit.createTopics(['kafka-admin-topic-1'])
-            .then(function () {
-                return Promise.all([
-                    admin.init(),
-                    consumer.init({
-                        subscriptions: ['kafka-admin-topic-1'],
-                        metadata: 'consumer-metadata',
-                        handler: function () {}
-                    }),
-                ]);
-            });
+        return Promise.all([
+            admin.init(),
+            consumer.init({
+                subscriptions: ['kafka-test-topic'],
+                metadata: 'consumer-metadata',
+                handler: function () {}
+            })
+        ]);
     });
 
     after(function () {
@@ -84,31 +76,24 @@ describe('GroupAdmin', function () {
             group.members[0].metadata.toString('utf8').should.be.eql('consumer-metadata');
             group.members[0].should.have.property('memberAssignment').that.is.a('object');
             group.members[0].memberAssignment.should.have.property('partitionAssignment').that.is.an('array');
-            group.members[0].memberAssignment.partitionAssignment[0].should.have.property('topic', 'kafka-admin-topic-1');
+            group.members[0].memberAssignment.partitionAssignment[0].should.have.property('topic', 'kafka-test-topic');
             group.members[0].memberAssignment.partitionAssignment[0].should.have.property('partitions').that.is.an('array', [0, 1, 2]);
         });
     });
 });
 
 describe('GroupAdmin', function () {
-    var admin;
-    var consumer;
-    var producer;
-
-    before(function () {
-        admin = new Kafka.GroupAdmin({ clientId: 'admin' });
-        producer = new Kafka.Producer({
-            requiredAcks: 1,
-            clientId: 'producer'
-        });
-        consumer = new Kafka.GroupConsumer({
-            groupId: 'no-kafka-admin-test-group',
-            timeout: 1000,
-            idleTimeout: 100,
-            heartbeatTimeout: 100,
-            clientId: 'group-consumer'
-        });
-        return kafkaTestkit.createTopics(['kafka-admin-topic-2']);
+    var admin = new Kafka.GroupAdmin({ clientId: 'admin' });
+    var consumer = new Kafka.GroupConsumer({
+        groupId: 'no-kafka-admin-test-group',
+        timeout: 1000,
+        idleTimeout: 100,
+        heartbeatTimeout: 100,
+        clientId: 'group-consumer'
+    });
+    var producer = new Kafka.Producer({
+        requiredAcks: 1,
+        clientId: 'producer'
     });
 
     after(function () {
@@ -126,7 +111,7 @@ describe('GroupAdmin', function () {
                 // Produce and consume a message in order to set
                 // the current offset for partition 0
                 consumer.init({
-                    subscriptions: ['kafka-admin-topic-2'],
+                    subscriptions: ['kafka-test-topic'],
                     metadata: 'consumer-metadata',
                     handler: function (messageSet, topic, partition) {
                         return Promise.each(messageSet, function (m) {
@@ -148,7 +133,7 @@ describe('GroupAdmin', function () {
                 producer.init()
             ]).then(function () {
                 producer.send({
-                    topic: 'kafka-admin-topic-2',
+                    topic: 'kafka-test-topic',
                     partition: 0,
                     message: {
                         key: 'test-key',
@@ -158,7 +143,7 @@ describe('GroupAdmin', function () {
             });
         }).then(function () {
             return admin.fetchConsumerLag(consumer.options.groupId, [{
-                topicName: 'kafka-admin-topic-2',
+                topicName: 'kafka-test-topic',
                 partitions: [0, 1, 2]
             }]);
         }).then(function (consumers) {
