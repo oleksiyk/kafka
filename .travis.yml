@@ -31,6 +31,7 @@ before_install:
   - echo "ssl.key.password=test1234" >> kafka/config/server.properties;
   - echo "ssl.truststore.location=${TRAVIS_BUILD_DIR}/test/ssl/server.truststore.jks" >> kafka/config/server.properties
   - echo "ssl.truststore.password=test1234" >> kafka/config/server.properties
+  - echo "auto.create.topics.enable=false" >> kafka/config/server.properties
   - nohup bash -c "cd kafka && bin/zookeeper-server-start.sh config/zookeeper.properties &"
   - sleep 10
   - nohup bash -c "cd kafka && bin/kafka-server-start.sh config/server.properties &"
