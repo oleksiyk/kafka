@@ -8,6 +8,8 @@ export class BaseConsumer {
     subscribe(topic: string, partitions: number | number[],
         options: BaseConsumerOptions,
         handler: DataHandler): Promise<void>;
+    subscribe(topic: string, options: BaseConsumerOptions, handler: DataHandler): Promise<void>;
+    subscribe(topic: string, handler: DataHandler): Promise<void>;
 
     unsubscribe(topic: string, partitions?: number | number[]): Promise<number[]>;
     offset(topic: string, partition?: number): Promise<number>;
