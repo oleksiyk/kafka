@@ -41,3 +41,6 @@ before_install:
 after_script:
   - npm install codeclimate-test-reporter
   - codeclimate-test-reporter < coverage/lcov.info
+
+after_failure:
+  - cat ${TRAVIS_BUILD_DIR}/nohup.out
