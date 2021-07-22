@@ -6,7 +6,7 @@
     "name": "Oleksiy Krivoshey",
     "email": "oleksiyk@gmail.com"
   },
-  "version": "3.4.3",
+  "version": "3.4.4",
   "main": "./lib/index.js",
   "types": "./types/index.d.ts",
   "keywords": [
@@ -17,7 +17,7 @@
     "bluebird": "^3.3.3",
     "buffer-crc32": "^0.2.5",
     "hashring": "^3.2.0",
-    "lodash": "=4.17.11",
+    "lodash": "^4.17.21",
     "murmur-hash-js": "^1.0.0",
     "nice-simple-logger": "^1.0.1",
     "wrr-pool": "^1.0.3",
@@ -31,10 +31,10 @@
     "eslint-config-magictoolbox": "^0.0.2",
     "eslint-plugin-react": "^6.10.3",
     "istanbul": "^0.4.2",
-    "mocha": "^3.1.2",
+    "mocha": "^9.0.2",
     "sinon": "^2.2.0",
     "sinon-chai": "^2.10.0",
-    "snappy": "^6.1.1"
+    "snappy": "^6.3.5"
   },
   "bugs": {
     "url": "https://github.com/oleksiyk/kafka/issues"
